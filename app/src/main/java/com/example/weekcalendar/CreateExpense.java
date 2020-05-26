@@ -2,6 +2,7 @@ package com.example.weekcalendar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,22 +11,32 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class ExpenseTracker extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
+public class CreateExpense extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
     private Spinner s;
-    private Button b;
+    private Button date;
+    private Button addExpenditure;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_expense_tracker);
+        setContentView(R.layout.activity_create_expense);
 
         s = findViewById(R.id.category_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(new NothingSelectedSpinnerAdapter(adapter, R.layout.spinner_nothing_selected, this));
 
-        b = findViewById(R.id.date);
-        b.setOnClickListener(v -> openSelectDateDialog(v, b));
+        date = findViewById(R.id.date);
+        date.setOnClickListener(v -> openSelectDateDialog(v, date));
+
+        addExpenditure = findViewById(R.id.add_expenditure);
+        addExpenditure.setOnClickListener(v -> addExpense());
+    }
+
+    private void addExpense() {
+        Intent i = new Intent(this, ExpenseHomePage.class);
+        // grab data and putExtra here
+        startActivity(i);
     }
 
     @Override
@@ -35,9 +46,7 @@ public class ExpenseTracker extends AppCompatActivity implements AdapterView.OnI
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
+    public void onNothingSelected(AdapterView<?> parent) { }
 
     private void openSelectDateDialog(View v, Button b) {
         Toast.makeText(this, "opened date dialog", Toast.LENGTH_SHORT).show();
@@ -49,4 +58,6 @@ public class ExpenseTracker extends AppCompatActivity implements AdapterView.OnI
     public void applyDateText(Day d, Button b) {
         b.setText(d.getDate());
     }
+
+
 }

@@ -1,21 +1,15 @@
 package com.example.weekcalendar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ActionBar;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -49,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     }
 
     private void moveToExpense() {
-        Intent i = new Intent(this, ExpenseTracker.class);
+        Intent i = new Intent(this, CreateExpense.class);
         startActivity(i);
     }
 
