@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker
+        android:id="@+id/date_selector_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_weight="0.8"
+        app:picker_curved="true"
+        app:picker_cyclic="true"
+        app:picker_displayDays="false"
+        app:picker_displayDaysOfMonth="false"
+        app:picker_displayHours="true"
+        app:picker_displayMinutes="true"
+        app:picker_displayMonth="false"
+        app:picker_displayMonthNumbers="false"
+        app:picker_displayYears="false"
+        app:picker_itemSpacing="15dp"
+        app:picker_mustBeOnFuture="true"
+        app:picker_selectorHeight="30dp"
+        app:picker_stepSizeMinutes="15"
+        app:picker_visibleItemCount="7">
+
+    </com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker>
+
+</LinearLayout>
