@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
     private FloatingActionButton floatingCreateEvent;
+    private FloatingActionButton linkToExpense; // random name
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,14 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
 
         floatingCreateEvent = findViewById(R.id.create_event);
         floatingCreateEvent.setOnClickListener(v -> createEvent());
+
+        linkToExpense = findViewById(R.id.random_button_link_expense);
+        linkToExpense.setOnClickListener(v -> moveToExpense());
+    }
+
+    private void moveToExpense() {
+        Intent i = new Intent(this, ExpenseTracker.class);
+        startActivity(i);
     }
 
     private void createEvent() {
@@ -77,4 +86,6 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         i.putExtra("event details", event);
         startActivity(i);
     }
+
+
 }
