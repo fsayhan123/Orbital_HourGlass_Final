@@ -29,6 +29,7 @@
         android:background="@drawable/event_button"
         android:gravity="center"
         android:paddingHorizontal="5dp"
+        android:singleLine="true"
         android:text="Event Title"
         android:textAlignment="viewStart"
         android:textSize="18dp" />

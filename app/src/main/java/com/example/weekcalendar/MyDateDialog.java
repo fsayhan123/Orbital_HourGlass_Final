@@ -18,7 +18,7 @@ import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 import java.text.SimpleDateFormat;
 
 public class MyDateDialog extends AppCompatDialogFragment {
-    private MyDateDialogListener listener;
+    private MyDateDialogEventListener listener;
     private Button b;
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
 
@@ -30,9 +30,9 @@ public class MyDateDialog extends AppCompatDialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            listener = (MyDateDialogListener) context;
+            listener = (MyDateDialogEventListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement MyDateDialogueListener");
+            throw new ClassCastException(context.toString() + " must implement MyDateDialogEventueListener");
         }
     }
 
@@ -55,7 +55,7 @@ public class MyDateDialog extends AppCompatDialogFragment {
         return builder.create();
     }
 
-    public interface MyDateDialogListener {
+    public interface MyDateDialogEventListener {
         void applyDateText(Day d, Button b);
     }
 }

@@ -32,15 +32,13 @@
             android:hint="Expenditure"
             android:inputType="textPersonName" />
 
-        <EditText
+        <Button
             android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
-            android:ems="10"
-            android:hint="Date"
-            android:inputType="textPersonName" />
+            android:text="Date" />
 
         <Spinner
             android:id="@+id/category_spinner"
