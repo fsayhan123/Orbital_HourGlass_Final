@@ -31,10 +31,6 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Toolbar toolbar = findViewById(R.id.main_toolbar);
-//        toolbar.setLogo(R.drawable.white_material_calendar);
-//        setSupportActionBar(toolbar);
-
         daysOfTheMonth = prepareMonth(); // should return a list of only days with events
         mRecyclerView = findViewById(R.id.week_view);
         mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, MainActivity.this);
