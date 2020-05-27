@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActionBar;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.widget.Button;
@@ -26,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
     private FloatingActionButton floatingCreateEvent;
-    private DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +42,6 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
 
         floatingCreateEvent = findViewById(R.id.create_event);
         floatingCreateEvent.setOnClickListener(v -> createEvent());
-
-        myDB = new DatabaseHelper(this);
-        SQLiteDatabase db = myDB.getWritableDatabase();
     }
 
     private void createEvent() {
