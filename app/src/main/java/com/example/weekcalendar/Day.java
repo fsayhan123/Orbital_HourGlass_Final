@@ -70,8 +70,20 @@ public class Day {
         return this.numEvents;
     }
 
-//    @Override
-//    public int compareTo(Date d2) {
-//        return this.date.compareTo(d2);
-//    }
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        } else if (other instanceof Day) {
+            Day d2 = (Day) other;
+            return this.today.equals(d2.today);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.today.hashCode();
+    }
 }

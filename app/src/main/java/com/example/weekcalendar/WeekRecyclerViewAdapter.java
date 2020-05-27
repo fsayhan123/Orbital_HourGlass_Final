@@ -95,8 +95,8 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
             temp.add(new MyEvent("Event fjdsfjdksfjdfkldjsfkldjsklfdjsfkldjsfkldsjfdkljsfdkljsfds" + i, "07.30pm", ""));
         }
 
-        EventRecylerViewAdapter e = new EventRecylerViewAdapter(temp, (MyOnEventClickListener) a);
-        LinearLayoutManager LLM = new LinearLayoutManager(a);
+        EventRecylerViewAdapter e = new EventRecylerViewAdapter(temp, (MyOnEventClickListener) a); // can store in holder?
+        LinearLayoutManager LLM = new LinearLayoutManager(a); // can store in holder?
         holder.dayEvents.setLayoutManager(LLM);
         holder.dayEvents.setAdapter(e);
     }
