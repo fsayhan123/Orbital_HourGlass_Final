@@ -4,32 +4,38 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecylerViewAdapter.MyExpenseViewHolder> {
-    private Map<Day, Map<String, Double>> dayCategoryExpense;
+    private Map<Day, Map<Integer, SortedMap<String, Double>>> dayCategoryExpense;
     private List<Day> spendingDays;
     private Activity a;
 
-    public ExpenseRecylerViewAdapter(Map<Day, Map<String, Double>> dayCategoryExpense, List<Day> spendingDays, Activity a) {
+    public ExpenseRecylerViewAdapter(Map<Day, Map<Integer, SortedMap<String, Double>>>  dayCategoryExpense, List<Day> spendingDays, Activity a) {
         this.dayCategoryExpense = dayCategoryExpense;
         this.spendingDays = spendingDays;
         this.a = a;
     }
 
     public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
-        TextView date;
+        private TextView date;
+        private RecyclerView categoryAndExpenses;
 
         public MyExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
-            date = itemView.findViewById(R.id.date);
+            this.date = itemView.findViewById(R.id.date);
+            this.categoryAndExpenses = itemView.findViewById(R.id.category_and_expenses);
         }
     }
 
@@ -45,10 +51,9 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecylerViewAdapter.MyExpenseViewHolder holder, int position) {
         Day d = this.spendingDays.get(position);
-        Map<String, Double> expenses = this.dayCategoryExpense.get(d);
+        Map<Integer, SortedMap<String, Double>> expenses = this.dayCategoryExpense.get(d);
         holder.date.setText(d.getDate());
-
-        LinearLayoutManager LLM = new LinearLayoutManager(a);
+        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenses);
     }
 
     @Override

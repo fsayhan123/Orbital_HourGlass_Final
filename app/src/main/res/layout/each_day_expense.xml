@@ -21,10 +21,11 @@
                 android:textAlignment="center"
                 android:textSize="56dp" />
 
-            <TableLayout
-                android:id="@+id/category_and_expense"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/category_and_expenses"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
