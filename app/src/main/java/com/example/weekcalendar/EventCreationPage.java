@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EventCreationPage extends AppCompatActivity implements MyDateDialog.MyDateDialogListener, MyTimeDialog.MyTimeDialogListener {
+public class EventCreationPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
     Button selectStartDate;
     Button selectEndDate;
     Button selectStartTime;
@@ -86,7 +86,7 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
 
     @Override
     public void applyTimeText(Day d, Button b) {
-        b.setText(d.getTime());
+        b.setText(d.getDate());
         selectedDay = d;
     }
 }
