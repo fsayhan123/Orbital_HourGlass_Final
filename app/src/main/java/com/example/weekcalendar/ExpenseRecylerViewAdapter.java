@@ -4,27 +4,24 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecylerViewAdapter.MyExpenseViewHolder> {
-    private Map<Day, Map<Integer, SortedMap<String, Double>>> dayCategoryExpense;
     private List<Day> spendingDays;
+    private Map<Day, List<ExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
 
-    public ExpenseRecylerViewAdapter(Map<Day, Map<Integer, SortedMap<String, Double>>>  dayCategoryExpense, List<Day> spendingDays, Activity a) {
-        this.dayCategoryExpense = dayCategoryExpense;
+    public ExpenseRecylerViewAdapter(List<Day> spendingDays, Map<Day, List<ExpenseCategory>> whatWeSpentEachDay, Activity a) {
+        // each Day has a List of expense categories
         this.spendingDays = spendingDays;
+        this.whatWeSpentEachDay = whatWeSpentEachDay;
         this.a = a;
     }
 
@@ -51,9 +48,13 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecylerViewAdapter.MyExpenseViewHolder holder, int position) {
         Day d = this.spendingDays.get(position);
-        Map<Integer, SortedMap<String, Double>> expenses = this.dayCategoryExpense.get(d);
         holder.date.setText(d.getDate());
-        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenses);
+
+        List<ExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
+        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenditureOnDayD);
+        LinearLayoutManager LLM = new LinearLayoutManager(a);
+        holder.categoryAndExpenses.setLayoutManager(LLM);
+        holder.categoryAndExpenses.setAdapter(e);
     }
 
     @Override

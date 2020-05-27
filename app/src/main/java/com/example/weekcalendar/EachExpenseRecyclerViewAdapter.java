@@ -8,14 +8,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.List;
 
 public class EachExpenseRecyclerViewAdapter extends RecyclerView.Adapter<EachExpenseRecyclerViewAdapter.MyEachExpenseViewHolder> {
-    private final Map<Integer, SortedMap<String, Double>> expenses;
+    private List<ExpenseCategory> expenditureOnDayD;
 
-    public EachExpenseRecyclerViewAdapter(Map<Integer, SortedMap<String, Double>> expenses) {
-        this.expenses = expenses;
+    public EachExpenseRecyclerViewAdapter(List<ExpenseCategory> expenditureOnDayD) {
+        this.expenditureOnDayD = expenditureOnDayD;
     }
 
     @NonNull
@@ -29,26 +28,24 @@ public class EachExpenseRecyclerViewAdapter extends RecyclerView.Adapter<EachExp
 
     @Override
     public void onBindViewHolder(@NonNull MyEachExpenseViewHolder holder, int position) {
-        SortedMap<String, Double> catAndEx = this.expenses.get(position);
-        for (String category : catAndEx.keySet()) {
-            holder.category.setText(category);
-            holder.expense.setText(Double.toString(catAndEx.get(category)));
-        }
+        ExpenseCategory category = this.expenditureOnDayD.get(position);
+        holder.category.setText(category.getName());
+        holder.expenseCost.setText(Double.toString(category.getTotalCost()));
     }
 
     @Override
     public int getItemCount() {
-        return this.expenses == null ? 0 : this.expenses.keySet().size();
+        return this.expenditureOnDayD == null ? 0 : this.expenditureOnDayD.size();
     }
 
     public class MyEachExpenseViewHolder extends RecyclerView.ViewHolder {
         private TextView category;
-        private TextView expense;
+        private TextView expenseCost;
 
         public MyEachExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
             this.category = itemView.findViewById(R.id.category);
-            this.expense = itemView.findViewById(R.id.expense);
+            this.expenseCost = itemView.findViewById(R.id.expense);
         }
     }
 }

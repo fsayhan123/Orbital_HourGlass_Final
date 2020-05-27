@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -20,131 +21,49 @@ import java.util.SortedMap;
 
 public class ExpenseHomePage extends AppCompatActivity {
     private RecyclerView expensesByDay;
-    private ExpenseRecylerViewAdapter expenseAdapter;
-    private List<Day> spendingDays;
+    private ExpenseRecylerViewAdapter dayExpenseAdapter;
+    private List<Day> daysISpent;
+    private Map<Day, List<ExpenseCategory>> spendingEachDay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_home_page);
 
-        expensesByDay = findViewById(R.id.category_and_expenses);
-        Map<Day, Map<Integer, SortedMap<String, Double>>> dayCategoryExpense = new HashMap<>();
-        spendingDays = new ArrayList<>();
+        daysISpent = getSpendingDays();
+        spendingEachDay = getSpendingEachDay();
 
-        Day d = new Day(new Date());
-        SortedMap<String, Double> s = new SortedMap<String, Double>() {
-            @Nullable
-            @Override
-            public Comparator<? super String> comparator() {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public SortedMap<String, Double> subMap(String fromKey, String toKey) {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public SortedMap<String, Double> headMap(String toKey) {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public SortedMap<String, Double> tailMap(String fromKey) {
-                return null;
-            }
-
-            @Override
-            public String firstKey() {
-                return null;
-            }
-
-            @Override
-            public String lastKey() {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public Set<String> keySet() {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public Collection<Double> values() {
-                return null;
-            }
-
-            @NonNull
-            @Override
-            public Set<Entry<String, Double>> entrySet() {
-                return null;
-            }
-
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public boolean containsKey(@Nullable Object key) {
-                return false;
-            }
-
-            @Override
-            public boolean containsValue(@Nullable Object value) {
-                return false;
-            }
-
-            @Nullable
-            @Override
-            public Double get(@Nullable Object key) {
-                return null;
-            }
-
-            @Nullable
-            @Override
-            public Double put(String key, Double value) {
-                return null;
-            }
-
-            @Nullable
-            @Override
-            public Double remove(@Nullable Object key) {
-                return null;
-            }
-
-            @Override
-            public void putAll(@NonNull Map<? extends String, ? extends Double> m) {
-
-            }
-
-            @Override
-            public void clear() {
-
-            }
-        };
-        s.put("Food", 5.00);
-        Map<Integer, SortedMap<String, Double>> m = new HashMap<>();
-        m.put(0, s);
-        spendingDays.add(d);
-        dayCategoryExpense.put(d, m);
-
-        expenseAdapter = new ExpenseRecylerViewAdapter(dayCategoryExpense, spendingDays, ExpenseHomePage.this);
+        expensesByDay = findViewById(R.id.day_by_day_expense_view);
+        dayExpenseAdapter = new ExpenseRecylerViewAdapter(daysISpent, spendingEachDay, ExpenseHomePage.this);
 
         LinearLayoutManager manager = new LinearLayoutManager(ExpenseHomePage.this);
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
-        expensesByDay.setAdapter(expenseAdapter);
+        expensesByDay.setAdapter(dayExpenseAdapter);
+    }
+
+    private Map<Day, List<ExpenseCategory>> getSpendingEachDay() {
+        spendingEachDay = new HashMap<>();
+        for (Day d : daysISpent) {
+            // query for each day the categories of expenses
+            List<ExpenseCategory> temp = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                temp.add(new ExpenseCategory("Food " + i));
+            }
+            spendingEachDay.put(d, temp);
+        }
+        return spendingEachDay;
+    }
+
+    private List<Day> getSpendingDays() {
+        // query here
+        daysISpent = new ArrayList<>();
+        Calendar c = Calendar.getInstance();
+        daysISpent.add(new Day(c.getTime()));
+        for (int i = 0; i < 30; i++) {
+            c.add(Calendar.DATE, 2);
+            daysISpent.add(new Day(c.getTime()));
+        }
+        return daysISpent;
     }
 }
