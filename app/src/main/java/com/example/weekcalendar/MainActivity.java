@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     private WeekRecyclerViewAdapter mAdapter;
     private FloatingActionButton floatingCreateEvent;
     private FloatingActionButton linkToExpense; // random name
+    private DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +42,13 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
 
         linkToExpense = findViewById(R.id.random_button_link_expense);
         linkToExpense.setOnClickListener(v -> moveToExpense());
+
+        myDB = new DatabaseHelper(this);
+        SQLiteDatabase db = this.myDB.getWritableDatabase();
     }
 
     private void moveToExpense() {
-        Intent i = new Intent(this, CreateExpense.class);
+        Intent i = new Intent(this,  ExpenseHomePage.class);
         startActivity(i);
     }
 
