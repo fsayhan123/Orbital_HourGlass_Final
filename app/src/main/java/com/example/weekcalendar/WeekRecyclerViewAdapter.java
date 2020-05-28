@@ -92,7 +92,7 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         // random events
         List<MyEvent> temp = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            temp.add(new MyEvent("Event fjdsfjdksfjdfkldjsfkldjsklfdjsfkldjsfkldsjfdkljsfdkljsfds" + i, "07.30pm", ""));
+            temp.add(new MyEvent("Event " + i, "07.30pm", ""));
         }
 
         EventRecylerViewAdapter e = new EventRecylerViewAdapter(temp, (MyOnEventClickListener) a); // can store in holder?

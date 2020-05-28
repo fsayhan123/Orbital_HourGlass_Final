@@ -18,6 +18,7 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
     EditText todo1;
     Day selectedDay;
     MyEvent e;
+    DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,8 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
 
         createEvent = findViewById(R.id.create_event_button);
         createEvent.setOnClickListener(v -> createEvent(v));
+
+        myDB = new DatabaseHelper(this);
     }
 
     private void createEvent(View v) {
@@ -59,6 +62,14 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
             Toast.makeText(this, "Please choose an end time!", Toast.LENGTH_SHORT).show();
         } else {
             String s = todo1.getText().toString();
+            String startDate = selectStartDate.getText().toString();
+            String endDate = selectEndDate.getText().toString();
+            String startTime = selectStartTime.getText().toString();
+            String endTime = selectEndTime.getText().toString();
+            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime);
+            if (result == true) {
+                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+            }
             Toast.makeText(this, "Event created with " + s, Toast.LENGTH_SHORT).show();
 //            e = new MyEvent(eventTitle, selectedDay.toString(), eventDescr);
             Intent i = new Intent(this, MainActivity.class);
@@ -86,7 +97,7 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
 
     @Override
     public void applyTimeText(Day d, Button b) {
-        b.setText(d.getDate());
+        b.setText(d.getTime());
         selectedDay = d;
     }
 }

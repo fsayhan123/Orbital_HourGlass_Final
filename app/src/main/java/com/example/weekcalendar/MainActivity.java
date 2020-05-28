@@ -5,14 +5,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
@@ -27,8 +34,16 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        myDB = new DatabaseHelper(this);
+        SQLiteDatabase db = this.myDB.getWritableDatabase();
 
-        daysOfTheMonth = prepareMonth(); // should return a list of only days with events
+        try {
+            daysOfTheMonth = prepareMonth();}
+        catch(ParseException e) {
+            Log.d("hello", "Hello");
+            daysOfTheMonth = new ArrayList<Day>();
+        }// should return a list of only days with events
+
         mRecyclerView = findViewById(R.id.week_view);
         mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, MainActivity.this);
 
@@ -43,8 +58,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         linkToExpense = findViewById(R.id.random_button_link_expense);
         linkToExpense.setOnClickListener(v -> moveToExpense());
 
-        myDB = new DatabaseHelper(this);
-        SQLiteDatabase db = this.myDB.getWritableDatabase();
+
     }
 
     private void moveToExpense() {
@@ -57,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         startActivity(intent);
     }
 
-    private List<Day> prepareMonth() {
+    /*private List<Day> prepareMonth() {
         // only to add Days where there are events
         daysOfTheMonth = new ArrayList<>();
         Calendar c = Calendar.getInstance();
@@ -68,6 +82,26 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
             daysOfTheMonth.add(new Day(c.getTime()));
         }
         return daysOfTheMonth;
+    }*/
+
+    private List<Day> prepareMonth() throws ParseException {
+        daysOfTheMonth = new ArrayList<>();
+        DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
+        Cursor query = this.myDB.getEventData();
+        if (query.getCount() == 0) {
+            return daysOfTheMonth;
+        }
+
+        for (int i =0; i < 30; i++) {
+            try {
+                String result = query.getString(1);
+                query.moveToNext();
+                Date date = dateFormatter.parse(result);
+                daysOfTheMonth.add(new Day(date));
+            } catch (CursorIndexOutOfBoundsException e) {
+                break;
+            }
+        } return daysOfTheMonth;
     }
 
     @Override

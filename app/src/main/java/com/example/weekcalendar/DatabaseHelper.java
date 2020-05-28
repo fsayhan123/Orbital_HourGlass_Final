@@ -1,6 +1,8 @@
 package com.example.weekcalendar;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -9,7 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Calendar.db";
 
     //Database Version
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 5;
 
     //Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -50,5 +52,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + EXPENSE_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + TO_DO_TABLE);
         onCreate(db);
+    }
+
+    //Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
+    public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] startDateArr = startDate.split(" ");
+        startDateArr[1] = startDateArr[1].substring(0,3);
+        String editedStartDate = String.join(" ", startDateArr[0], startDateArr[1], startDateArr[2]);
+        String[] endDateArr = endDate.split(" ");
+        endDateArr[1] = endDateArr[1].substring(0,3);
+        String editedEndDate = String.join(" ", endDateArr[0], endDateArr[1], endDateArr[2]);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(EVENTS_1, editedStartDate);
+        contentValues.put(EVENTS_2, editedEndDate);
+        contentValues.put(EVENTS_3, startTime);
+        contentValues.put(EVENTS_4, endTime);
+        contentValues.put(EVENTS_5, eventTitle);
+        long result = db.insert(EVENTS_TABLE, null, contentValues);
+        if (result == -1) {
+            return false;
+        } return true;
+    }
+
+    //
+    public Cursor getEventData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Events_table", null);
+        return result;
     }
 }
