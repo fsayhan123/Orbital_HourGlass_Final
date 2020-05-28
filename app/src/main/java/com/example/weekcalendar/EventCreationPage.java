@@ -46,7 +46,7 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
 
     private void createEvent(View v) {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
-//        String eventDescr = ((EditText) findViewById(R.id.insert_event_description)).getText().toString();
+//        String eventDescr = ((EditText) findViewById(R.id.insert_event_description)).getText().toString();`
         if (eventTitle.equals("")) {
             Toast.makeText(this, "Please insert event title!", Toast.LENGTH_SHORT).show();
         } else if (selectStartDate.getText().toString().equals("Select Start Date")) {
