@@ -29,7 +29,7 @@ public class EachExpenseRecyclerViewAdapter extends RecyclerView.Adapter<EachExp
     @Override
     public void onBindViewHolder(@NonNull MyEachExpenseViewHolder holder, int position) {
         ExpenseCategory category = this.expenditureOnDayD.get(position);
-        holder.category.setText(category.getName());
+        holder.category.setText(category.getTitle());
         holder.expenseCost.setText(Double.toString(category.getTotalCost()));
     }
 

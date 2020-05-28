@@ -1,22 +1,16 @@
 package com.example.weekcalendar;
 
+import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
+
 import java.util.List;
 
-public class ExpenseCategory {
+public class ExpenseCategory extends ExpandableGroup<Expense> {
     private String name;
     private List<Expense> expensesInCategory;
     private double totalCost;
 
-    public ExpenseCategory(String name) { // to include the list and double later
-        this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public List<Expense> getExpensesInCategory() {
-        return this.expensesInCategory;
+    public ExpenseCategory(String name, List<Expense> expensesInCategory) { // to include the list and double later
+        super(name, expensesInCategory);
     }
 
     public double getTotalCost() {

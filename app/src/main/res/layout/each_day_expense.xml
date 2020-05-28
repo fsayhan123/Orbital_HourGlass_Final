@@ -24,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:text="today"
                 android:textAlignment="center"
-                android:textSize="56dp" />
+                android:textColor="#4A4A4A"
+                android:textSize="48dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/category_and_expenses"

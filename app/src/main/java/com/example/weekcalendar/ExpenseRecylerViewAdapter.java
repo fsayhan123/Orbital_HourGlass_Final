@@ -51,8 +51,10 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
         holder.date.setText(d.getDate());
 
         List<ExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
-        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenditureOnDayD);
+//        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenditureOnDayD);
+        EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
         LinearLayoutManager LLM = new LinearLayoutManager(a);
+
         holder.categoryAndExpenses.setLayoutManager(LLM);
         holder.categoryAndExpenses.setAdapter(e);
     }

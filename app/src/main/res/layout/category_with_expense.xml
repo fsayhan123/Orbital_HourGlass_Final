@@ -9,7 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="category" />
+        android:text="category"
+        android:textColor="#4A4A4A"
+        android:textSize="20dp" />
 
     <TextView
         android:id="@+id/expense"
@@ -17,5 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="expense"
-        android:textAlignment="textEnd" />
+        android:textAlignment="textEnd"
+        android:textColor="#4A4A4A"
+        android:textSize="20dp" />
 </LinearLayout>

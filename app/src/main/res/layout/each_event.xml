@@ -18,6 +18,7 @@
         android:singleLine="false"
         android:text="07.30pm"
         android:textAlignment="center"
+        android:textColor="#4A4A4A"
         android:textSize="12dp" />
 
     <TextView
@@ -32,5 +33,6 @@
         android:singleLine="true"
         android:text="Event Title"
         android:textAlignment="viewStart"
+        android:textColor="#4A4A4A"
         android:textSize="18dp" />
 </LinearLayout>

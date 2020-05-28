@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -47,8 +48,17 @@ public class ExpenseHomePage extends AppCompatActivity {
         for (Day d : daysISpent) {
             // query for each day the categories of expenses
             List<ExpenseCategory> temp = new ArrayList<>();
+            ExpenseCategory exCat;
             for (int i = 0; i < 3; i++) {
-                temp.add(new ExpenseCategory("Food " + i));
+                List<Expense> whatIAte = new ArrayList<>();
+                for (int j = 0; j < 3; j++) {
+                    whatIAte.add(new Expense("Chicken Rice " + j));
+                }
+                exCat = new ExpenseCategory("Food " + i, whatIAte);
+                temp.add(exCat);
+                if (exCat.getItems() == null) {
+                    Toast.makeText(this, "empty expenses list in this category", Toast.LENGTH_SHORT).show();
+                }
             }
             spendingEachDay.put(d, temp);
         }
