@@ -37,13 +37,24 @@
                 android:hint="Expenditure"
                 android:inputType="textPersonName" />
 
+            <EditText
+                android:id="@+id/cost"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="10dp"
+                android:ems="10"
+                android:hint="Cost"
+                android:inputType="numberDecimal"
+                android:numeric="decimal" />
+
             <Button
                 android:id="@+id/date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="10dp"
-                android:text="Date" />
+                android:text="Select Date" />
 
             <Spinner
                 android:id="@+id/category_spinner"
@@ -94,7 +105,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/add_expenditure"
+        android:id="@+id/submit_expenditure"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

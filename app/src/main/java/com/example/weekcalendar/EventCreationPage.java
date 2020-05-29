@@ -42,12 +42,12 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
         todo1 = findViewById(R.id.todo_item);
 
         createEvent = findViewById(R.id.create_event_button);
-        createEvent.setOnClickListener(v -> createEvent(v));
+        createEvent.setOnClickListener(v -> createEvent());
 
         myDB = new DatabaseHelper(this);
     }
 
-    private void createEvent(View v) {
+    private void createEvent() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
 //        String eventDescr = ((EditText) findViewById(R.id.insert_event_description)).getText().toString();`
         if (eventTitle.equals("")) {

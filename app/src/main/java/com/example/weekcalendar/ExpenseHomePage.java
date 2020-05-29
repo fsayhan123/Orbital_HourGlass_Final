@@ -1,30 +1,27 @@
 package com.example.weekcalendar;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
 
 public class ExpenseHomePage extends AppCompatActivity {
     private RecyclerView expensesByDay;
     private ExpenseRecylerViewAdapter dayExpenseAdapter;
     private List<Day> daysISpent;
     private Map<Day, List<ExpenseCategory>> spendingEachDay;
+    private FloatingActionButton addExpense;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +38,14 @@ public class ExpenseHomePage extends AppCompatActivity {
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
         expensesByDay.setAdapter(dayExpenseAdapter);
+
+        addExpense = findViewById(R.id.to_add_expense);
+        addExpense.setOnClickListener(v -> moveToAddExpensePage());
+    }
+
+    private void moveToAddExpensePage() {
+        Intent i = new Intent(this, CreateExpense.class);
+        startActivity(i);
     }
 
     private Map<Day, List<ExpenseCategory>> getSpendingEachDay() {

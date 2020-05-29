@@ -4,16 +4,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 public class CreateExpense extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
     private Spinner s;
     private Button date;
+    private EditText cost;
     private Button addExpenditure;
 
     @Override
@@ -29,14 +32,29 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
         date = findViewById(R.id.date);
         date.setOnClickListener(v -> openSelectDateDialog(v, date));
 
-        addExpenditure = findViewById(R.id.add_expenditure);
+        addExpenditure = findViewById(R.id.submit_expenditure);
         addExpenditure.setOnClickListener(v -> addExpense());
+
+        cost = findViewById(R.id.cost);
+        cost.setFilters(new InputFilter[] {new DigitsInputFilter(Integer.MAX_VALUE, 2, Double.MAX_VALUE)});
     }
 
     private void addExpense() {
-        Intent i = new Intent(this, ExpenseHomePage.class);
-        // grab data and putExtra here
-        startActivity(i);
+        String expenseName = ((EditText) findViewById(R.id.expenditure)).getText().toString();
+        if (expenseName.equals("")) {
+            Toast.makeText(this, "Please insert expense name!", Toast.LENGTH_SHORT).show();
+        } else if (cost.getText().equals("")) {
+            Toast.makeText(this, "Please insert expense cost!", Toast.LENGTH_SHORT).show();
+        } else if (date.getText().toString().equals("Select Date")) {
+            Toast.makeText(this, "Please choose date!", Toast.LENGTH_SHORT).show();
+        } else if (s.getSelectedItem() == null) {
+            Toast.makeText(this, "Please choose a category!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Added expense", Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(this, ExpenseHomePage.class);
+            // grab data and add to db here
+            startActivity(i);
+        }
     }
 
     @Override
