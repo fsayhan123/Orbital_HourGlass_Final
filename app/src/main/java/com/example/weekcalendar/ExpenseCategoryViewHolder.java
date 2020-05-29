@@ -18,6 +18,6 @@ public class ExpenseCategoryViewHolder extends GroupViewHolder {
 
     public void setCategoryText(ExpandableGroup group) {
         category.setText(group.getTitle());
-        expenseCost.setText(Double.toString(((ExpenseCategory) group).getTotalCost()));
+        expenseCost.setText(Double.toString(((CustomExpenseCategory) group).getTotalCost()));
     }
 }

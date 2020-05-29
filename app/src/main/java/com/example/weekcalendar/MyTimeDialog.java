@@ -47,15 +47,15 @@ public class MyTimeDialog extends AppCompatDialogFragment {
         builder.setView(scrolling)
                 .setTitle("Select Time")
                 .setPositiveButton("Submit", (dialog, which) -> {
-                    Day selectedDay = new Day(s.getDate());
-                    Toast.makeText(getContext(),"Selected " + selectedDay.getTime(), Toast.LENGTH_SHORT).show();
-                    listener.applyTimeText(selectedDay, b);
+                    CustomDay selectedCustomDay = new CustomDay(s.getDate());
+                    Toast.makeText(getContext(),"Selected " + selectedCustomDay.getTime(), Toast.LENGTH_SHORT).show();
+                    listener.applyTimeText(selectedCustomDay, b);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> { });
         return builder.create();
     }
 
     public interface MyTimeDialogListener {
-        void applyTimeText(Day d, Button b);
+        void applyTimeText(CustomDay d, Button b);
     }
 }

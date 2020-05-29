@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerViewAdapter.MyEventViewHolder> {
-    private List<MyEvent> listOfEvents;
+    private List<CustomEvent> listOfEvents;
     private MyOnEventClickListener mEventClickListener;
 
     public class MyEventViewHolder extends RecyclerView.ViewHolder {
@@ -25,7 +25,7 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
         }
     }
 
-    public EventRecylerViewAdapter(List<MyEvent> listOfEvents, MyOnEventClickListener eventClicker) {
+    public EventRecylerViewAdapter(List<CustomEvent> listOfEvents, MyOnEventClickListener eventClicker) {
         this.listOfEvents = listOfEvents;
         this.mEventClickListener = eventClicker;
     }
@@ -53,7 +53,7 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
 
     @Override
     public void onBindViewHolder(@NonNull EventRecylerViewAdapter.MyEventViewHolder holder, int position) {
-        MyEvent e = this.listOfEvents.get(position);
+        CustomEvent e = this.listOfEvents.get(position);
         holder.time.setText(e.getDate());
         holder.eventTitle.setText(e.getTitle());
     }

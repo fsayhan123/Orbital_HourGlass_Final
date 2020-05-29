@@ -15,7 +15,7 @@ public class EachExpenseViewHolder extends ChildViewHolder {
         expenseCost = itemView.findViewById(R.id.expense_cost);
     }
 
-    public void setExpenseText(Expense e) {
+    public void setExpenseText(CustomExpense e) {
         expenseName.setText(e.getExpenseName());
         expenseCost.setText(Double.toString(e.getCost()));
     }

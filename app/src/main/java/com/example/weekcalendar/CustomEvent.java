@@ -4,12 +4,12 @@ package com.example.weekcalendar;
  to store data relevant to each event
  */
 
-public class MyEvent {
+public class CustomEvent {
     private String title;
     private String date;
     private String description;
 
-    public MyEvent(String title, String d, String description) {
+    public CustomEvent(String title, String d, String description) {
         this.title = title;
         this.date = d;
         this.description = description;

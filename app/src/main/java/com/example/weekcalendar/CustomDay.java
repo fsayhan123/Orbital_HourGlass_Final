@@ -8,7 +8,7 @@ import java.util.Date;
 /*
  to encapsulate a Date and return it in the format as required.
  */
-public class Day {
+public class CustomDay {
     private String time;
     private Date today;
     private String dateAsString;
@@ -25,7 +25,7 @@ public class Day {
 
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm a");
 
-    public Day(Date d) {
+    public CustomDay(Date d) {
         this.today = d;
         LocalDate temp = d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         this.dd = temp.getDayOfMonth();
@@ -74,8 +74,8 @@ public class Day {
     public boolean equals(Object other) {
         if (other == null) {
             return false;
-        } else if (other instanceof Day) {
-            Day d2 = (Day) other;
+        } else if (other instanceof CustomDay) {
+            CustomDay d2 = (CustomDay) other;
             return this.today.equals(d2.today);
         } else {
             return false;

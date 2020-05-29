@@ -3,33 +3,33 @@ package com.example.weekcalendar;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Expense implements Parcelable {
+public class CustomExpense implements Parcelable {
     private String expenseName;
     private double cost;
 
-    public Expense(String expenseName) {
+    public CustomExpense(String expenseName) {
         this.expenseName = expenseName;
     }
 
-    public Expense(String expenseName, double cost) {
+    public CustomExpense(String expenseName, double cost) {
         this.expenseName = expenseName;
         this.cost = cost;
     }
 
-    protected Expense(Parcel in) {
+    protected CustomExpense(Parcel in) {
         expenseName = in.readString();
         cost = in.readDouble();
     }
 
-    public static final Creator<Expense> CREATOR = new Creator<Expense>() {
+    public static final Creator<CustomExpense> CREATOR = new Creator<CustomExpense>() {
         @Override
-        public Expense createFromParcel(Parcel in) {
-            return new Expense(in);
+        public CustomExpense createFromParcel(Parcel in) {
+            return new CustomExpense(in);
         }
 
         @Override
-        public Expense[] newArray(int size) {
-            return new Expense[size];
+        public CustomExpense[] newArray(int size) {
+            return new CustomExpense[size];
         }
     };
 

@@ -47,15 +47,15 @@ public class MyDateDialog extends AppCompatDialogFragment {
         builder.setView(scrolling)
                 .setTitle("Select Date")
                 .setPositiveButton("Submit", (dialog, which) -> {
-                    Day selectedDay = new Day(s.getDate());
-                    Toast.makeText(getContext(),"Selected " + selectedDay.getDate(), Toast.LENGTH_SHORT).show();
-                    listener.applyDateText(selectedDay, b);
+                    CustomDay selectedCustomDay = new CustomDay(s.getDate());
+                    Toast.makeText(getContext(),"Selected " + selectedCustomDay.getDate(), Toast.LENGTH_SHORT).show();
+                    listener.applyDateText(selectedCustomDay, b);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> { });
         return builder.create();
     }
 
     public interface MyDateDialogEventListener {
-        void applyDateText(Day d, Button b);
+        void applyDateText(CustomDay d, Button b);
     }
 }

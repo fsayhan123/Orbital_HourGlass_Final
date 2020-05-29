@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class CreateExpense extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
+public class ActivityCreateExpensePage extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
     private Spinner s;
     private Button date;
     private EditText cost;
@@ -23,7 +23,7 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_expense);
+        setContentView(R.layout.activity_create_expense_page);
 
         myDB = new DatabaseHelper(this);
 
@@ -58,7 +58,7 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
             if (result == true) {
                 Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
             }
-            Intent i = new Intent(this, ExpenseHomePage.class);
+            Intent i = new Intent(this, ActivityExpensePage.class);
             // grab data and add to db here
             startActivity(i);
         }
@@ -80,7 +80,7 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
     }
 
     @Override
-    public void applyDateText(Day d, Button b) {
+    public void applyDateText(CustomDay d, Button b) {
         b.setText(d.getDate());
     }
 

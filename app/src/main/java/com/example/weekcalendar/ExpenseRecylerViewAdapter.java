@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecylerViewAdapter.MyExpenseViewHolder> {
-    private List<Day> spendingDays;
-    private Map<Day, List<ExpenseCategory>> whatWeSpentEachDay;
+    private List<CustomDay> spendingCustomDays;
+    private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
 
-    public ExpenseRecylerViewAdapter(List<Day> spendingDays, Map<Day, List<ExpenseCategory>> whatWeSpentEachDay, Activity a) {
-        // each Day has a List of expense categories
-        this.spendingDays = spendingDays;
+    public ExpenseRecylerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
+        // each CustomDay has a List of expense categories
+        this.spendingCustomDays = spendingCustomDays;
         this.whatWeSpentEachDay = whatWeSpentEachDay;
         this.a = a;
     }
@@ -47,10 +47,10 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
 
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecylerViewAdapter.MyExpenseViewHolder holder, int position) {
-        Day d = this.spendingDays.get(position);
+        CustomDay d = this.spendingCustomDays.get(position);
         holder.date.setText(d.getDate());
 
-        List<ExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
+        List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
 //        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenditureOnDayD);
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
         LinearLayoutManager LLM = new LinearLayoutManager(a);
@@ -61,6 +61,6 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
 
     @Override
     public int getItemCount() {
-        return this.spendingDays == null ? 0 : this.spendingDays.size();
+        return this.spendingCustomDays == null ? 0 : this.spendingCustomDays.size();
     }
 }

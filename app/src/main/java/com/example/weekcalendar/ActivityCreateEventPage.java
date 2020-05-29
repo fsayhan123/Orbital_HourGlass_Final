@@ -9,21 +9,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EventCreationPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
+public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
     Button selectStartDate;
     Button selectEndDate;
     Button selectStartTime;
     Button selectEndTime;
     Button createEvent;
     EditText todo1;
-    Day selectedDay;
-    MyEvent e;
+    CustomDay selectedCustomDay;
+    CustomEvent e;
     DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_event_creation_page);
+        setContentView(R.layout.activity_create_event_page);
 
         this.setTitle("Create Event");
 
@@ -71,8 +71,8 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
                 Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
             }
             Toast.makeText(this, "Event created with " + s, Toast.LENGTH_SHORT).show();
-//            e = new MyEvent(eventTitle, selectedDay.toString(), eventDescr);
-            Intent i = new Intent(this, MainActivity.class);
+//            e = new CustomEvent(eventTitle, selectedCustomDay.toString(), eventDescr);
+            Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);
         }
     }
@@ -90,14 +90,14 @@ public class EventCreationPage extends AppCompatActivity implements MyDateDialog
     }
 
     @Override
-    public void applyDateText(Day d, Button b) {
+    public void applyDateText(CustomDay d, Button b) {
         b.setText(d.getDate());
-        selectedDay = d;
+        selectedCustomDay = d;
     }
 
     @Override
-    public void applyTimeText(Day d, Button b) {
+    public void applyTimeText(CustomDay d, Button b) {
         b.setText(d.getTime());
-        selectedDay = d;
+        selectedCustomDay = d;
     }
 }

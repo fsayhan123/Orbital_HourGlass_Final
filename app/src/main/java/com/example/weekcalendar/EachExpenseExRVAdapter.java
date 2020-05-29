@@ -30,7 +30,7 @@ public class EachExpenseExRVAdapter extends ExpandableRecyclerViewAdapter<Expens
 
     @Override
     public void onBindChildViewHolder(EachExpenseViewHolder holder, int flatPosition, ExpandableGroup group, int childIndex) {
-        Expense e = ((ExpenseCategory) group).getItems().get(childIndex);
+        CustomExpense e = ((CustomExpenseCategory) group).getItems().get(childIndex);
         holder.setExpenseText(e);
     }
 

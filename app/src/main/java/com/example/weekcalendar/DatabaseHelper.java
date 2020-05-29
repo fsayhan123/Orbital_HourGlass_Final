@@ -21,7 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //To Do Table Columns
     public static final String TO_DO_1 = "DETAILS";
 
-    //Expense Table Columns
+    //CustomExpense Table Columns
     public static final String EXPENSE_1 = "DATE";
     public static final String EXPENSE_2 = "CATEGORY";
     public static final String EXPENSE_3 = "AMOUNT";

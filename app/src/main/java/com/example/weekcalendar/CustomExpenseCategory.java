@@ -4,16 +4,16 @@ import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
 
 import java.util.List;
 
-public class ExpenseCategory extends ExpandableGroup<Expense> {
+public class CustomExpenseCategory extends ExpandableGroup<CustomExpense> {
     private String name;
-    private List<Expense> expensesInCategory;
+    private List<CustomExpense> expensesInCategory;
     private double totalCost;
 
-    public ExpenseCategory(String name, List<Expense> expensesInCategory) { // to include the list and double later
+    public CustomExpenseCategory(String name, List<CustomExpense> expensesInCategory) { // to include the list and double later
         super(name, expensesInCategory);
         double cost = 0;
-        for (Expense expense: expensesInCategory) {
-            cost += expense.getCost();
+        for (CustomExpense customExpense : expensesInCategory) {
+            cost += customExpense.getCost();
         }
         this.totalCost = cost;
     }

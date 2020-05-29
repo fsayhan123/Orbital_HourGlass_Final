@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,12 +18,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
-    private List<Day> daysOfTheMonth; // to change name
+public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
+    private List<CustomDay> daysOfTheMonth; // to change name
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
     private FloatingActionButton floatingCreateEvent;
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_upcoming_page);
         myDB = new DatabaseHelper(this);
         SQLiteDatabase db = this.myDB.getWritableDatabase();
 
@@ -44,13 +42,13 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
-            daysOfTheMonth = new ArrayList<Day>();
+            daysOfTheMonth = new ArrayList<CustomDay>();
         }// should return a list of only days with events
 
         mRecyclerView = findViewById(R.id.week_view);
-        mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, MainActivity.this, getApplicationContext());
+        mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, ActivityUpcomingPage.this, getApplicationContext());
 
-        LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
+        LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.setAdapter(mAdapter);
@@ -71,29 +69,29 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     }
 
     private void moveToExpense() {
-        Intent i = new Intent(this,  ExpenseHomePage.class);
+        Intent i = new Intent(this,  ActivityExpensePage.class);
         startActivity(i);
     }
 
     private void createEvent() {
-        Intent intent = new Intent(this, EventCreationPage.class);
+        Intent intent = new Intent(this, ActivityCreateEventPage.class);
         startActivity(intent);
     }
 
-    /*private List<Day> prepareMonth() {
+    /*private List<CustomDay> prepareMonth() {
         // only to add Days where there are events
         daysOfTheMonth = new ArrayList<>();
         Calendar c = Calendar.getInstance();
-        daysOfTheMonth.add(new Day(c.getTime()));
+        daysOfTheMonth.add(new CustomDay(c.getTime()));
         for (int i = 0; i < 30; i++) {
             c.add(Calendar.DATE, 2);
-            // if Day has a >= 1 Event, add to list to send to Recycler View
-            daysOfTheMonth.add(new Day(c.getTime()));
+            // if CustomDay has a >= 1 Event, add to list to send to Recycler View
+            daysOfTheMonth.add(new CustomDay(c.getTime()));
         }
         return daysOfTheMonth;
     }*/
 
-    private List<Day> prepareMonth() throws ParseException {
+    private List<CustomDay> prepareMonth() throws ParseException {
         daysOfTheMonth = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
         Cursor query = this.myDB.getEventData();
@@ -109,11 +107,11 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
             query.moveToNext();
             String result = query.getString(1);
             Date date = dateFormatter.parse(result);
-            Day day = new Day(date);
-            if (daysOfTheMonth.contains(day)) {
+            CustomDay customDay = new CustomDay(date);
+            if (daysOfTheMonth.contains(customDay)) {
                 continue;
             } else{
-                daysOfTheMonth.add(day);
+                daysOfTheMonth.add(customDay);
             }
         } return daysOfTheMonth;
     }
@@ -121,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     @Override
     public void onDateClickListener(String date) {
         Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, EventCreationPage.class);
+        Intent i = new Intent(this, ActivityCreateEventPage.class);
         i.putExtra("date clicked", date);
         startActivity(i);
     }
@@ -129,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     @Override
     public void onEventClickListener(String event) {
         Toast.makeText(this, "clicked " + event, Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, IndividualEventPage.class);
+        Intent i = new Intent(this, ActivityEventDetailsPage.class);
         i.putExtra("event details", event);
         startActivity(i);
     }

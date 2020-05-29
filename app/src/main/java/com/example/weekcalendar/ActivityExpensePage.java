@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -15,36 +14,35 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExpenseHomePage extends AppCompatActivity {
+public class ActivityExpensePage extends AppCompatActivity {
     private RecyclerView expensesByDay;
     private ExpenseRecylerViewAdapter dayExpenseAdapter;
-    private List<Day> daysISpent;
-    private Map<Day, List<ExpenseCategory>> spendingEachDay;
+    private List<CustomDay> daysISpent;
+    private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
     private FloatingActionButton addExpense;
     private DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_expense_home_page);
+        setContentView(R.layout.activity_expense_page);
         myDB = new DatabaseHelper(this);
         try {
             daysISpent = getSpendingDays();
         } catch (ParseException e) {
-            daysISpent = new ArrayList<Day>();
+            daysISpent = new ArrayList<CustomDay>();
         }
         spendingEachDay = getSpendingEachDay();
 
         expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        dayExpenseAdapter = new ExpenseRecylerViewAdapter(daysISpent, spendingEachDay, ExpenseHomePage.this);
+        dayExpenseAdapter = new ExpenseRecylerViewAdapter(daysISpent, spendingEachDay, ActivityExpensePage.this);
 
-        LinearLayoutManager manager = new LinearLayoutManager(ExpenseHomePage.this);
+        LinearLayoutManager manager = new LinearLayoutManager(ActivityExpensePage.this);
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
         expensesByDay.setAdapter(dayExpenseAdapter);
@@ -54,20 +52,20 @@ public class ExpenseHomePage extends AppCompatActivity {
     }
 
     private void moveToAddExpensePage() {
-        Intent i = new Intent(this, CreateExpense.class);
+        Intent i = new Intent(this, ActivityCreateExpensePage.class);
         startActivity(i);
     }
 
     //Returns a Map of each day along with expense category
-    private Map<Day, List<ExpenseCategory>> getSpendingEachDay() {
+    private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
         spendingEachDay = new HashMap<>();
-        for (Day d : daysISpent) {
+        for (CustomDay d : daysISpent) {
             String daySQL = d.getdd() + " " + d.getMMM() + " " + d.getyyyy();
             Cursor result = myDB.getExpenseData(daySQL);
             // query for each day the categories of expenses
-            HashMap<String, List<Expense>> catHashMap = new HashMap<>();
-            List<ExpenseCategory> temp = new ArrayList<>();
-            ExpenseCategory exCat;
+            HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
+            List<CustomExpenseCategory> temp = new ArrayList<>();
+            CustomExpenseCategory exCat;
 
             for (int i = 0; i < result.getCount(); i++) {
                 result.moveToNext();
@@ -75,20 +73,20 @@ public class ExpenseHomePage extends AppCompatActivity {
                 String name = result.getString(4);
                 String amount = result.getString(3);
                 if (catHashMap.containsKey(category)) {
-                    List<Expense> expenseCategory = new ArrayList<>(catHashMap.get(category));
-                    expenseCategory.add(new Expense(name, Double.valueOf(amount)));
-                    catHashMap.put(category, expenseCategory);
+                    List<CustomExpense> customExpenseCategory = new ArrayList<>(catHashMap.get(category));
+                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
+                    catHashMap.put(category, customExpenseCategory);
                 } else {
-                    List<Expense> expenseCategory = new ArrayList<>();
-                    expenseCategory.add(new Expense(name, Double.valueOf(amount)));
-                    catHashMap.put(category, expenseCategory);
+                    List<CustomExpense> customExpenseCategory = new ArrayList<>();
+                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
+                    catHashMap.put(category, customExpenseCategory);
                 }
             }
 
-            for (Map.Entry<String, List<Expense>> entry : catHashMap.entrySet()) {
+            for (Map.Entry<String, List<CustomExpense>> entry : catHashMap.entrySet()) {
                 String key = entry.getKey();
-                List<Expense> value = entry.getValue();
-                exCat = new ExpenseCategory(key, value);
+                List<CustomExpense> value = entry.getValue();
+                exCat = new CustomExpenseCategory(key, value);
                 temp.add(exCat);
             }
             spendingEachDay.put(d, temp);
@@ -96,8 +94,8 @@ public class ExpenseHomePage extends AppCompatActivity {
         return spendingEachDay;
     }
 
-    //Returns a List<Day> that user has a spending;
-    private List<Day> getSpendingDays() throws ParseException {
+    //Returns a List<CustomDay> that user has a spending;
+    private List<CustomDay> getSpendingDays() throws ParseException {
         // query here
         daysISpent = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
@@ -113,11 +111,11 @@ public class ExpenseHomePage extends AppCompatActivity {
             query.moveToNext();
             String result = query.getString(1);
             Date date = dateFormatter.parse(result);
-            Day day = new Day(date);
-            if (daysISpent.contains(day)) {
+            CustomDay customDay = new CustomDay(date);
+            if (daysISpent.contains(customDay)) {
                 continue;
             } else {
-                daysISpent.add(day);
+                daysISpent.add(customDay);
             }} return daysISpent;
     }
 }
