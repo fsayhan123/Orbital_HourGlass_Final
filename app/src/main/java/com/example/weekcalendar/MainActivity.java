@@ -10,6 +10,7 @@ import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
     private WeekRecyclerViewAdapter mAdapter;
     private FloatingActionButton floatingCreateEvent;
     private FloatingActionButton linkToExpense; // random name
+    private Button randomButton;
     private DatabaseHelper myDB;
 
     @Override
@@ -59,7 +61,13 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         linkToExpense = findViewById(R.id.random_button_link_expense);
         linkToExpense.setOnClickListener(v -> moveToExpense());
 
+        randomButton = findViewById(R.id.test_button);
+        randomButton.setOnClickListener(v -> moveToDrawer());
+    }
 
+    private void moveToDrawer() {
+        Intent i = new Intent(this,  testDrawer.class);
+        startActivity(i);
     }
 
     private void moveToExpense() {

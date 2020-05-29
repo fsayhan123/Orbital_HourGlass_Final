@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ExpenseHomePage"></activity>
+        <activity android:name=".testDrawer"></activity>
+        <activity android:name=".ExpenseHomePage" />
         <activity android:name=".CreateExpense" />
         <activity android:name=".IndividualEventPage" />
         <activity android:name=".EventCreationPage" />

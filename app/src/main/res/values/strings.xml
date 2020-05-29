@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">WeekCalendar</string>
+    <string name="Open" />
+    <string name="Close" />
     <string-array name="categories">
         <item>Food</item>
         <item>Travel</item>
