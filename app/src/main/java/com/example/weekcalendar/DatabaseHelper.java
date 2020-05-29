@@ -11,7 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Calendar.db";
 
     //Database Version
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
 
     //Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -25,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String EXPENSE_1 = "DATE";
     public static final String EXPENSE_2 = "CATEGORY";
     public static final String EXPENSE_3 = "AMOUNT";
+    public static final String EXPENSE_4 = "NAME";
 
     //Events Table Columns
     public static final String EVENTS_1 = "START_DATE";
@@ -41,7 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + EVENTS_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, START_DATE TEXT, END_DATE TEXT, START_TIME TEXT, END_TIME TEXT, ACTIVITY TEXT)");
-        db.execSQL("create table " + EXPENSE_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, CATEGORY TEXT, AMOUNT INTEGER)");
+        db.execSQL("create table " + EXPENSE_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, CATEGORY TEXT, AMOUNT INTEGER, NAME TEXT)");
         db.execSQL("create table " + TO_DO_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DETAILS TEXT)");
     }
 
@@ -75,6 +76,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
+    public boolean addExpense(String name, String expense, String category, String expenseDate) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] expenseDateArr = expenseDate.split(" ");
+        expenseDateArr[1] = expenseDateArr[1].substring(0,3);
+        String editedExpenseDate = String.join(" ", expenseDateArr[0], expenseDateArr[1], expenseDateArr[2]);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(EXPENSE_1, editedExpenseDate);
+        contentValues.put(EXPENSE_2, category);
+        contentValues.put(EXPENSE_3, expense);
+        contentValues.put(EXPENSE_4, name);
+        long result = db.insert(EXPENSE_TABLE, null, contentValues);
+        if (result == -1) {
+            return false;
+        } return true;
+    }
+
     //Get all event Data
     public Cursor getEventData() {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -82,10 +99,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+
     //Get all event data with a given startDate
     public Cursor getEventData(String startDate) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE START_DATE = \"" + startDate + "\"" + "ORDER BY START_TIME ASC", null);
+        return result;
+    }
+
+    //Get all event Data
+    public Cursor getExpenseData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Expense_Table", null);
+        return result;
+    }
+
+    //Get all event data for a given date
+    public Cursor getExpenseData(String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE DATE = \"" + date + "\" ORDER BY CATEGORY ASC" , null);
         return result;
     }
 }

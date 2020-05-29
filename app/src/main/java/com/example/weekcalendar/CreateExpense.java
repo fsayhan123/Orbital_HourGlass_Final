@@ -18,11 +18,14 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
     private Button date;
     private EditText cost;
     private Button addExpenditure;
+    private DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_expense);
+
+        myDB = new DatabaseHelper(this);
 
         s = findViewById(R.id.category_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
@@ -51,6 +54,10 @@ public class CreateExpense extends AppCompatActivity implements AdapterView.OnIt
             Toast.makeText(this, "Please choose a category!", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Added expense", Toast.LENGTH_SHORT).show();
+            boolean result = myDB.addExpense(expenseName, cost.getText().toString(), s.getSelectedItem().toString(), date.getText().toString());
+            if (result == true) {
+                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+            }
             Intent i = new Intent(this, ExpenseHomePage.class);
             // grab data and add to db here
             startActivity(i);
