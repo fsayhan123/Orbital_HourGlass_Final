@@ -94,13 +94,13 @@
                 android:scrollbars="vertical"
                 android:singleLine="false" />
 
-            <Button
-                android:id="@+id/attach_file"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="10dp"
-                android:text="Attach File" />
+<!--            <Button-->
+<!--                android:id="@+id/attach_file"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginHorizontal="20dp"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:text="Attach File" />-->
         </LinearLayout>
     </LinearLayout>
 
