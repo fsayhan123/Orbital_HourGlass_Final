@@ -38,14 +38,15 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         SQLiteDatabase db = this.myDB.getWritableDatabase();
 
         try {
-            daysOfTheMonth = prepareMonth();}
+            daysOfTheMonth = prepareMonth();
+        }
         catch(ParseException e) {
             Log.d("hello", "Hello");
             daysOfTheMonth = new ArrayList<Day>();
         }// should return a list of only days with events
 
         mRecyclerView = findViewById(R.id.week_view);
-        mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, MainActivity.this);
+        mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, MainActivity.this, getApplicationContext());
 
         LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
         mRecyclerView.setHasFixedSize(true);
@@ -89,17 +90,22 @@ public class MainActivity extends AppCompatActivity implements MyOnDateClickList
         DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
         Cursor query = this.myDB.getEventData();
         if (query.getCount() == 0) {
+            Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
             return daysOfTheMonth;
         }
 
         for (int i =0; i < 30; i++) {
-            try {
-                String result = query.getString(1);
-                query.moveToNext();
-                Date date = dateFormatter.parse(result);
-                daysOfTheMonth.add(new Day(date));
-            } catch (CursorIndexOutOfBoundsException e) {
+            if (i >= query.getCount()) {
                 break;
+            }
+            query.moveToNext();
+            String result = query.getString(1);
+            Date date = dateFormatter.parse(result);
+            Day day = new Day(date);
+            if (daysOfTheMonth.contains(day)) {
+                continue;
+            } else{
+                daysOfTheMonth.add(day);
             }
         } return daysOfTheMonth;
     }

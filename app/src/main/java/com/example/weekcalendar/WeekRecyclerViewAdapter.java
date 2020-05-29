@@ -1,6 +1,8 @@
 package com.example.weekcalendar;
 
 import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,8 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
     private MyOnDateClickListener mDateClickListener;
     private Activity a;
     private View eachDayView;
+    private DatabaseHelper myDB;
+
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -35,6 +39,7 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         private LinearLayout.LayoutParams eventLayoutFormat;
 
         private MyViewHolder(View itemView) {
+
             super(itemView);
             date = itemView.findViewById(R.id.date_button);
             month = itemView.findViewById(R.id.month_button);
@@ -56,10 +61,11 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         }
     }
 
-    public WeekRecyclerViewAdapter(List<Day> list, MyOnDateClickListener dateClicker, Activity a) {
+    public WeekRecyclerViewAdapter(List<Day> list, MyOnDateClickListener dateClicker, Activity a, Context context) {
         this.listOfDates = list;
         this.mDateClickListener = dateClicker;
         this.a = a;
+        this.myDB = new DatabaseHelper(context);
     }
 
     @NonNull
@@ -89,10 +95,18 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
 
+        String daySQL = d.getdd() + " " + d.getMMM() + " " + d.getyyyy();
+        Cursor result = myDB.getEventData(daySQL);
+
+
+
         // random events
         List<MyEvent> temp = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            temp.add(new MyEvent("Event " + i, "07.30pm", ""));
+        for (int i = 0; i < result.getCount(); i++) {
+            result.moveToNext();
+            String title = result.getString(5);
+            String startTime = result.getString(3);
+            temp.add(new MyEvent(title, startTime, ""));
         }
 
         EventRecylerViewAdapter e = new EventRecylerViewAdapter(temp, (MyOnEventClickListener) a); // can store in holder?

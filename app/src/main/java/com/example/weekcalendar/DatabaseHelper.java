@@ -75,10 +75,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
-    //
+    //Get all event Data
     public Cursor getEventData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_table", null);
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table", null);
+        return result;
+    }
+
+    //Get all event data with a given startDate
+    public Cursor getEventData(String startDate) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE START_DATE = \"" + startDate + "\"" + "ORDER BY START_TIME ASC", null);
         return result;
     }
 }
