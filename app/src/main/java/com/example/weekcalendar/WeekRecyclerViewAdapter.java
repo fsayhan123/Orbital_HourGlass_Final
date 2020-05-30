@@ -102,9 +102,10 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         List<CustomEvent> temp = new ArrayList<>();
         for (int i = 0; i < result.getCount(); i++) {
             result.moveToNext();
+            String id = result.getString(0);
             String title = result.getString(5);
             String startTime = result.getString(3);
-            temp.add(new CustomEvent(title, startTime, ""));
+            temp.add(new CustomEvent(id, title, startTime, ""));
         }
 
         EventRecylerViewAdapter e = new EventRecylerViewAdapter(temp, (MyOnEventClickListener) a); // can store in holder?

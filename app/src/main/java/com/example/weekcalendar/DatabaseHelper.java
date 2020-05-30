@@ -107,6 +107,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public Cursor getEventDataByID(String eventID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID, null );
+        return result;
+    }
+
     //Get all event Data
     public Cursor getExpenseData() {
         SQLiteDatabase db = this.getWritableDatabase();

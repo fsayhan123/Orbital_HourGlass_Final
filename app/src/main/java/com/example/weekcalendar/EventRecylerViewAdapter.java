@@ -15,6 +15,7 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
     private MyOnEventClickListener mEventClickListener;
 
     public class MyEventViewHolder extends RecyclerView.ViewHolder {
+        private String id;
         private TextView time;
         private TextView eventTitle;
 
@@ -39,13 +40,13 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
         holder.time.setOnClickListener(v -> {
             String time = holder.time.getText().toString();
             String event = holder.eventTitle.getText().toString();
-            mEventClickListener.onEventClickListener(time + " " + event);
+                mEventClickListener.onEventClickListener(holder.id);
         });
 
         holder.eventTitle.setOnClickListener(v -> {
             String time = holder.time.getText().toString();
             String event = holder.eventTitle.getText().toString();
-            mEventClickListener.onEventClickListener(time + " " + event);
+            mEventClickListener.onEventClickListener(holder.id);
         });
 
         return holder;
@@ -54,6 +55,7 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
     @Override
     public void onBindViewHolder(@NonNull EventRecylerViewAdapter.MyEventViewHolder holder, int position) {
         CustomEvent e = this.listOfEvents.get(position);
+        holder.id = e.getId();
         holder.time.setText(e.getDate());
         holder.eventTitle.setText(e.getTitle());
     }

@@ -110,10 +110,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
     // To link to ActivityEventDetailsPage upon clicking an event in the RecyclerView
     @Override
-    public void onEventClickListener(String event) {
-        Toast.makeText(this, "clicked " + event, Toast.LENGTH_SHORT).show();
+    public void onEventClickListener(String eventId) {
+        Toast.makeText(this, "clicked " + eventId, Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
-        i.putExtra("event details", event);
+        i.putExtra("eventId", eventId);
         startActivity(i);
     }
 }
