@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -22,31 +21,43 @@ import java.util.Date;
 import java.util.List;
 
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
-    private List<CustomDay> daysOfTheMonth; // to change name
+    // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
+    private List<CustomDay> daysWithEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
+
+    // FloatingActionButton to link to ActivityCreateEvent
     private FloatingActionButton floatingCreateEvent;
-    private FloatingActionButton linkToExpense; // random name
-    private Button randomButton;
+
+    // Database handler
     private DatabaseHelper myDB;
+
+    // Navigation drawer pane
+//    private DrawerLayout dl;
+//    private ActionBarDrawerToggle t;
+//    private NavigationView nv;
+    private SetupNavDrawer navDrawer;
+
+    // to be edited
+    private FloatingActionButton linkToExpense;
+    private Button randomButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
         myDB = new DatabaseHelper(this);
-        SQLiteDatabase db = this.myDB.getWritableDatabase();
 
         try {
-            daysOfTheMonth = prepareMonth();
+            daysWithEvents = fetchDaysWithEvents();
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
-            daysOfTheMonth = new ArrayList<CustomDay>();
-        }// should return a list of only days with events
+            daysWithEvents = new ArrayList<CustomDay>();
+        }
 
         mRecyclerView = findViewById(R.id.week_view);
-        mAdapter = new WeekRecyclerViewAdapter(daysOfTheMonth, this, ActivityUpcomingPage.this, getApplicationContext());
+        mAdapter = new WeekRecyclerViewAdapter(daysWithEvents, this, ActivityUpcomingPage.this, getApplicationContext());
 
         LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
         mRecyclerView.setHasFixedSize(true);
@@ -54,53 +65,27 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         mRecyclerView.setAdapter(mAdapter);
 
         floatingCreateEvent = findViewById(R.id.create_event);
-        floatingCreateEvent.setOnClickListener(v -> createEvent());
+        floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
 
-        linkToExpense = findViewById(R.id.random_button_link_expense);
-        linkToExpense.setOnClickListener(v -> moveToExpense());
-
-        randomButton = findViewById(R.id.test_button);
-        randomButton.setOnClickListener(v -> moveToDrawer());
+        // Navigation pane drawer setup
+        navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
+        navDrawer.setupNavDrawerPane();
     }
 
-    private void moveToDrawer() {
-        Intent i = new Intent(this,  testDrawer.class);
-        startActivity(i);
-    }
-
-    private void moveToExpense() {
-        Intent i = new Intent(this,  ActivityExpensePage.class);
-        startActivity(i);
-    }
-
-    private void createEvent() {
+    private void moveToCreateEventPage() {
         Intent intent = new Intent(this, ActivityCreateEventPage.class);
         startActivity(intent);
     }
 
-    /*private List<CustomDay> prepareMonth() {
-        // only to add Days where there are events
-        daysOfTheMonth = new ArrayList<>();
-        Calendar c = Calendar.getInstance();
-        daysOfTheMonth.add(new CustomDay(c.getTime()));
-        for (int i = 0; i < 30; i++) {
-            c.add(Calendar.DATE, 2);
-            // if CustomDay has a >= 1 Event, add to list to send to Recycler View
-            daysOfTheMonth.add(new CustomDay(c.getTime()));
-        }
-        return daysOfTheMonth;
-    }*/
-
-    private List<CustomDay> prepareMonth() throws ParseException {
-        daysOfTheMonth = new ArrayList<>();
+    private List<CustomDay> fetchDaysWithEvents() throws ParseException {
+        daysWithEvents = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
         Cursor query = this.myDB.getEventData();
         if (query.getCount() == 0) {
             Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
-            return daysOfTheMonth;
+            return daysWithEvents;
         }
-
-        for (int i =0; i < 30; i++) {
+        for (int i = 0; i < 30; i++) { // further: fetch on demand
             if (i >= query.getCount()) {
                 break;
             }
@@ -108,14 +93,15 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             String result = query.getString(1);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-            if (daysOfTheMonth.contains(customDay)) {
+            if (daysWithEvents.contains(customDay)) {
                 continue;
             } else{
-                daysOfTheMonth.add(customDay);
+                daysWithEvents.add(customDay);
             }
-        } return daysOfTheMonth;
+        } return daysWithEvents;
     }
 
+    // To link to ActivityCreateEventPage upon clicking a date in the RecyclerView
     @Override
     public void onDateClickListener(String date) {
         Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
@@ -124,6 +110,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(i);
     }
 
+    // To link to ActivityEventDetailsPage upon clicking an event in the RecyclerView
     @Override
     public void onEventClickListener(String event) {
         Toast.makeText(this, "clicked " + event, Toast.LENGTH_SHORT).show();

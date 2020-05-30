@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import java.util.Map;
 
-public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecylerViewAdapter.MyExpenseViewHolder> {
+public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecyclerViewAdapter.MyExpenseViewHolder> {
     private List<CustomDay> spendingCustomDays;
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
 
-    public ExpenseRecylerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
+    public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
         // each CustomDay has a List of expense categories
         this.spendingCustomDays = spendingCustomDays;
         this.whatWeSpentEachDay = whatWeSpentEachDay;
@@ -38,15 +38,15 @@ public class ExpenseRecylerViewAdapter extends RecyclerView.Adapter<ExpenseRecyl
 
     @NonNull
     @Override
-    public ExpenseRecylerViewAdapter.MyExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ExpenseRecyclerViewAdapter.MyExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_day_expense, parent, false);
-        ExpenseRecylerViewAdapter.MyExpenseViewHolder holder = new ExpenseRecylerViewAdapter.MyExpenseViewHolder(view);
+        ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder = new ExpenseRecyclerViewAdapter.MyExpenseViewHolder(view);
 
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ExpenseRecylerViewAdapter.MyExpenseViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder, int position) {
         CustomDay d = this.spendingCustomDays.get(position);
         holder.date.setText(d.getDate());
 

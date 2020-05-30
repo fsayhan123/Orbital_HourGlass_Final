@@ -20,35 +20,56 @@ import java.util.List;
 import java.util.Map;
 
 public class ActivityExpensePage extends AppCompatActivity {
+    /*
+    RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates),
+    and a Map with key-value pair of CustomDay and a List<CustomExpenseCategory>, representing
+    the spending in each category each day.
+     */
+    private List<CustomDay> daysWithExpenditure;
     private RecyclerView expensesByDay;
-    private ExpenseRecylerViewAdapter dayExpenseAdapter;
-    private List<CustomDay> daysISpent;
+    private ExpenseRecyclerViewAdapter dayExpenseAdapter;
     private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
-    private FloatingActionButton addExpense;
+
+    // FloatingActionButton to link to ActivityCreateExpense
+    private FloatingActionButton floatingAddExpense;
+
+    // Database handler
     private DatabaseHelper myDB;
+
+    // Navigation drawer pane
+//    private DrawerLayout dl;
+//    private ActionBarDrawerToggle t;
+//    private NavigationView nv;
+    private SetupNavDrawer navDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_page);
         myDB = new DatabaseHelper(this);
+
         try {
-            daysISpent = getSpendingDays();
+            daysWithExpenditure = getSpendingDays();
         } catch (ParseException e) {
-            daysISpent = new ArrayList<CustomDay>();
+            daysWithExpenditure = new ArrayList<CustomDay>();
         }
+
         spendingEachDay = getSpendingEachDay();
 
         expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        dayExpenseAdapter = new ExpenseRecylerViewAdapter(daysISpent, spendingEachDay, ActivityExpensePage.this);
+        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay, ActivityExpensePage.this);
 
         LinearLayoutManager manager = new LinearLayoutManager(ActivityExpensePage.this);
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
         expensesByDay.setAdapter(dayExpenseAdapter);
 
-        addExpense = findViewById(R.id.to_add_expense);
-        addExpense.setOnClickListener(v -> moveToAddExpensePage());
+        floatingAddExpense = findViewById(R.id.to_add_expense);
+        floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
+
+        // Navigation pane drawer setup
+        navDrawer = new SetupNavDrawer(this, findViewById(R.id.expenses_toolbar));
+        navDrawer.setupNavDrawerPane();
     }
 
     private void moveToAddExpensePage() {
@@ -56,13 +77,12 @@ public class ActivityExpensePage extends AppCompatActivity {
         startActivity(i);
     }
 
-    //Returns a Map of each day along with expense category
+    // Returns a Map of each day along with expense category
     private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
         spendingEachDay = new HashMap<>();
-        for (CustomDay d : daysISpent) {
+        for (CustomDay d : daysWithExpenditure) {
             String daySQL = d.getdd() + " " + d.getMMM() + " " + d.getyyyy();
             Cursor result = myDB.getExpenseData(daySQL);
-            // query for each day the categories of expenses
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();
             CustomExpenseCategory exCat;
@@ -94,14 +114,13 @@ public class ActivityExpensePage extends AppCompatActivity {
         return spendingEachDay;
     }
 
-    //Returns a List<CustomDay> that user has a spending;
+    // Returns a List<CustomDay> that user has a spending;
     private List<CustomDay> getSpendingDays() throws ParseException {
-        // query here
-        daysISpent = new ArrayList<>();
+        daysWithExpenditure = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
         Cursor query = this.myDB.getExpenseData();
         if (query.getCount() == 0) {
-            return daysISpent;
+            return daysWithExpenditure;
         }
 
         for (int i = 0; i < 30; i++) {
@@ -112,10 +131,10 @@ public class ActivityExpensePage extends AppCompatActivity {
             String result = query.getString(1);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-            if (daysISpent.contains(customDay)) {
+            if (daysWithExpenditure.contains(customDay)) {
                 continue;
             } else {
-                daysISpent.add(customDay);
-            }} return daysISpent;
+                daysWithExpenditure.add(customDay);
+            }} return daysWithExpenditure;
     }
 }

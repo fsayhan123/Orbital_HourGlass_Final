@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -38,19 +37,18 @@ public class testDrawer extends AppCompatActivity {
         nv = findViewById(R.id.nv);
         nv.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-            switch(id)
-            {
-                case R.id.account:
-                    Toast.makeText(testDrawer.this, "My Account",Toast.LENGTH_SHORT).show();break;
-                case R.id.settings:
-                    Toast.makeText(testDrawer.this, "Settings",Toast.LENGTH_SHORT).show();break;
-                case R.id.mycart:
-                    Toast.makeText(testDrawer.this, "My Cart",Toast.LENGTH_SHORT).show();break;
-                default:
-                    return true;
-            }
+//            switch(id)
+//            {
+//                case R.id.account:
+//                    Toast.makeText(testDrawer.this, "My Account",Toast.LENGTH_SHORT).show();break;
+//                case R.id.settings:
+//                    Toast.makeText(testDrawer.this, "Settings",Toast.LENGTH_SHORT).show();break;
+//                case R.id.mycart:
+//                    Toast.makeText(testDrawer.this, "My Cart",Toast.LENGTH_SHORT).show();break;
+//                default:
+//                    return true;
+//            }
             return true;
-
         });
     }
 

@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group>
-        <item android:id="@+id/account"
-            android:title="My Account"/>
-        <item android:id="@+id/settings"
-            android:title="Settings"/>
-        <item android:id="@+id/mycart"
-            android:title="My Cart"/>
+    <group android:id="@+id/features">
+        <item android:id="@+id/activity_upcoming_view"
+            android:title="Upcoming Activities"/>
+        <item android:id="@+id/activity_expenses_view"
+            android:title="Expenses"/>
+        <item android:id="@+id/activity_todo_view"
+            android:title="Todo List"/>
     </group>
-
-    <item android:title="Test Title">
-        <group>
-            <item android:id="@+id/account2"
-                android:title="My Account"/>
-            <item android:id="@+id/settings2"
-                android:title="Settings"/>
-            <item android:id="@+id/mycart2"
-                android:title="My Cart2"/>
-        </group>
-    </item>
 
 </menu>

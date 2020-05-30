@@ -4,7 +4,8 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:theme="@style/AppTheme">
 
     <include
         layout="@layout/app_bar_main"
@@ -15,7 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar3"
             android:layout_width="match_parent"
@@ -25,25 +25,25 @@
             android:theme="?attr/actionBarTheme" />
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Main"
-            android:textSize="50dp"
-            android:id="@+id/textView"
+            android:layout_marginLeft="130dp"
             android:layout_marginTop="200dp"
-            android:layout_marginLeft="130dp"/>
+            android:text="Main"
+            android:textSize="50dp" />
 
 
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nv"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        app:menu="@menu/nav_menu"
         android:layout_gravity="start"
+        android:fitsSystemWindows="false"
         app:headerLayout="@layout/header"
-        android:id="@+id/nv"
-        android:fitsSystemWindows="false">
+        app:menu="@menu/nav_menu">
 
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>
