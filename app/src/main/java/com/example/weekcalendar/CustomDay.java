@@ -11,8 +11,6 @@ import java.util.Date;
 public class CustomDay {
     private String time;
     private Date today;
-    private String dateAsString;
-    private String num;
     private int dd;
     private String MMMMMM;
     private String MMM;
@@ -34,7 +32,6 @@ public class CustomDay {
         this.yyyy = temp.getYear();
         this.time = dateFormatter.format(d.getTime());
         this.numEvents = 5;
-//        this.listOfEvents = new TreeSet<>((e1, e2) -> e1.getDate().compareTo(e2.getDate()));
     }
 
     public String getdd() {
@@ -64,10 +61,6 @@ public class CustomDay {
     @Override
     public String toString() {
         return this.dd + " " + this.MMMMMM + " " + this.yyyy;
-    }
-
-    public int getNumEvents() {
-        return this.numEvents;
     }
 
     @Override

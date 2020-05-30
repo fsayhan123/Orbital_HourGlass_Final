@@ -53,7 +53,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
-            daysWithEvents = new ArrayList<CustomDay>();
+            daysWithEvents = new ArrayList<>();
         }
 
         mRecyclerView = findViewById(R.id.week_view);
@@ -93,9 +93,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             String result = query.getString(1);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-            if (daysWithEvents.contains(customDay)) {
-                continue;
-            } else{
+            if (!daysWithEvents.contains(customDay)) {
                 daysWithEvents.add(customDay);
             }
         } return daysWithEvents;
@@ -118,6 +116,4 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         i.putExtra("event details", event);
         startActivity(i);
     }
-
-
 }
