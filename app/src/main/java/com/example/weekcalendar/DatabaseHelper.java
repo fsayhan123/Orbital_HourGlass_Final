@@ -6,12 +6,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.HashMap;
+
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     //Database Name
     public static final String DATABASE_NAME = "Calendar.db";
 
     //Database Version
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 7;
 
     //Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -58,12 +61,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
     public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime) {
         SQLiteDatabase db = this.getWritableDatabase();
+
         String[] startDateArr = startDate.split(" ");
-        startDateArr[1] = startDateArr[1].substring(0,3);
-        String editedStartDate = String.join(" ", startDateArr[0], startDateArr[1], startDateArr[2]);
+        startDateArr[1] = this.convertDate(startDateArr[1].substring(0,3));
+        String editedStartDate = String.join("-", startDateArr[2], startDateArr[1], startDateArr[0]);
+
         String[] endDateArr = endDate.split(" ");
-        endDateArr[1] = endDateArr[1].substring(0,3);
-        String editedEndDate = String.join(" ", endDateArr[0], endDateArr[1], endDateArr[2]);
+        endDateArr[1] = this.convertDate(endDateArr[1].substring(0,3));
+        String editedEndDate = String.join("-", endDateArr[2], endDateArr[1], endDateArr[0]);
+
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENTS_1, editedStartDate);
         contentValues.put(EVENTS_2, editedEndDate);
@@ -78,9 +84,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean addExpense(String name, String expense, String category, String expenseDate) {
         SQLiteDatabase db = this.getWritableDatabase();
+
         String[] expenseDateArr = expenseDate.split(" ");
-        expenseDateArr[1] = expenseDateArr[1].substring(0,3);
-        String editedExpenseDate = String.join(" ", expenseDateArr[0], expenseDateArr[1], expenseDateArr[2]);
+        expenseDateArr[1] = this.convertDate(expenseDateArr[1].substring(0,3));
+        String editedExpenseDate = String.join("-", expenseDateArr[2], expenseDateArr[1], expenseDateArr[0]);
+
         ContentValues contentValues = new ContentValues();
         contentValues.put(EXPENSE_1, editedExpenseDate);
         contentValues.put(EXPENSE_2, category);
@@ -92,10 +100,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
+    public String convertDate(String month) {
+        HashMap<String, String> mapper = new HashMap<>();
+        mapper.put("Jan", "01");
+        mapper.put("Feb", "02");
+        mapper.put("Mar", "03");
+        mapper.put("Apr", "04");
+        mapper.put("May", "05");
+        mapper.put("Jun", "06");
+        mapper.put("Jul", "07");
+        mapper.put("Aug", "08");
+        mapper.put("Sep", "09");
+        mapper.put("Oct", "10");
+        mapper.put("Nov", "11");
+        mapper.put("Dec", "12");
+        return mapper.get(month);
+    }
+
     //Get all event Data
     public Cursor getEventData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table", null);
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table ORDER BY START_DATE ASC", null);
         return result;
     }
 
@@ -116,7 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //Get all event Data
     public Cursor getExpenseData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Expense_Table", null);
+        Cursor result = db.rawQuery("SELECT * FROM Expense_Table ORDER BY DATE ASC", null);
         return result;
     }
 

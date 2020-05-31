@@ -46,7 +46,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
         try {
             daysWithEvents = fetchDaysWithEvents();
-            daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
+            //daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
@@ -76,12 +76,13 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
     private List<CustomDay> fetchDaysWithEvents() throws ParseException {
         daysWithEvents = new ArrayList<>();
-        DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         Cursor query = this.myDB.getEventData();
         if (query.getCount() == 0) {
             Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
             return daysWithEvents;
         }
+
         for (int i = 0; i < 30; i++) { // further: fetch on demand
             if (i >= query.getCount()) {
                 break;
@@ -93,7 +94,9 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             if (!daysWithEvents.contains(customDay)) {
                 daysWithEvents.add(customDay);
             }
-        } return daysWithEvents;
+        }
+
+        return daysWithEvents;
     }
 
     // To link to ActivityCreateEventPage upon clicking a date in the RecyclerView

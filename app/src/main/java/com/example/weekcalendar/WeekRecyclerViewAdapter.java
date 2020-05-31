@@ -93,7 +93,7 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
 
-        String daySQL = d.getdd() + " " + d.getMMM() + " " + d.getyyyy();
+        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + d.getdd();
         Cursor result = myDB.getEventData(daySQL);
 
 

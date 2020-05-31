@@ -56,7 +56,7 @@ public class ActivityExpensePage extends AppCompatActivity {
 
         try {
             daysWithExpenditure = getSpendingDays();
-            daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2));
+            //daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2));
         } catch (ParseException e) {
             daysWithExpenditure = new ArrayList<>();
         }
@@ -88,7 +88,7 @@ public class ActivityExpensePage extends AppCompatActivity {
     private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
         spendingEachDay = new HashMap<>();
         for (CustomDay d : daysWithExpenditure) {
-            String daySQL = d.getdd() + " " + d.getMMM() + " " + d.getyyyy();
+            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + d.getdd();
             Cursor result = myDB.getExpenseData(daySQL);
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();
@@ -124,7 +124,7 @@ public class ActivityExpensePage extends AppCompatActivity {
     // Returns a List<CustomDay> that user has a spending;
     private List<CustomDay> getSpendingDays() throws ParseException {
         daysWithExpenditure = new ArrayList<>();
-        DateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         Cursor query = this.myDB.getExpenseData();
         if (query.getCount() == 0) {
             return daysWithExpenditure;
