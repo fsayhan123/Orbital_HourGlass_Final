@@ -56,6 +56,8 @@ public class TestExListAdapter extends RecyclerView.Adapter<TestExListAdapter.My
 
         public MyListViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.title = itemView.findViewById(R.id.textView2);
+            this.testList = itemView.findViewById(R.id.ex_list);
         }
     }
 }
