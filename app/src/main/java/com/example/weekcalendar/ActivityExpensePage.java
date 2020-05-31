@@ -146,18 +146,18 @@ public class ActivityExpensePage extends AppCompatActivity {
         return daysWithExpenditure;
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mListState = manager.onSaveInstanceState();
-        outState.putParcelable(LIST_STATE_KEY, mListState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            manager.onRestoreInstanceState(mListState);
-        }
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        mListState = manager.onSaveInstanceState();
+//        outState.putParcelable(LIST_STATE_KEY, mListState);
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            manager.onRestoreInstanceState(mListState);
+//        }
+//    }
 }
