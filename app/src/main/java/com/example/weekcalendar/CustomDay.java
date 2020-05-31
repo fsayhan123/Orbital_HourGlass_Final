@@ -8,7 +8,7 @@ import java.util.Date;
 /*
  to encapsulate a Date and return it in the format as required.
  */
-public class CustomDay {
+public class CustomDay implements Comparable<CustomDay> {
     private String time;
     private Date today;
     private int dd;
@@ -78,5 +78,10 @@ public class CustomDay {
     @Override
     public int hashCode() {
         return this.today.hashCode();
+    }
+
+    @Override
+    public int compareTo(CustomDay o) {
+        return this.today.compareTo(o.today);
     }
 }

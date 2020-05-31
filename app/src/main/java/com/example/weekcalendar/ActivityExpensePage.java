@@ -50,8 +50,9 @@ public class ActivityExpensePage extends AppCompatActivity {
 
         try {
             daysWithExpenditure = getSpendingDays();
+            daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2)); // not efficient?
         } catch (ParseException e) {
-            daysWithExpenditure = new ArrayList<CustomDay>();
+            daysWithExpenditure = new ArrayList<>();
         }
 
         spendingEachDay = getSpendingEachDay();
@@ -122,7 +123,6 @@ public class ActivityExpensePage extends AppCompatActivity {
         if (query.getCount() == 0) {
             return daysWithExpenditure;
         }
-
         for (int i = 0; i < 30; i++) {
             if (i >= query.getCount()) {
                 break;
@@ -135,6 +135,8 @@ public class ActivityExpensePage extends AppCompatActivity {
                 continue;
             } else {
                 daysWithExpenditure.add(customDay);
-            }} return daysWithExpenditure;
+            }
+        }
+        return daysWithExpenditure;
     }
 }

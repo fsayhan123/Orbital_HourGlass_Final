@@ -53,13 +53,11 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         } else if (s.getSelectedItem() == null) {
             Toast.makeText(this, "Please choose a category!", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Added expense", Toast.LENGTH_SHORT).show();
             boolean result = myDB.addExpense(expenseName, cost.getText().toString(), s.getSelectedItem().toString(), date.getText().toString());
             if (result == true) {
-                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Added expense", Toast.LENGTH_SHORT).show();
             }
             Intent i = new Intent(this, ActivityExpensePage.class);
-            // grab data and add to db here
             startActivity(i);
         }
     }

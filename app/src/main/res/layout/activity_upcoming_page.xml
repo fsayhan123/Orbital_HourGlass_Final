@@ -14,20 +14,6 @@
         android:layout_height="match_parent"
         tools:context=".ActivityUpcomingPage">
 
-        <!--    <Button-->
-        <!--        android:id="@+id/test_button"-->
-        <!--        android:layout_width="wrap_content"-->
-        <!--        android:layout_height="wrap_content"-->
-        <!--        android:text="to drawer" />-->
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/random_button_link_expense"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:clickable="true"
-            app:srcCompat="@drawable/circle" />
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/upcoming_toolbar"
             android:layout_width="match_parent"

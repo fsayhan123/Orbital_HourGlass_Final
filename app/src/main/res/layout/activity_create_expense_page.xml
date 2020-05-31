@@ -44,7 +44,7 @@
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="10dp"
                 android:ems="10"
-                android:hint="Cost"
+                android:hint="Cost ($)"
                 android:inputType="numberDecimal"
                 android:numeric="decimal" />
 

@@ -38,10 +38,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 //    private NavigationView nv;
     private SetupNavDrawer navDrawer;
 
-    // to be edited
-    private FloatingActionButton linkToExpense;
-    private Button randomButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +46,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
         try {
             daysWithEvents = fetchDaysWithEvents();
+            daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
