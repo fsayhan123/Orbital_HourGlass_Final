@@ -86,7 +86,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     @Override
     public void onViewRecycled(@NonNull MyExpenseViewHolder holder) {
         super.onViewRecycled(holder);
-//        this.saveStates.put(holder.getAdapterPosition(), holder.getAdapter().onSaveInstanceState());
+//        this.saveStates.put(holder.getAdapterPosition(), holder.getAdapter().onSaveInstanceState()); // need to pass an outstate to onSaveInstaceState method, outstate is a hashmap.
     }
 
     @Override
