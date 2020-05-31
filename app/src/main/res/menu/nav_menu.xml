@@ -8,6 +8,8 @@
             android:title="Expenses"/>
         <item android:id="@+id/activity_todo_view"
             android:title="Todo List"/>
+        <item android:id="@+id/test_ex_list"
+            android:title="Ex List"/>
     </group>
 
 </menu>
