@@ -92,8 +92,11 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         final CustomDay d = listOfDates.get(position);
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
-
-        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + d.getdd();
+        String day = d.getdd();
+        if (day.length() == 1) {
+            day = "0" + day;
+        }
+        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
         Cursor result = myDB.getEventData(daySQL);
 
 

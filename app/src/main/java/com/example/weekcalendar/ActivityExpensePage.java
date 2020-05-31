@@ -88,7 +88,11 @@ public class ActivityExpensePage extends AppCompatActivity {
     private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
         spendingEachDay = new HashMap<>();
         for (CustomDay d : daysWithExpenditure) {
-            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + d.getdd();
+            String day = d.getdd();
+            if (day.length() == 1) {
+                day = "0" + day;
+            }
+            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
             Cursor result = myDB.getExpenseData(daySQL);
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();

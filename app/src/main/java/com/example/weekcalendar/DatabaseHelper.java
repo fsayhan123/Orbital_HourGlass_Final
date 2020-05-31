@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.HashMap;
 
@@ -14,7 +15,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Calendar.db";
 
     //Database Version
-    public static final int DATABASE_VERSION = 7;
+    public static final int DATABASE_VERSION = 16;
 
     //Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -64,11 +65,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String[] startDateArr = startDate.split(" ");
         startDateArr[1] = this.convertDate(startDateArr[1].substring(0,3));
+        if (startDateArr[0].length() == 1) {
+            startDateArr[0] = "0" + startDateArr[0];
+        }
         String editedStartDate = String.join("-", startDateArr[2], startDateArr[1], startDateArr[0]);
 
         String[] endDateArr = endDate.split(" ");
         endDateArr[1] = this.convertDate(endDateArr[1].substring(0,3));
+        if (endDateArr[0].length() == 1) {
+            endDateArr[0] = "0" + endDateArr[0];
+        }
         String editedEndDate = String.join("-", endDateArr[2], endDateArr[1], endDateArr[0]);
+
+        Cursor numDaysQuery = db.rawQuery(String.format("Select Cast((julianday(%s) - julianday(%s)) As Integer)", editedStartDate, editedEndDate), null);
+        numDaysQuery.moveToLast();
+        int numDays = numDaysQuery.getInt(0);
+
+        if (numDays > 0) {
+            for (int i = 1; i < numDays+1; i++) {
+                Cursor newDateQuery = db.rawQuery(String.format("SELECT Date(\"%s\", \"+%s days\")", editedStartDate, i), null);
+                newDateQuery.moveToLast();
+                String newStartDate = newDateQuery.getString(0);
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(EVENTS_1, newStartDate);
+                contentValues.put(EVENTS_2, editedEndDate);
+                contentValues.put(EVENTS_3, "All Day");
+                contentValues.put(EVENTS_4, "All Day");
+                contentValues.put(EVENTS_5, eventTitle);
+                db.insert(EVENTS_TABLE, null, contentValues);
+            }
+        }
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENTS_1, editedStartDate);
