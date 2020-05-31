@@ -17,6 +17,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     private List<CustomDay> spendingCustomDays;
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
+    private LinearLayoutManager manager;
 
     public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
         // each CustomDay has a List of expense categories
@@ -51,11 +52,10 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
         holder.date.setText(d.getDate());
 
         List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
-//        EachExpenseRecyclerViewAdapter e = new EachExpenseRecyclerViewAdapter(expenditureOnDayD);
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
-        LinearLayoutManager LLM = new LinearLayoutManager(a);
 
-        holder.categoryAndExpenses.setLayoutManager(LLM);
+        manager = new LinearLayoutManager(a);
+        holder.categoryAndExpenses.setLayoutManager(manager);
         holder.categoryAndExpenses.setAdapter(e);
     }
 

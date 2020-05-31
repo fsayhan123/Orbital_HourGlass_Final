@@ -1,5 +1,6 @@
 package com.example.weekcalendar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -28,7 +30,11 @@ public class ActivityExpensePage extends AppCompatActivity {
     private List<CustomDay> daysWithExpenditure;
     private RecyclerView expensesByDay;
     private ExpenseRecyclerViewAdapter dayExpenseAdapter;
+    private LinearLayoutManager manager;
     private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
+
+    private final static String LIST_STATE_KEY = "recycler_list_state";
+    private Parcelable mListState;
 
     // FloatingActionButton to link to ActivityCreateExpense
     private FloatingActionButton floatingAddExpense;
@@ -50,7 +56,7 @@ public class ActivityExpensePage extends AppCompatActivity {
 
         try {
             daysWithExpenditure = getSpendingDays();
-            daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2)); // not efficient?
+            daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2));
         } catch (ParseException e) {
             daysWithExpenditure = new ArrayList<>();
         }
@@ -60,7 +66,7 @@ public class ActivityExpensePage extends AppCompatActivity {
         expensesByDay = findViewById(R.id.day_by_day_expense_view);
         dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay, ActivityExpensePage.this);
 
-        LinearLayoutManager manager = new LinearLayoutManager(ActivityExpensePage.this);
+        manager = new LinearLayoutManager(ActivityExpensePage.this);
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
         expensesByDay.setAdapter(dayExpenseAdapter);
@@ -138,5 +144,20 @@ public class ActivityExpensePage extends AppCompatActivity {
             }
         }
         return daysWithExpenditure;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mListState = manager.onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            manager.onRestoreInstanceState(mListState);
+        }
     }
 }
