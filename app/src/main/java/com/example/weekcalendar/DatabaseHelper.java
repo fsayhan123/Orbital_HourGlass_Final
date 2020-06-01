@@ -113,6 +113,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String[] expenseDateArr = expenseDate.split(" ");
         expenseDateArr[1] = this.convertDate(expenseDateArr[1].substring(0,3));
+        if (expenseDateArr[0].length() == 1) {
+            expenseDateArr[0] = "0" + expenseDateArr[0];
+        }
         String editedExpenseDate = String.join("-", expenseDateArr[2], expenseDateArr[1], expenseDateArr[0]);
 
         ContentValues contentValues = new ContentValues();
