@@ -27,6 +27,7 @@ public class TestExpandableList extends AppCompatActivity {
 
         forExList = new ArrayList<>();
         map = new HashMap<>();
+        sectionHeader = new ArrayList<>();
 
         initListData();
         test100 = findViewById(R.id.test100);
@@ -39,6 +40,11 @@ public class TestExpandableList extends AppCompatActivity {
     }
 
     private void initListData() {
+        for (int i = 0; i < 6; i++) {
+            sectionHeader.add("Mega Group " + i);
+        }
+
+
         forExList.add(getString(R.string.group1));
         forExList.add(getString(R.string.group2));
         forExList.add(getString(R.string.group3));

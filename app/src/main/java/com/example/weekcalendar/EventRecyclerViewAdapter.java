@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerViewAdapter.MyEventViewHolder> {
+public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecyclerViewAdapter.MyEventViewHolder> {
     private List<CustomEvent> listOfEvents;
     private MyOnEventClickListener mEventClickListener;
 
@@ -26,21 +26,21 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
         }
     }
 
-    public EventRecylerViewAdapter(List<CustomEvent> listOfEvents, MyOnEventClickListener eventClicker) {
+    public EventRecyclerViewAdapter(List<CustomEvent> listOfEvents, MyOnEventClickListener eventClicker) {
         this.listOfEvents = listOfEvents;
         this.mEventClickListener = eventClicker;
     }
 
     @NonNull
     @Override
-    public EventRecylerViewAdapter.MyEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public EventRecyclerViewAdapter.MyEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_event, parent, false);
-        EventRecylerViewAdapter.MyEventViewHolder holder = new EventRecylerViewAdapter.MyEventViewHolder(view);
+        EventRecyclerViewAdapter.MyEventViewHolder holder = new EventRecyclerViewAdapter.MyEventViewHolder(view);
 
         holder.time.setOnClickListener(v -> {
             String time = holder.time.getText().toString();
             String event = holder.eventTitle.getText().toString();
-                mEventClickListener.onEventClickListener(holder.id);
+            mEventClickListener.onEventClickListener(holder.id);
         });
 
         holder.eventTitle.setOnClickListener(v -> {
@@ -53,7 +53,7 @@ public class EventRecylerViewAdapter extends RecyclerView.Adapter<EventRecylerVi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull EventRecylerViewAdapter.MyEventViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull EventRecyclerViewAdapter.MyEventViewHolder holder, int position) {
         CustomEvent e = this.listOfEvents.get(position);
         holder.id = e.getId();
         holder.time.setText(e.getDate());

@@ -1,17 +1,18 @@
 package com.example.weekcalendar;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,16 +21,17 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
     private LinearLayoutManager manager;
-    private RecyclerView.RecycledViewPool viewPool;
-    private Map<Integer, Parcelable> saveStates;
+    private Bundle outState;
 
     public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
         // each CustomDay has a List of expense categories
         this.spendingCustomDays = spendingCustomDays;
         this.whatWeSpentEachDay = whatWeSpentEachDay;
         this.a = a;
-        this.viewPool = new RecyclerView.RecycledViewPool();
-        this.saveStates = new HashMap<>();
+    }
+
+    public void passOutState(Bundle outState) {
+        this.outState = outState;
     }
 
     public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
@@ -64,29 +66,25 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder, int position) {
         CustomDay d = this.spendingCustomDays.get(position);
-        Parcelable state = this.saveStates.get(position);
 
         holder.date.setText(d.getDate());
 
         List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
-
         manager = new LinearLayoutManager(a);
-        if (state != null) {
-            manager.onRestoreInstanceState(state);
-        }
-
         holder.categoryAndExpenses.setLayoutManager(manager);
         holder.categoryAndExpenses.setAdapter(e);
-        holder.setHolderAdapter(e);
-
-        holder.categoryAndExpenses.setRecycledViewPool(viewPool);
     }
 
     @Override
     public void onViewRecycled(@NonNull MyExpenseViewHolder holder) {
         super.onViewRecycled(holder);
-//        this.saveStates.put(holder.getAdapterPosition(), holder.getAdapter().onSaveInstanceState()); // need to pass an outstate to onSaveInstaceState method, outstate is a hashmap.
+        if (this.outState != null) {
+            holder.getAdapter().onSaveInstanceState(this.outState);
+        } else {
+            Toast.makeText(a, "null", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override

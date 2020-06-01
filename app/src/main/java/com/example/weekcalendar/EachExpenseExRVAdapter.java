@@ -55,7 +55,7 @@ public class EachExpenseExRVAdapter extends
 
         public void setCategoryText(ExpandableGroup group) {
             category.setText(group.getTitle());
-            expenseCost.setText(Double.toString(((CustomExpenseCategory) group).getTotalCost()));
+            expenseCost.setText(String.format("%.2f", ((CustomExpenseCategory) group).getTotalCost()));
         }
     }
 
@@ -71,7 +71,7 @@ public class EachExpenseExRVAdapter extends
 
         public void setExpenseText(CustomExpense e) {
             expenseName.setText(e.getExpenseName());
-            expenseCost.setText(Double.toString(e.getCost()));
+            expenseCost.setText(String.format("%.2f", e.getCost()));
         }
     }
 }
