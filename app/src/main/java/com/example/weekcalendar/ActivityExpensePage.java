@@ -89,9 +89,10 @@ public class ActivityExpensePage extends AppCompatActivity {
         spendingEachDay = new HashMap<>();
         for (CustomDay d : daysWithExpenditure) {
             String day = d.getdd();
-            if (day.length() == 1) {
-                day = "0" + day;
-            }
+            // breaks SQL
+//            if (day.length() == 1) {
+//                day = "0" + day;
+//            }
             String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
             Cursor result = myDB.getExpenseData(daySQL);
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
@@ -150,18 +151,19 @@ public class ActivityExpensePage extends AppCompatActivity {
         return daysWithExpenditure;
     }
 
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        mListState = manager.onSaveInstanceState();
-//        outState.putParcelable(LIST_STATE_KEY, mListState);
-//    }
-//
-//    @Override
-//    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            manager.onRestoreInstanceState(mListState);
-//        }
-//    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        mListState = manager.onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
+        dayExpenseAdapter.passOutState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            manager.onRestoreInstanceState(mListState);
+        }
+    }
 }

@@ -40,7 +40,6 @@ public class TestExListAdapter extends RecyclerView.Adapter<TestExListAdapter.My
         String s = this.list.get(position);
         holder.title.setText(s);
 
-        LinearLayoutManager manager = new LinearLayoutManager(this.context);
         ExListAdapter e = new ExListAdapter(this.context, this.listGroup, this.listItem);
         holder.testList.setAdapter(e);
     }
