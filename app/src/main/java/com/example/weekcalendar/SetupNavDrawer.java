@@ -53,8 +53,8 @@ public class SetupNavDrawer {
                     break;
                 case R.id.activity_todo_view:
                     Toast.makeText(a, "Todo List",Toast.LENGTH_SHORT).show();
-                    Intent i3 = new Intent(a, ActivityToDoListPage.class);
-                    a.startActivity(i3);
+//                    Intent i3 = new Intent(a, Activity.class);
+//                    a.startActivity(i3);
                     break;
                 case R.id.test_ex_list:
                     Toast.makeText(a, "Test Ex list",Toast.LENGTH_SHORT).show();

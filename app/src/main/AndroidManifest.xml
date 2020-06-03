@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.weekcalendar">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,21 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActivityToDoListPage"></activity>
-
-        <uses-library
-            android:name="com.google.android.wearable"
-            android:required="true" />
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
-        <meta-data
-            android:name="com.google.android.wearable.standalone"
-            android:value="true" />
-
-
-        <activity android:name=".TestExpandableList" />
+        <activity android:name=".TestExpandableList"></activity>
         <activity android:name=".ActivityExpensePage" />
         <activity android:name=".ActivityCreateExpensePage" />
         <activity android:name=".ActivityEventDetailsPage" />
