@@ -71,5 +71,10 @@
         <item>item6</item>
         <item>item7</item>
     </string-array>
+    <string name="title_activity_to_do_list">ActivityToDoList</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
 
 </resources>
