@@ -93,7 +93,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             CustomDay customDay = new CustomDay(date);
             daysWithEvents.add(customDay);
         }
-
         return daysWithEvents;
     }
 

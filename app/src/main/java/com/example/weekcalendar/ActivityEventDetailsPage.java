@@ -31,7 +31,6 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         eventTime = findViewById(R.id.event_time);
 
         this.setView(eventID);
-
     }
 
     public void setView(String eventID) {

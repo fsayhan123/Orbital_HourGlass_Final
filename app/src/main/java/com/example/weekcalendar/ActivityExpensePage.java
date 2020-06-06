@@ -95,9 +95,6 @@ public class ActivityExpensePage extends AppCompatActivity {
             }
             String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
             Cursor result = myDB.getExpenseData(daySQL);
-            if (result.getCount() == 0) {
-                Toast.makeText(this, daySQL, Toast.LENGTH_SHORT).show();
-            }
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();
             CustomExpenseCategory exCat;
@@ -109,11 +106,7 @@ public class ActivityExpensePage extends AppCompatActivity {
                 String name = result.getString(4);
                 String amount = result.getString(3);
                 if (catHashMap.containsKey(category)) {
-                    // edit add instead of creating new object
                     catHashMap.get(category).add(new CustomExpense(name, Double.valueOf(amount)));
-//                    List<CustomExpense> customExpenseCategory = new ArrayList<>(catHashMap.get(category));
-//                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
-//                    catHashMap.put(category, customExpenseCategory);
                 } else {
                     List<CustomExpense> customExpenseCategory = new ArrayList<>();
                     customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
@@ -127,13 +120,8 @@ public class ActivityExpensePage extends AppCompatActivity {
                 exCat = new CustomExpenseCategory(key, value);
                 temp.add(exCat);
             }
-            if (temp.size() == 0) {
-                Toast.makeText(this, "REMPTYYYYYYYYYYYYYYYYYYY", Toast.LENGTH_SHORT).show();
-            }
             spendingEachDay.put(d, temp);
         }
-
-
         return spendingEachDay;
     }
 
@@ -153,28 +141,8 @@ public class ActivityExpensePage extends AppCompatActivity {
             String result = query.getString(0);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-//            if (daysWithExpenditure.contains(customDay)) {
-//                continue;
-//            } else {
-                daysWithExpenditure.add(customDay);
-//            }
+            daysWithExpenditure.add(customDay);
         }
         return daysWithExpenditure;
     }
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        mListState = manager.onSaveInstanceState();
-//        outState.putParcelable(LIST_STATE_KEY, mListState);
-//        dayExpenseAdapter.passOutState(outState);
-//        super.onSaveInstanceState(outState);
-//    }
-//
-//    @Override
-//    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            manager.onRestoreInstanceState(mListState);
-//        }
-//    }
 }
