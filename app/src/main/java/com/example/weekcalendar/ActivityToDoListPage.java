@@ -22,14 +22,16 @@ import java.util.List;
 
 public class ActivityToDoListPage extends AppCompatActivity {
 
-    ToDoListDataPump toDoListDataPump;
-    ExpandableListView expandableListView;
-    ExpandableListAdapter expandableListAdapter;
-    List<CustomDay> expandableListTitle;
-    HashMap<CustomDay, List<String>> expandableListDetail;
+    private ToDoListDataPump toDoListDataPump;
+    private ExpandableListView expandableListView;
+    private ExpandableListAdapter expandableListAdapter;
+    private List<CustomDay> expandableListTitle;
+    private HashMap<CustomDay, List<String>> expandableListDetail;
 
     private DatabaseHelper myDB;
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
+    private SetupNavDrawer navDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,16 +86,12 @@ public class ActivityToDoListPage extends AppCompatActivity {
             }
         });
 
-        Toolbar myChildToolbar = findViewById(R.id.to_do_list);
-        setSupportActionBar(myChildToolbar);
-
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
+        navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
+        navDrawer.setupNavDrawerPane();
     }
 
     public List<CustomDay> getToDoDays() throws ParseException {
         List<CustomDay> temp = new ArrayList<>();
-        // Insert query here
         Cursor query = myDB.getToDo();
         if (query.getCount() == 0) {
             return temp;
@@ -103,15 +101,10 @@ public class ActivityToDoListPage extends AppCompatActivity {
                     break;
                 }
                 query.moveToNext();
-                String result = query.getString(0);
+                String result = query.getString(1);
                 Date date = dateFormatter.parse(result);
                 CustomDay customDay = new CustomDay(date);
-                if (temp.contains(customDay)) {
-                    // we should try and change this, very inefficient, should not check for contains
-                    continue;
-                } else {
-                    temp.add(customDay);
-                }
+                temp.add(customDay);
             }
         }
         return temp;

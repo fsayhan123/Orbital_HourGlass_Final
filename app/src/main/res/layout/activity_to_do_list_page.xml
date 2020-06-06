@@ -1,32 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ActivityToDoListPage">
+    android:fitsSystemWindows="true"
+    android:theme="@style/AppTheme">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/to_do_list"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:title="To-Do List"
-        app:titleTextColor="#FFFFFF" />
+        android:layout_height="match_parent">
 
-    <ExpandableListView
-        android:id="@+id/expandableListView"
-        android:layout_width="match_parent"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/todo_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            app:title="To Do List"
+            app:titleTextColor="#FFFFFF" />
+
+        <ExpandableListView
+            android:id="@+id/expandableListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="60dp"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="0.5dp"
+            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"></ExpandableListView>
+    </RelativeLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nv"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginTop="60dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp"
-        android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/to_do_list" />
+        android:layout_gravity="start"
+        android:fitsSystemWindows="false"
+        app:headerLayout="@layout/header"
+        app:menu="@menu/nav_menu"></com.google.android.material.navigation.NavigationView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.drawerlayout.widget.DrawerLayout>
