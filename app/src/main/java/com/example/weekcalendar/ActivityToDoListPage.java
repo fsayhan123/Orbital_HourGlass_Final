@@ -1,9 +1,9 @@
 package com.example.weekcalendar;
 
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -12,6 +12,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,13 +28,23 @@ public class ActivityToDoListPage extends AppCompatActivity {
     List<CustomDay> expandableListTitle;
     HashMap<CustomDay, List<String>> expandableListDetail;
 
+    private DatabaseHelper myDB;
+    private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_do_list_page);
+        myDB = new DatabaseHelper(this);
 
-        this.toDoListDataPump = new ToDoListDataPump(getToDoDays());
-        expandableListView = (ExpandableListView) findViewById(R.id.expandableListView);
+        try {
+            this.toDoListDataPump = new ToDoListDataPump(getToDoDays());
+        } catch (ParseException e) {
+            Toast.makeText(this, "something wrong", Toast.LENGTH_SHORT).show();
+            this.toDoListDataPump = new ToDoListDataPump(new ArrayList<>());
+        }
+
+        expandableListView = findViewById(R.id.expandableListView);
         expandableListDetail = this.toDoListDataPump.getData();
         expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
         expandableListAdapter = new ToDoListViewAdapter(this, expandableListTitle, expandableListDetail);
@@ -71,19 +84,36 @@ public class ActivityToDoListPage extends AppCompatActivity {
             }
         });
 
-        Toolbar myChildToolbar = (Toolbar) findViewById(R.id.to_do_list);
+        Toolbar myChildToolbar = findViewById(R.id.to_do_list);
         setSupportActionBar(myChildToolbar);
 
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
     }
 
-    public static List<CustomDay> getToDoDays() {
-        // Insert query here
+    public List<CustomDay> getToDoDays() throws ParseException {
         List<CustomDay> temp = new ArrayList<>();
-        temp.add(new CustomDay(new Date()));
+        // Insert query here
+        Cursor query = myDB.getToDo();
+        if (query.getCount() == 0) {
+            return temp;
+        } else {
+            for (int i = 0; i < 30; i++) {
+                if (i >= query.getCount()) {
+                    break;
+                }
+                query.moveToNext();
+                String result = query.getString(0);
+                Date date = dateFormatter.parse(result);
+                CustomDay customDay = new CustomDay(date);
+                if (temp.contains(customDay)) {
+                    // we should try and change this, very inefficient, should not check for contains
+                    continue;
+                } else {
+                    temp.add(customDay);
+                }
+            }
+        }
         return temp;
     }
-
-
 }
