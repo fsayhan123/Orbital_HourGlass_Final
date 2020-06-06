@@ -3,6 +3,7 @@ package com.example.weekcalendar;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -36,7 +37,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
         expandableListAdapter = new ToDoListViewAdapter(this, expandableListTitle, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-
             @Override
             public void onGroupExpand(int groupPosition) {
                 Toast.makeText(getApplicationContext(),
@@ -46,7 +46,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
         });
 
         expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
-
             @Override
             public void onGroupCollapse(int groupPosition) {
                 Toast.makeText(getApplicationContext(),
@@ -55,8 +54,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
 
             }
         });
-
-
 
         expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
@@ -74,8 +71,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
             }
         });
 
-        Toolbar myChildToolbar =
-                (Toolbar) findViewById(R.id.to_do_list);
+        Toolbar myChildToolbar = (Toolbar) findViewById(R.id.to_do_list);
         setSupportActionBar(myChildToolbar);
 
         ActionBar ab = getSupportActionBar();
@@ -83,7 +79,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
     }
 
     public static List<CustomDay> getToDoDays() {
-        //Insert query here
+        // Insert query here
         List<CustomDay> temp = new ArrayList<>();
         temp.add(new CustomDay(new Date()));
         return temp;

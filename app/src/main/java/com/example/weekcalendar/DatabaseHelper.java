@@ -11,32 +11,48 @@ import java.util.HashMap;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    //Database Name
+    // Database Name
     public static final String DATABASE_NAME = "Calendar.db";
 
-    //Database Version
+    // Database Version
     public static final int DATABASE_VERSION = 16;
 
-    //Table Names
+    // Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
     public static final String EVENTS_TABLE = "Events_Table";
     public static final String TO_DO_TABLE = "To_Do_Table";
 
-    //To Do Table Columns
-    public static final String TO_DO_1 = "DETAILS";
+    // To Do Table Columns
+    public static final String TO_DO_1 = "DATE";
+    public static final String TO_DO_2 = "DETAILS";
 
-    //CustomExpense Table Columns
+    // CustomExpense Table Columns
     public static final String EXPENSE_1 = "DATE";
     public static final String EXPENSE_2 = "CATEGORY";
     public static final String EXPENSE_3 = "AMOUNT";
     public static final String EXPENSE_4 = "NAME";
 
-    //Events Table Columns
+    // Events Table Columns
     public static final String EVENTS_1 = "START_DATE";
     public static final String EVENTS_2 = "END_DATE";
     public static final String EVENTS_3 = "START_TIME";
     public static final String EVENTS_4 = "END_TIME";
     public static final String EVENTS_5 = "ACTIVITY";
+
+    // static variable to prevent reinitialising every time the method is called
+    private static final HashMap<String, String> mapper = new HashMap<>();
+    static { mapper.put("Jan", "01");
+             mapper.put("Feb", "02");
+             mapper.put("Mar", "03");
+             mapper.put("Apr", "04");
+             mapper.put("May", "05");
+             mapper.put("Jun", "06");
+             mapper.put("Jul", "07");
+             mapper.put("Aug", "08");
+             mapper.put("Sep", "09");
+             mapper.put("Oct", "10");
+             mapper.put("Nov", "11");
+             mapper.put("Dec", "12"); }
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -59,7 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    //Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
+    // Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
     public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -129,32 +145,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
+    public boolean addToDo(String date, String details) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String[] todoDateArr = date.split(" ");
+        todoDateArr[1] = this.convertDate(todoDateArr[1].substring(0, 3));
+        if (todoDateArr[0].length() == 1) {
+            todoDateArr[0] = "0" + todoDateArr[0];
+        }
+
+        String editedToDoDate = String.join("-", todoDateArr[2], todoDateArr[1], todoDateArr[0]);
+
+        ContentValues cV = new ContentValues();
+        cV.put(TO_DO_1, editedToDoDate);
+        cV.put(TO_DO_2, details);
+
+        return db.insert(TO_DO_TABLE, null, cV) != -1;
+    }
+
     public String convertDate(String month) {
-        HashMap<String, String> mapper = new HashMap<>();
-        mapper.put("Jan", "01");
-        mapper.put("Feb", "02");
-        mapper.put("Mar", "03");
-        mapper.put("Apr", "04");
-        mapper.put("May", "05");
-        mapper.put("Jun", "06");
-        mapper.put("Jul", "07");
-        mapper.put("Aug", "08");
-        mapper.put("Sep", "09");
-        mapper.put("Oct", "10");
-        mapper.put("Nov", "11");
-        mapper.put("Dec", "12");
         return mapper.get(month);
     }
 
-    //Get all event Data
+    // Get all event Data
     public Cursor getEventData() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Events_Table ORDER BY START_DATE ASC", null);
         return result;
     }
 
-
-    //Get all event data with a given startDate
+    // Get all event data with a given startDate
     public Cursor getEventData(String startDate) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE START_DATE = \"" + startDate + "\"" + "ORDER BY START_TIME ASC", null);
@@ -167,17 +187,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    //Get all event Data
+    // Get all event Data
     public Cursor getExpenseData() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Expense_Table ORDER BY DATE ASC", null);
         return result;
     }
 
-    //Get all event data for a given date
+    // Get all event data for a given date
     public Cursor getExpenseData(String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE DATE = \"" + date + "\" ORDER BY CATEGORY ASC" , null);
+        return result;
+    }
+
+    // gets all todo
+    public Cursor getToDo() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM To_Do_Table ORDER BY DATE ASC", null);
+        return result;
+    }
+
+    // gets all todo for a given date
+    public Cursor getToDo(String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM To_Do_Table WHERE DATE = \"" + date + "\" ORDER BY ID ASC", null);
         return result;
     }
 }
