@@ -56,10 +56,6 @@ public class SetupNavDrawer {
                     Intent i3 = new Intent(a, ActivityToDoListPage.class);
                     a.startActivity(i3);
                     break;
-                case R.id.test_ex_list:
-                    Toast.makeText(a, "Test Ex list",Toast.LENGTH_SHORT).show();
-                    Intent i4 = new Intent(a, TestExpandableList.class);
-                    a.startActivity(i4);
                 default:
                     break;
             }
