@@ -98,10 +98,6 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         }
         String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
         Cursor result = myDB.getEventData(daySQL);
-
-
-
-        // random events
         List<CustomEvent> temp = new ArrayList<>();
         for (int i = 0; i < result.getCount(); i++) {
             result.moveToNext();

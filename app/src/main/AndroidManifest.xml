@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ActivityToDoListPage"
-            android:parentActivityName="com.example.weekcalendar.ActivityUpcomingPage" >></activity>
+            android:parentActivityName="com.example.weekcalendar.ActivityUpcomingPage"></activity>
         <activity android:name=".ActivityExpensePage" />
         <activity android:name=".ActivityCreateExpensePage" />
         <activity android:name=".ActivityEventDetailsPage" />

@@ -1,8 +1,6 @@
 package com.example.weekcalendar;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +19,6 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
     private LinearLayoutManager manager;
-    private Bundle outState;
 
     public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
         // each CustomDay has a List of expense categories
@@ -30,27 +27,14 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
         this.a = a;
     }
 
-    public void passOutState(Bundle outState) {
-        this.outState = outState;
-    }
-
     public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
         private TextView date;
         private RecyclerView categoryAndExpenses;
-        private EachExpenseExRVAdapter e;
 
         public MyExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
             this.date = itemView.findViewById(R.id.date);
             this.categoryAndExpenses = itemView.findViewById(R.id.category_and_expenses);
-        }
-
-        public void setHolderAdapter(EachExpenseExRVAdapter e) {
-            this.e = e;
-        }
-
-        public EachExpenseExRVAdapter getAdapter() {
-            return this.e;
         }
     }
 
@@ -66,25 +50,17 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder, int position) {
         CustomDay d = this.spendingCustomDays.get(position);
-
         holder.date.setText(d.getDate());
 
         List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
+        if (expenditureOnDayD.size() == 0) {
+            Toast.makeText(a, "empty!!!!!!", Toast.LENGTH_SHORT).show();
+        }
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
+
         manager = new LinearLayoutManager(a);
         holder.categoryAndExpenses.setLayoutManager(manager);
         holder.categoryAndExpenses.setAdapter(e);
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull MyExpenseViewHolder holder) {
-        super.onViewRecycled(holder);
-        if (this.outState != null) {
-            holder.getAdapter().onSaveInstanceState(this.outState);
-        } else {
-            Toast.makeText(a, "null", Toast.LENGTH_SHORT).show();
-        }
-
     }
 
     @Override

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -89,12 +90,14 @@ public class ActivityExpensePage extends AppCompatActivity {
         spendingEachDay = new HashMap<>();
         for (CustomDay d : daysWithExpenditure) {
             String day = d.getdd();
-            // breaks SQL
-//            if (day.length() == 1) {
-//                day = "0" + day;
-//            }
+            if (day.length() == 1) {
+                day = "0" + day;
+            }
             String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
             Cursor result = myDB.getExpenseData(daySQL);
+            if (result.getCount() == 0) {
+                Toast.makeText(this, daySQL, Toast.LENGTH_SHORT).show();
+            }
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();
             CustomExpenseCategory exCat;
@@ -102,12 +105,15 @@ public class ActivityExpensePage extends AppCompatActivity {
             for (int i = 0; i < result.getCount(); i++) {
                 result.moveToNext();
                 String category = result.getString(2);
+                Toast.makeText(this, category, Toast.LENGTH_SHORT).show();
                 String name = result.getString(4);
                 String amount = result.getString(3);
                 if (catHashMap.containsKey(category)) {
-                    List<CustomExpense> customExpenseCategory = new ArrayList<>(catHashMap.get(category));
-                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
-                    catHashMap.put(category, customExpenseCategory);
+                    // edit add instead of creating new object
+                    catHashMap.get(category).add(new CustomExpense(name, Double.valueOf(amount)));
+//                    List<CustomExpense> customExpenseCategory = new ArrayList<>(catHashMap.get(category));
+//                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
+//                    catHashMap.put(category, customExpenseCategory);
                 } else {
                     List<CustomExpense> customExpenseCategory = new ArrayList<>();
                     customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
@@ -121,8 +127,13 @@ public class ActivityExpensePage extends AppCompatActivity {
                 exCat = new CustomExpenseCategory(key, value);
                 temp.add(exCat);
             }
+            if (temp.size() == 0) {
+                Toast.makeText(this, "REMPTYYYYYYYYYYYYYYYYYYY", Toast.LENGTH_SHORT).show();
+            }
             spendingEachDay.put(d, temp);
         }
+
+
         return spendingEachDay;
     }
 
@@ -139,31 +150,31 @@ public class ActivityExpensePage extends AppCompatActivity {
                 break;
             }
             query.moveToNext();
-            String result = query.getString(1);
+            String result = query.getString(0);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-            if (daysWithExpenditure.contains(customDay)) {
-                continue;
-            } else {
+//            if (daysWithExpenditure.contains(customDay)) {
+//                continue;
+//            } else {
                 daysWithExpenditure.add(customDay);
-            }
+//            }
         }
         return daysWithExpenditure;
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        mListState = manager.onSaveInstanceState();
-        outState.putParcelable(LIST_STATE_KEY, mListState);
-        dayExpenseAdapter.passOutState(outState);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            manager.onRestoreInstanceState(mListState);
-        }
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        mListState = manager.onSaveInstanceState();
+//        outState.putParcelable(LIST_STATE_KEY, mListState);
+//        dayExpenseAdapter.passOutState(outState);
+//        super.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            manager.onRestoreInstanceState(mListState);
+//        }
+//    }
 }

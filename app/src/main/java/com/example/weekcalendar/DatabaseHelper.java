@@ -9,13 +9,12 @@ import android.util.Log;
 
 import java.util.HashMap;
 
-
 public class DatabaseHelper extends SQLiteOpenHelper {
     // Database Name
     public static final String DATABASE_NAME = "Calendar.db";
 
     // Database Version
-    public static final int DATABASE_VERSION = 16;
+    public static final int DATABASE_VERSION = 17;
 
     // Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -75,6 +74,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public String convertDate(String month) {
+        mapper.put("Jan", "01");
+        mapper.put("Feb", "02");
+        mapper.put("Mar", "03");
+        mapper.put("Apr", "04");
+        mapper.put("May", "05");
+        mapper.put("Jun", "06");
+        mapper.put("Jul", "07");
+        mapper.put("Aug", "08");
+        mapper.put("Sep", "09");
+        mapper.put("Oct", "10");
+        mapper.put("Nov", "11");
+        mapper.put("Dec", "12");
+        return mapper.get(month);
+    }
+
+    /*
+    Database methods for Events page
+     */
+
     // Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
     public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -124,6 +143,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
+    // Get all days with event items
+    public Cursor getEventData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT DISTINCT START_DATE FROM Events_Table ORDER BY START_DATE ASC", null);
+        return result;
+    }
+
+    // Get all event data with a given startDate
+    public Cursor getEventData(String startDate) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE START_DATE = \"" + startDate + "\"" + "ORDER BY START_TIME ASC", null);
+        return result;
+    }
+
+    public Cursor getEventDataByID(String eventID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID, null );
+        return result;
+    }
+
+    /*
+    Database methods for Expense page
+     */
+
     public boolean addExpense(String name, String expense, String category, String expenseDate) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -145,6 +188,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } return true;
     }
 
+    // Get all days with expense items
+    public Cursor getExpenseData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT DISTINCT DATE FROM Expense_Table ORDER BY DATE ASC", null);
+        return result;
+    }
+
+    // Get all expense data for a given date
+    public Cursor getExpenseData(String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE DATE = \"" + date + "\" ORDER BY CATEGORY ASC" , null);
+        return result;
+    }
+
+    /*
+    Database methods for To Do page
+     */
+
     public boolean addToDo(String date, String details) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -163,48 +224,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.insert(TO_DO_TABLE, null, cV) != -1;
     }
 
-    public String convertDate(String month) {
-        return mapper.get(month);
-    }
-
-    // Get all event Data
-    public Cursor getEventData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table ORDER BY START_DATE ASC", null);
-        return result;
-    }
-
-    // Get all event data with a given startDate
-    public Cursor getEventData(String startDate) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE START_DATE = \"" + startDate + "\"" + "ORDER BY START_TIME ASC", null);
-        return result;
-    }
-
-    public Cursor getEventDataByID(String eventID) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID, null );
-        return result;
-    }
-
-    // Get all event Data
-    public Cursor getExpenseData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Expense_Table ORDER BY DATE ASC", null);
-        return result;
-    }
-
-    // Get all event data for a given date
-    public Cursor getExpenseData(String date) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE DATE = \"" + date + "\" ORDER BY CATEGORY ASC" , null);
-        return result;
-    }
-
-    // gets all todo
+    // gets all days with todo items
     public Cursor getToDo() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM To_Do_Table ORDER BY DATE ASC", null);
+        Cursor result = db.rawQuery("SELECT DISTINCT DATE FROM To_Do_Table ORDER BY DATE ASC", null);
         return result;
     }
 

@@ -88,12 +88,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 break;
             }
             query.moveToNext();
-            String result = query.getString(1);
+            String result = query.getString(0);
             Date date = dateFormatter.parse(result);
             CustomDay customDay = new CustomDay(date);
-            if (!daysWithEvents.contains(customDay)) {
-                daysWithEvents.add(customDay);
-            }
+            daysWithEvents.add(customDay);
         }
 
         return daysWithEvents;
