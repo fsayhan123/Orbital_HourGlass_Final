@@ -9,9 +9,7 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -20,14 +18,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ActivityToDoListPage extends AppCompatActivity {
 
-    private ToDoListDataPump toDoListDataPump;
     private ExpandableListView expandableListView;
     private ExpandableListAdapter expandableListAdapter;
-    private List<CustomDay> expandableListTitle;
-    private HashMap<CustomDay, List<String>> expandableListDetail;
+    private Map<CustomDay, List<String>> expandableListDetail;
+    private List<CustomDay> listOfDays;
 
     private DatabaseHelper myDB;
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -41,22 +39,21 @@ public class ActivityToDoListPage extends AppCompatActivity {
         myDB = new DatabaseHelper(this);
 
         try {
-            this.toDoListDataPump = new ToDoListDataPump(getToDoDays());
+            this.listOfDays = getToDoDays();
         } catch (ParseException e) {
             Toast.makeText(this, "something wrong", Toast.LENGTH_SHORT).show();
-            this.toDoListDataPump = new ToDoListDataPump(new ArrayList<>());
+            this.listOfDays = new ArrayList<>();
         }
 
+        expandableListDetail = getData();
         expandableListView = findViewById(R.id.expandableListView);
-        expandableListDetail = this.toDoListDataPump.getData();
-        expandableListTitle = new ArrayList<>(expandableListDetail.keySet());
-        expandableListAdapter = new ToDoListViewAdapter(this, expandableListTitle, expandableListDetail);
+        expandableListAdapter = new ToDoListViewAdapter(this, this.listOfDays, expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
                 Toast.makeText(getApplicationContext(),
-                        expandableListTitle.get(groupPosition) + " List Expanded.",
+                        listOfDays.get(groupPosition) + " List Expanded.",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -65,7 +62,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
             @Override
             public void onGroupCollapse(int groupPosition) {
                 Toast.makeText(getApplicationContext(),
-                        expandableListTitle.get(groupPosition) + " List Collapsed.",
+                        listOfDays.get(groupPosition) + " List Collapsed.",
                         Toast.LENGTH_SHORT).show();
 
             }
@@ -77,10 +74,10 @@ public class ActivityToDoListPage extends AppCompatActivity {
                                         int groupPosition, int childPosition, long id) {
                 Toast.makeText(
                         getApplicationContext(),
-                        expandableListTitle.get(groupPosition)
+                        listOfDays.get(groupPosition)
                                 + " -> "
                                 + expandableListDetail.get(
-                                expandableListTitle.get(groupPosition)).get(
+                                listOfDays.get(groupPosition)).get(
                                 childPosition), Toast.LENGTH_SHORT
                 ).show();
                 return false;
@@ -102,7 +99,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
                     break;
                 }
                 query.moveToNext();
-                String result = query.getString(1);
+                String result = query.getString(0);
                 Date date = dateFormatter.parse(result);
                 CustomDay customDay = new CustomDay(date);
                 temp.add(customDay);
@@ -114,5 +111,24 @@ public class ActivityToDoListPage extends AppCompatActivity {
     public void createToDo(View view) {
         Intent intent = new Intent(this, ActivityCreateToDoPage.class);
         startActivity(intent);
+    }
+
+    public Map<CustomDay, List<String>> getData() {
+        expandableListDetail = new HashMap<>();
+        for (CustomDay d : this.listOfDays) {
+            String day = d.getdd();
+            if (day.length() == 1) {
+                day = "0" + day;
+            }
+            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
+            Cursor result = myDB.getToDo(daySQL);
+            expandableListDetail.put(d, new ArrayList<>());
+            for (int i = 0; i < result.getCount(); i++) {
+                result.moveToNext();
+                String description = result.getString(2);
+                expandableListDetail.get(d).add(description);
+            }
+        }
+        return expandableListDetail;
     }
 }

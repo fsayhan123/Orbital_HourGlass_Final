@@ -18,11 +18,12 @@ public class ToDoListDataPump {
         for (CustomDay day: this.daysList) {
             List<String> contentList = new ArrayList<>();
             //Nonsense Data
-            contentList.add("Buy Food");
-            contentList.add("Buy Groceries");
-            contentList.add("Get BAE");
+//            contentList.add("Buy Food");
+//            contentList.add("Buy Groceries");
+//            contentList.add("Get BAE");
             //Insert SQL query here to extract ToDoList for respective date
             //Can also query once from DB and iterate thru cursor each time a new day is checked, unsure which is faster tbh
+
 
             expandableListDetail.put(day, contentList);
         }

@@ -43,10 +43,6 @@ public class ActivityExpensePage extends AppCompatActivity {
     // Database handler
     private DatabaseHelper myDB;
 
-    // Navigation drawer pane
-//    private DrawerLayout dl;
-//    private ActionBarDrawerToggle t;
-//    private NavigationView nv;
     private SetupNavDrawer navDrawer;
 
     @Override
@@ -102,7 +98,6 @@ public class ActivityExpensePage extends AppCompatActivity {
             for (int i = 0; i < result.getCount(); i++) {
                 result.moveToNext();
                 String category = result.getString(2);
-                Toast.makeText(this, category, Toast.LENGTH_SHORT).show();
                 String name = result.getString(4);
                 String amount = result.getString(3);
                 if (catHashMap.containsKey(category)) {

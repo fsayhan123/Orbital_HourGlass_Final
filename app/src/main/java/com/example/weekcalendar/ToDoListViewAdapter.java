@@ -2,6 +2,8 @@ package com.example.weekcalendar;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import android.content.Context;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
@@ -15,10 +17,10 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<CustomDay> expandableListTitle;
-    private HashMap<CustomDay, List<String>> expandableListDetail;
+    private Map<CustomDay, List<String>> expandableListDetail;
 
     public ToDoListViewAdapter(Context context, List<CustomDay> expandableListTitle,
-                                       HashMap<CustomDay, List<String>> expandableListDetail) {
+                                       Map<CustomDay, List<String>> expandableListDetail) {
         this.context = context;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;

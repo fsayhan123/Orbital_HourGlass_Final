@@ -14,7 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Calendar.db";
 
     // Database Version
-    public static final int DATABASE_VERSION = 18;
+    public static final int DATABASE_VERSION = 19;
 
     // Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
