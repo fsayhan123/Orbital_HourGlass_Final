@@ -1,6 +1,7 @@
 package com.example.weekcalendar;
 
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -108,5 +109,10 @@ public class ActivityToDoListPage extends AppCompatActivity {
             }
         }
         return temp;
+    }
+
+    public void createToDo(View view) {
+        Intent intent = new Intent(this, ActivityCreateToDoPage.class);
+        startActivity(intent);
     }
 }

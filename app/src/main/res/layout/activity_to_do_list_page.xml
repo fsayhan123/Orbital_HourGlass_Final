@@ -28,7 +28,34 @@
             android:layout_marginTop="60dp"
             android:divider="@android:color/darker_gray"
             android:dividerHeight="0.5dp"
-            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"></ExpandableListView>
+            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft">
+
+
+
+        </ExpandableListView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/create_to_do_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/expandableListView"
+            android:layout_alignBottom="@id/expandableListView"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="false"
+            android:layout_marginRight="40dp"
+            android:layout_marginBottom="40dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:clickable="true"
+            android:foregroundGravity="center"
+            android:onClick="createToDo"
+            app:borderWidth="0dp"
+            app:fabCustomSize="0dp"
+            app:maxImageSize="48dp"
+            app:srcCompat="@drawable/plus_icon" />
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -39,5 +66,6 @@
         android:fitsSystemWindows="false"
         app:headerLayout="@layout/header"
         app:menu="@menu/nav_menu"></com.google.android.material.navigation.NavigationView>
+
 
 </androidx.drawerlayout.widget.DrawerLayout>
