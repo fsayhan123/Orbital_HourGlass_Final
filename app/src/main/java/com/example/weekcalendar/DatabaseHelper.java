@@ -224,14 +224,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.insert(TO_DO_TABLE, null, cV) != -1;
     }
 
-    // gets all days with todo items
+    // gets all days with to-do items
     public Cursor getToDo() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT DISTINCT DATE FROM To_Do_Table ORDER BY DATE ASC", null);
         return result;
     }
 
-    // gets all todo for a given date
+    // gets all to-do for a given date
     public Cursor getToDo(String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM To_Do_Table WHERE DATE = \"" + date + "\" ORDER BY ID ASC", null);

@@ -24,7 +24,6 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
     private View eachDayView;
     private DatabaseHelper myDB;
 
-
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
         private View view;
@@ -43,17 +42,17 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
             month = itemView.findViewById(R.id.month_button);
             dayEvents = itemView.findViewById(R.id.all_events_layout);
 
-            timeLayoutFormat = new LinearLayout.LayoutParams
-                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-            timeLayoutFormat.setMargins(10, 0, 0, 50);
-
-            lastTimeLayoutFormat = new LinearLayout.LayoutParams
-                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-            lastTimeLayoutFormat.setMargins(10, 0, 0, 0);
-
-            eventLayoutFormat = new LinearLayout.LayoutParams
-                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 100f);
-            eventLayoutFormat.setMargins(5, 0, 0, 0);
+//            timeLayoutFormat = new LinearLayout.LayoutParams
+//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+//            timeLayoutFormat.setMargins(10, 0, 0, 50);
+//
+//            lastTimeLayoutFormat = new LinearLayout.LayoutParams
+//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+//            lastTimeLayoutFormat.setMargins(10, 0, 0, 0);
+//
+//            eventLayoutFormat = new LinearLayout.LayoutParams
+//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 100f);
+//            eventLayoutFormat.setMargins(5, 0, 0, 0);
 
 //            eventLayout = eachDayView.findViewById(R.id.all_events_layout);
         }
@@ -96,6 +95,7 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         if (day.length() == 1) {
             day = "0" + day;
         }
+        // todo can we prepare this on create?
         String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
         Cursor result = myDB.getEventData(daySQL);
         List<CustomEvent> temp = new ArrayList<>();

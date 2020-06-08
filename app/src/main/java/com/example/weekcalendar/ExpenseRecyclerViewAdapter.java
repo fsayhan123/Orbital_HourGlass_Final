@@ -19,12 +19,17 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
     private LinearLayoutManager manager;
+    private MyOnDateClickListener mDateClickListener;
 
-    public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays, Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay, Activity a) {
+    public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays,
+                                      Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay,
+                                      Activity a,
+                                      MyOnDateClickListener mDateClickListener) {
         // each CustomDay has a List of expense categories
         this.spendingCustomDays = spendingCustomDays;
         this.whatWeSpentEachDay = whatWeSpentEachDay;
         this.a = a;
+        this.mDateClickListener = mDateClickListener;
     }
 
     public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
@@ -33,7 +38,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
 
         public MyExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.date = itemView.findViewById(R.id.date);
+            this.date = itemView.findViewById(R.id.date_header);
             this.categoryAndExpenses = itemView.findViewById(R.id.category_and_expenses);
         }
     }
@@ -43,7 +48,10 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     public ExpenseRecyclerViewAdapter.MyExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_day_expense, parent, false);
         ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder = new ExpenseRecyclerViewAdapter.MyExpenseViewHolder(view);
-
+        holder.date.setOnClickListener(v -> {
+            String day = holder.date.getText().toString();
+            mDateClickListener.onDateClickListener(day);
+        });
         return holder;
     }
 

@@ -22,7 +22,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         setContentView(R.layout.activity_create_to_do_page);
         myDB = new DatabaseHelper(this);
 
-        date = findViewById(R.id.date);
+        date = findViewById(R.id.date_header);
         date.setOnClickListener(v -> openSelectDateDialog(v, date));
 
         description = findViewById(R.id.to_do_description);

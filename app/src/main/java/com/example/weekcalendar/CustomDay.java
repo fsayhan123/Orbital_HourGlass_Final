@@ -15,7 +15,6 @@ public class CustomDay implements Comparable<CustomDay> {
     private String MMMMMM;
     private String MMM;
     private int yyyy;
-    private int numEvents;
 
     static String[] months = new String[] { "",
             "January", "February", "March", "April", "May", "June", "July",
@@ -31,7 +30,6 @@ public class CustomDay implements Comparable<CustomDay> {
         this.MMM = this.MMMMMM.substring(0, 3);
         this.yyyy = temp.getYear();
         this.time = dateFormatter.format(d.getTime());
-        this.numEvents = 5;
     }
 
     public String getdd() {

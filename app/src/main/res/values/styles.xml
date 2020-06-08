@@ -10,7 +10,7 @@
     </style>
 
     <style name="MyDrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">
-        <item name="color">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
     </style>
 
 </resources>

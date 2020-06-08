@@ -1,6 +1,5 @@
 package com.example.weekcalendar;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ActivityExpensePage extends AppCompatActivity {
+public class ActivityExpensePage extends AppCompatActivity implements MyOnDateClickListener {
     /*
     RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates),
     and a Map with key-value pair of CustomDay and a List<CustomExpenseCategory>, representing
@@ -61,7 +60,8 @@ public class ActivityExpensePage extends AppCompatActivity {
         spendingEachDay = getSpendingEachDay();
 
         expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay, ActivityExpensePage.this);
+        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
+                ActivityExpensePage.this, this);
 
         manager = new LinearLayoutManager(ActivityExpensePage.this);
         expensesByDay.setHasFixedSize(true);
@@ -139,5 +139,13 @@ public class ActivityExpensePage extends AppCompatActivity {
             daysWithExpenditure.add(customDay);
         }
         return daysWithExpenditure;
+    }
+
+    @Override
+    public void onDateClickListener(String date) {
+        Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(this, ActivityEachDayExpenses.class);
+        i.putExtra("date clicked", date);
+        startActivity(i);
     }
 }

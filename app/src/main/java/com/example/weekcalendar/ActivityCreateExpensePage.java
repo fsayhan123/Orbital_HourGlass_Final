@@ -32,7 +32,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         s.setAdapter(new NothingSelectedSpinnerAdapter(adapter, R.layout.spinner_nothing_selected, this));
 
-        date = findViewById(R.id.date);
+        date = findViewById(R.id.date_header);
         date.setOnClickListener(v -> openSelectDateDialog(v, date));
 
         addExpenditure = findViewById(R.id.submit_expenditure);

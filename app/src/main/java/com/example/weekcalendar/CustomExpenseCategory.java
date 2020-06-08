@@ -18,8 +18,6 @@ public class CustomExpenseCategory extends ExpandableGroup<CustomExpense> {
         this.totalCost = cost;
     }
 
-
-
     public double getTotalCost() {
         return this.totalCost;
     }

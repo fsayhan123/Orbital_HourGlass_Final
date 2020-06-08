@@ -19,7 +19,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/date"
+                android:id="@+id/date_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="today"
