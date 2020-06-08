@@ -67,6 +67,17 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
 //        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
 //        itemTouchHelper.attachToRecyclerView(allExpenseCategories);
+
+        adapter = new EachDayExpensesExListAdapter(this, this.listOfCat, this.expensesInEachCat);
+        allExpenseCategories.setAdapter(adapter);
+        allExpenseCategories.setOnGroupExpandListener(pos -> {
+            Toast.makeText(getApplicationContext(),
+                    this.listOfCat.get(pos) + " List Expanded.",
+                    Toast.LENGTH_SHORT).show();
+        });
+        for (int i = 0; i < adapter.getGroupCount(); i++) {
+            allExpenseCategories.expandGroup(i);
+        }
     }
 
 //    String deleted = null;

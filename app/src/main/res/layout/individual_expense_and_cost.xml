@@ -11,14 +11,26 @@
         android:layout_marginHorizontal="30dp"
         android:orientation="horizontal">
 
-        <TextView
+<!--        <TextView-->
+<!--            android:id="@+id/expense_name"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="TextView"-->
+<!--            android:textColor="#4A4A4A"-->
+<!--            android:textSize="16dp" />-->
+
+        <CheckedTextView
             android:id="@+id/expense_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="TextView"
             android:textColor="#4A4A4A"
-            android:textSize="16dp" />
+            android:textSize="16dp"
+            android:text="CheckedTextView"
+            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+            android:background="@drawable/txt_view_bg"
+            />
 
         <TextView
             android:id="@+id/expense_cost"
