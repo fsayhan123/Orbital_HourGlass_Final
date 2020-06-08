@@ -13,6 +13,8 @@ import android.database.Cursor;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -28,9 +30,12 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
     private DatabaseHelper myDB;
     private List<String> listOfCat;
     private Map<String, List<CustomExpense>> expensesInEachCat;
-    private EachDayExpensesAdapter adapter;
-    private LinearLayoutManager manager;
-    private RecyclerView allExpenseCategories;
+//    private EachDayExpensesAdapter adapter;
+//    private LinearLayoutManager manager;
+//    private RecyclerView allExpenseCategories;
+
+    private ExpandableListView allExpenseCategories;
+    private ExpandableListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,60 +59,60 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
         allExpenseCategories = findViewById(R.id.all_expense_categories);
 
-        adapter = new EachDayExpensesAdapter(this.listOfCat, this.expensesInEachCat, this);
-        manager = new LinearLayoutManager(this);
-        allExpenseCategories.setHasFixedSize(true);
-        allExpenseCategories.setLayoutManager(manager);
-        allExpenseCategories.setAdapter(adapter);
+//        adapter = new EachDayExpensesAdapter(this.listOfCat, this.expensesInEachCat, this);
+//        manager = new LinearLayoutManager(this);
+//        allExpenseCategories.setHasFixedSize(true);
+//        allExpenseCategories.setLayoutManager(manager);
+//        allExpenseCategories.setAdapter(adapter);
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(allExpenseCategories);
+//        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+//        itemTouchHelper.attachToRecyclerView(allExpenseCategories);
     }
 
-    String deleted = null;
-    String edit = null;
-
-    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            int position = viewHolder.getAdapterPosition();
-
-            switch (direction) {
-                case ItemTouchHelper.LEFT:
-                    deleted = listOfCat.get(position);
-                    listOfCat.remove(position);
-                    adapter.notifyDataSetChanged();
-                    Snackbar.make(allExpenseCategories, deleted, Snackbar.LENGTH_LONG)
-                            .setAction("Undo", v -> {
-                                listOfCat.add(position, deleted);
-                                adapter.notifyItemInserted(position);
-                            })
-                    .show();
-                    break;
-                case ItemTouchHelper.RIGHT:
-                    edit = listOfCat.get(position);
-                    adapter.notifyDataSetChanged();
-                    break;
-            }
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                    .addSwipeLeftBackgroundColor(R.color.Pink)
-                    .addSwipeLeftActionIcon(R.drawable.ic_baseline_delete_24)
-                    .addSwipeRightBackgroundColor(R.color.green)
-                    .addSwipeRightActionIcon(R.drawable.ic_baseline_edit_24)
-                    .create()
-                    .decorate();
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-        }
-    };
+//    String deleted = null;
+//    String edit = null;
+//
+//    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+//        @Override
+//        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+//            return false;
+//        }
+//
+//        @Override
+//        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+//            int position = viewHolder.getAdapterPosition();
+//
+//            switch (direction) {
+//                case ItemTouchHelper.LEFT:
+//                    deleted = listOfCat.get(position);
+//                    listOfCat.remove(position);
+//                    adapter.notifyDataSetChanged();
+//                    Snackbar.make(allExpenseCategories, deleted, Snackbar.LENGTH_LONG)
+//                            .setAction("Undo", v -> {
+//                                listOfCat.add(position, deleted);
+//                                adapter.notifyItemInserted(position);
+//                            })
+//                    .show();
+//                    break;
+//                case ItemTouchHelper.RIGHT:
+//                    edit = listOfCat.get(position);
+//                    adapter.notifyDataSetChanged();
+//                    break;
+//            }
+//        }
+//
+//        @Override
+//        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+//            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+//                    .addSwipeLeftBackgroundColor(R.color.Pink)
+//                    .addSwipeLeftActionIcon(R.drawable.ic_baseline_delete_24)
+//                    .addSwipeRightBackgroundColor(R.color.green)
+//                    .addSwipeRightActionIcon(R.drawable.ic_baseline_edit_24)
+//                    .create()
+//                    .decorate();
+//            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+//        }
+//    };
 
     public String parseDate(String date) {
         String[] expenseDateArr = date.split(" ");
