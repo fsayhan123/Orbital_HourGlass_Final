@@ -3,6 +3,7 @@ package com.example.weekcalendar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
@@ -13,12 +14,21 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ActivityCreateExpensePage extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
     private Spinner s;
     private Button date;
+    private EditText expenditure;
     private EditText cost;
+    private Button dateDialog;
     private Button addExpenditure;
     private DatabaseHelper myDB;
+    private SimpleDateFormat stringToDate = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat dateToString = new SimpleDateFormat("dd MMMMMM yyyy");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +50,29 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
 
         cost = findViewById(R.id.cost);
         cost.setFilters(new InputFilter[] {new DigitsInputFilter(Integer.MAX_VALUE, 2, Double.MAX_VALUE)});
+
+        Intent i = getIntent();
+        int num = i.getIntExtra("expense ID", -1);
+        Toast.makeText(this, String.valueOf(num), Toast.LENGTH_SHORT).show();
+        if (num != -1) {
+            Toast.makeText(this, "fetching details of " + num, Toast.LENGTH_SHORT).show();
+            Cursor results = myDB.getExpenseDetails(num);
+            results.moveToNext();
+            expenditure = findViewById(R.id.expenditure);
+            expenditure.setText(results.getString(4));
+
+            dateDialog = findViewById(R.id.date_header);
+            String date = results.getString(1);
+            try {
+                Date d = stringToDate.parse(date);
+                String output = dateToString.format(d);
+                dateDialog.setText(output);
+            } catch (ParseException e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
     }
 
     private void addExpense() {

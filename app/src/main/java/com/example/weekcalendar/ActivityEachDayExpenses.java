@@ -3,30 +3,17 @@ package com.example.weekcalendar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.SparseBooleanArray;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,12 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
-
 public class ActivityEachDayExpenses extends AppCompatActivity {
     private DatabaseHelper myDB;
     private List<String> listOfCat;
     private Map<String, List<CustomExpense>> expensesInEachCat;
+    private boolean canDelete = false;
 //    private EachDayExpensesAdapter adapter;
 //    private LinearLayoutManager manager;
 //    private RecyclerView allExpenseCategories;
@@ -66,7 +52,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         myDB = new DatabaseHelper(this);
 
         String parsedDate = parseDate(expenseDate);
-        Cursor results = myDB.getExpenseData(parsedDate);
+        Cursor results = myDB.getDayExpenseData(parsedDate);
         populateCategories(results);
 
         allExpenseCategories = findViewById(R.id.all_expense_categories);
@@ -90,21 +76,27 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         allExpenseCategories.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
-                int pos = parent.getFlatListPosition(packedPos);
-                boolean isChecked = parent.isItemChecked(pos);
-
-                if (isChecked) {
-                    parent.setItemChecked(pos, false);
-                    for (int i = 0; i < listOfPos.size(); i++) {
-                        if (listOfPos.get(i)[0] == groupPosition && listOfPos.get(i)[1] == childPosition) {
-                            listOfPos.remove(i);
-                            break;
+                if (canDelete) {
+                    long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
+                    int pos = parent.getFlatListPosition(packedPos);
+                    boolean isChecked = parent.isItemChecked(pos);
+                    if (isChecked) {
+                        parent.setItemChecked(pos, false);
+                        for (int i = 0; i < listOfPos.size(); i++) {
+                            if (listOfPos.get(i)[0] == groupPosition && listOfPos.get(i)[1] == childPosition) {
+                                listOfPos.remove(i);
+                                break;
+                            }
                         }
+                    } else {
+                        parent.setItemChecked(pos, true);
+                        listOfPos.add(new int[] {groupPosition, childPosition});
                     }
                 } else {
-                    parent.setItemChecked(pos, true);
-                    listOfPos.add(new int[] {groupPosition, childPosition});
+                    Intent i = new Intent(ActivityEachDayExpenses.this, ActivityCreateExpensePage.class);
+                    CustomExpense e = (CustomExpense) adapter.getChild(groupPosition, childPosition);
+                    i.putExtra("expense ID", e.getID());
+                    startActivity(i);
                 }
                 return false;
             }
@@ -122,14 +114,22 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.delete:
-                Toast.makeText(this, "deleted", Toast.LENGTH_SHORT).show();
-                for (int i = listOfPos.size() - 1; i >= 0; i--) {
-                    int[] pair = listOfPos.get(i);
-                    Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
-                    adapter.remove(pair[0], pair[1]);
+                Toast.makeText(this, "toggle delete", Toast.LENGTH_SHORT).show();
+                if (canDelete) {
+                    if (listOfPos.size() == 0) {
+                        canDelete = false;
+                    } else {
+                        for (int i = listOfPos.size() - 1; i >= 0; i--) {
+                            int[] pair = listOfPos.get(i);
+                            Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
+                            adapter.remove(pair[0], pair[1]);
+                        }
+                        listOfPos.clear();
+                        allExpenseCategories.clearChoices();
+                    }
+                } else {
+                    canDelete = true;
                 }
-                listOfPos.clear();
-                allExpenseCategories.clearChoices();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -195,14 +195,15 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         listOfCat = new ArrayList<>();
         for (int i = 0; i < results.getCount(); i++) {
             results.moveToNext();
+            int id = Integer.valueOf(results.getString(0));
             String category = results.getString(2);
             String name = results.getString(4);
             String amount = results.getString(3);
             if (expensesInEachCat.get(category) != null) {
-                expensesInEachCat.get(category).add(new CustomExpense(name, Double.valueOf(amount)));
+                expensesInEachCat.get(category).add(new CustomExpense(id, name, Double.valueOf(amount)));
             } else {
                 List<CustomExpense> temp = new ArrayList<>();
-                temp.add(new CustomExpense(name, Double.valueOf(amount)));
+                temp.add(new CustomExpense(id, name, Double.valueOf(amount)));
                 expensesInEachCat.put(category, temp);
                 listOfCat.add(category);
             }

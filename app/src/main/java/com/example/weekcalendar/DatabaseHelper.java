@@ -159,7 +159,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getEventDataByID(String eventID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID, null );
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID + "\"", null );
         return result;
     }
 
@@ -189,16 +189,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Get all days with expense items
-    public Cursor getExpenseData() {
+    public Cursor getDayExpenseData() {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT DISTINCT DATE FROM Expense_Table ORDER BY DATE ASC", null);
         return result;
     }
 
     // Get all expense data for a given date
-    public Cursor getExpenseData(String date) {
+    public Cursor getDayExpenseData(String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE DATE = \"" + date + "\" ORDER BY CATEGORY ASC" , null);
+        return result;
+    }
+
+    public Cursor getExpenseDetails(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM Expense_Table WHERE ID = \"" + id + "\"", null);
         return result;
     }
 

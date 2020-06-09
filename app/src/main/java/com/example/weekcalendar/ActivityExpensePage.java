@@ -90,21 +90,22 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
                 day = "0" + day;
             }
             String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
-            Cursor result = myDB.getExpenseData(daySQL);
+            Cursor result = myDB.getDayExpenseData(daySQL);
             HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
             List<CustomExpenseCategory> temp = new ArrayList<>();
             CustomExpenseCategory exCat;
 
             for (int i = 0; i < result.getCount(); i++) {
                 result.moveToNext();
+                int id = Integer.valueOf(result.getString(0));
                 String category = result.getString(2);
                 String name = result.getString(4);
                 String amount = result.getString(3);
                 if (catHashMap.containsKey(category)) {
-                    catHashMap.get(category).add(new CustomExpense(name, Double.valueOf(amount)));
+                    catHashMap.get(category).add(new CustomExpense(id, name, Double.valueOf(amount)));
                 } else {
                     List<CustomExpense> customExpenseCategory = new ArrayList<>();
-                    customExpenseCategory.add(new CustomExpense(name, Double.valueOf(amount)));
+                    customExpenseCategory.add(new CustomExpense(id, name, Double.valueOf(amount)));
                     catHashMap.put(category, customExpenseCategory);
                 }
             }
@@ -124,7 +125,7 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     private List<CustomDay> getSpendingDays() throws ParseException {
         daysWithExpenditure = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        Cursor query = this.myDB.getExpenseData();
+        Cursor query = this.myDB.getDayExpenseData();
         if (query.getCount() == 0) {
             return daysWithExpenditure;
         }

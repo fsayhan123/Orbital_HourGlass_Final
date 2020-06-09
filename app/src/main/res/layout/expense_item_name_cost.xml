@@ -10,6 +10,7 @@
         android:layout_height="match_parent"
         android:layout_marginHorizontal="0dp"
         android:background="@drawable/selector"
+        android:clickable="false"
         android:orientation="horizontal">
 
         <!--        <TextView-->
@@ -26,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="false"
             android:paddingHorizontal="10dp"
             android:text="TextView"
             android:textColor="#4A4A4A"
@@ -36,6 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clickable="false"
             android:paddingHorizontal="10dp"
             android:paddingLeft="0dp"
             android:text="TextView"
