@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class CustomExpense implements Parcelable {
     private String expenseName;
     private double cost;
+    private boolean selected;
 
     public CustomExpense(String expenseName) {
         this.expenseName = expenseName;
@@ -14,6 +15,7 @@ public class CustomExpense implements Parcelable {
     public CustomExpense(String expenseName, double cost) {
         this.expenseName = expenseName;
         this.cost = cost;
+        this.selected = false;
     }
 
     protected CustomExpense(Parcel in) {
@@ -50,5 +52,17 @@ public class CustomExpense implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(expenseName);
         dest.writeDouble(cost);
+    }
+
+    public void toggleSelected() {
+        if (this.selected) {
+            this.selected = false;
+        } else {
+            this.selected = true;
+        }
+    }
+
+    public boolean isSelected() {
+        return this.selected;
     }
 }

@@ -1,12 +1,13 @@
 package com.example.weekcalendar;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.List;
@@ -17,12 +18,14 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<String> listOfCat;
     private Map<String, List<CustomExpense>> expensesInEachCat;
+    private SparseBooleanArray mSelectedItemsIds;
 
     public EachDayExpensesExListAdapter(Context context, List<String> listOfCat,
                                         Map<String, List<CustomExpense>> expensesInEachCat) {
         this.context = context;
         this.listOfCat = listOfCat;
         this.expensesInEachCat = expensesInEachCat;
+        this.mSelectedItemsIds = new SparseBooleanArray();
     }
 
     @Override
@@ -83,8 +86,9 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.individual_expense_and_cost, null);
+            convertView = layoutInflater.inflate(R.layout.expense_item_name_cost, null);
         }
+        convertView.setBackgroundColor(e.isSelected() ? Color.RED : Color.WHITE);
         TextView expense = convertView.findViewById(R.id.expense_name);
         TextView cost = convertView.findViewById(R.id.expense_cost);
         expense.setText(e.getExpenseName());

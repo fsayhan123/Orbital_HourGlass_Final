@@ -11,10 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -35,7 +42,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 //    private RecyclerView allExpenseCategories;
 
     private ExpandableListView allExpenseCategories;
-    private ExpandableListAdapter adapter;
+    private EachDayExpensesExListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +77,19 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
         adapter = new EachDayExpensesExListAdapter(this, this.listOfCat, this.expensesInEachCat);
         allExpenseCategories.setAdapter(adapter);
-        allExpenseCategories.setOnGroupExpandListener(pos -> {
-            Toast.makeText(getApplicationContext(),
-                    this.listOfCat.get(pos) + " List Expanded.",
-                    Toast.LENGTH_SHORT).show();
-        });
+
         for (int i = 0; i < adapter.getGroupCount(); i++) {
             allExpenseCategories.expandGroup(i);
         }
+
+        allExpenseCategories.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+//                int index = parent.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
+//                v.setSelected(true);
+                return false;
+            }
+        });
     }
 
 //    String deleted = null;

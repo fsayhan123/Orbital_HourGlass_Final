@@ -25,5 +25,7 @@
         android:id="@+id/all_expense_categories"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:choiceMode="multipleChoice"></ExpandableListView>
+        android:choiceMode="singleChoice"></ExpandableListView>
+
+
 </LinearLayout>

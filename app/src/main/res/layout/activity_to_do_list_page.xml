@@ -29,9 +29,6 @@
             android:divider="@android:color/darker_gray"
             android:dividerHeight="0.5dp"
             android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft">
-
-
-
         </ExpandableListView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
