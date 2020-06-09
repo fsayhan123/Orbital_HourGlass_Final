@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -88,16 +89,26 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.expense_item_name_cost, null);
         }
-        convertView.setBackgroundColor(e.isSelected() ? Color.RED : Color.WHITE);
+//        convertView.setBackgroundColor(e.isSelected() ? Color.RED : Color.WHITE);
         TextView expense = convertView.findViewById(R.id.expense_name);
         TextView cost = convertView.findViewById(R.id.expense_cost);
         expense.setText(e.getExpenseName());
         cost.setText(Double.toString(e.getCost()));
+
+//        long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
+//        int pos = ((ExpandableListView) parent).getFlatListPosition(packedPos);
+//        ((ExpandableListView) parent).setItemChecked(pos, true);
         return convertView;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    public void remove(int groupPos, int childPos) {
+        String group = this.listOfCat.get(groupPos);
+        this.expensesInEachCat.get(group).remove(childPos);
+        notifyDataSetChanged();
     }
 }

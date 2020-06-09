@@ -16,17 +16,20 @@ import android.os.Bundle;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,8 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
     private ExpandableListView allExpenseCategories;
     private EachDayExpensesExListAdapter adapter;
+    private SparseBooleanArray selectedItems;
+    private List<int[]> listOfPos = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,14 +90,53 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         allExpenseCategories.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-//                int index = parent.getFlatListPosition(ExpandableListView.getPackedPositionForChild(groupPosition, childPosition));
-//                v.setSelected(true);
+                long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
+                int pos = parent.getFlatListPosition(packedPos);
+                boolean isChecked = parent.isItemChecked(pos);
+
+                if (isChecked) {
+                    parent.setItemChecked(pos, false);
+                    for (int i = 0; i < listOfPos.size(); i++) {
+                        if (listOfPos.get(i)[0] == groupPosition && listOfPos.get(i)[1] == childPosition) {
+                            listOfPos.remove(i);
+                            break;
+                        }
+                    }
+                } else {
+                    parent.setItemChecked(pos, true);
+                    listOfPos.add(new int[] {groupPosition, childPosition});
+                }
                 return false;
             }
         });
     }
 
-//    String deleted = null;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflator = getMenuInflater();
+        inflator.inflate(R.menu.top_right_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.delete:
+                Toast.makeText(this, "deleted", Toast.LENGTH_SHORT).show();
+                for (int i = listOfPos.size() - 1; i >= 0; i--) {
+                    int[] pair = listOfPos.get(i);
+                    Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
+                    adapter.remove(pair[0], pair[1]);
+                }
+                listOfPos.clear();
+                allExpenseCategories.clearChoices();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    //    String deleted = null;
 //    String edit = null;
 //
 //    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
