@@ -93,7 +93,7 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
         TextView expense = convertView.findViewById(R.id.expense_name);
         TextView cost = convertView.findViewById(R.id.expense_cost);
         expense.setText(e.getExpenseName());
-        cost.setText(Double.toString(e.getCost()));
+        cost.setText(String.format("%.2f", e.getCost()));
 
 //        long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
 //        int pos = ((ExpandableListView) parent).getFlatListPosition(packedPos);

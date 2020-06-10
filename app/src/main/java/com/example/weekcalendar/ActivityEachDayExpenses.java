@@ -105,8 +105,8 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflator = getMenuInflater();
-        inflator.inflate(R.menu.top_right_menu, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.top_right_menu, menu);
         return true;
     }
 

@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 public class MyTimeDialog extends AppCompatDialogFragment {
     private MyTimeDialogListener listener;
     private Button b;
-    private static SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a");
 
     public MyTimeDialog(Button b) {
         this.b = b;
