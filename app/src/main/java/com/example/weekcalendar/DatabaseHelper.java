@@ -207,6 +207,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
+    public boolean deleteExpense(int ID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(EXPENSE_TABLE, "ID = " + ID, null) != -1;
+    }
+
     // Get all days with expense items
     public Cursor getDayExpenseData() {
         SQLiteDatabase db = this.getWritableDatabase();

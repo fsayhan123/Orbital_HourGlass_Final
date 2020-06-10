@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -46,8 +47,13 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         Toolbar tb = findViewById(R.id.date_header);
         setSupportActionBar(tb);
         getSupportActionBar().setTitle(expenseDate);
+        // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
+        });
 
         myDB = new DatabaseHelper(this);
 
@@ -122,10 +128,15 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
                         for (int i = listOfPos.size() - 1; i >= 0; i--) {
                             int[] pair = listOfPos.get(i);
                             Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
+                            CustomExpense e = (CustomExpense) (adapter.getChild(pair[0], pair[1]));
+                            myDB.deleteExpense(e.getID());
                             adapter.remove(pair[0], pair[1]);
                         }
                         listOfPos.clear();
                         allExpenseCategories.clearChoices();
+                        if (adapter.getGroupCount() == 0) {
+                            startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
+                        }
                     }
                 } else {
                     canDelete = true;

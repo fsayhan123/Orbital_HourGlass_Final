@@ -109,6 +109,9 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
     public void remove(int groupPos, int childPos) {
         String group = this.listOfCat.get(groupPos);
         this.expensesInEachCat.get(group).remove(childPos);
+        if (this.getChildrenCount(groupPos) == 0) {
+            this.listOfCat.remove(groupPos);
+        }
         notifyDataSetChanged();
     }
 }
