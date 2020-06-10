@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -19,13 +18,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ActivityEachDayExpenses extends AppCompatActivity {
     private DatabaseHelper myDB;
-    private List<String> listOfCat;
-    private Map<String, List<CustomExpense>> expensesInEachCat;
+    private List<CustomExpenseCategory> listOfCat;
     private boolean canDelete = false;
 //    private EachDayExpensesAdapter adapter;
 //    private LinearLayoutManager manager;
@@ -46,7 +46,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
         Toolbar tb = findViewById(R.id.date_header);
         setSupportActionBar(tb);
-        getSupportActionBar().setTitle(expenseDate);
+        getSupportActionBar().setTitle("Expenses on " + expenseDate);
         // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -72,7 +72,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 //        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
 //        itemTouchHelper.attachToRecyclerView(allExpenseCategories);
 
-        adapter = new EachDayExpensesExListAdapter(this, this.listOfCat, this.expensesInEachCat);
+        adapter = new EachDayExpensesExListAdapter(this, this.listOfCat);
         allExpenseCategories.setAdapter(adapter);
 
         for (int i = 0; i < adapter.getGroupCount(); i++) {
@@ -118,33 +118,34 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.delete:
-                Toast.makeText(this, "toggle delete", Toast.LENGTH_SHORT).show();
-                if (canDelete) {
-                    if (listOfPos.size() == 0) {
-                        canDelete = false;
-                    } else {
-                        for (int i = listOfPos.size() - 1; i >= 0; i--) {
-                            int[] pair = listOfPos.get(i);
-                            Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
-                            CustomExpense e = (CustomExpense) (adapter.getChild(pair[0], pair[1]));
-                            myDB.deleteExpense(e.getID());
-                            adapter.remove(pair[0], pair[1]);
-                        }
-                        listOfPos.clear();
-                        allExpenseCategories.clearChoices();
-                        if (adapter.getGroupCount() == 0) {
-                            startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
-                        }
-                    }
+        if (item.getItemId() == R.id.delete) {
+            Toast.makeText(this, "toggle delete", Toast.LENGTH_SHORT).show();
+            if (canDelete) {
+                if (listOfPos.size() == 0) {
+                    canDelete = false;
                 } else {
-                    canDelete = true;
+                    for (int i = listOfPos.size() - 1; i >= 0; i--) {
+                        int[] pair = listOfPos.get(i);
+                        Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
+                        CustomExpense e = (CustomExpense) (adapter.getChild(pair[0], pair[1]));
+                        myDB.deleteExpense(e.getID());
+                        adapter.remove(pair[0], pair[1]);
+                    }
+                    listOfPos.clear();
+                    allExpenseCategories.clearChoices();
+                    if (adapter.getGroupCount() == 0) {
+                        startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
+                    }
+                    for (int i = 0; i < adapter.getGroupCount(); i++) {
+                        adapter.getGroupView(i, true, null, null);
+                    }
                 }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            } else {
+                canDelete = true;
+            }
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     //    String deleted = null;
@@ -202,22 +203,26 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
     }
 
     public void populateCategories(Cursor results) {
-        expensesInEachCat = new HashMap<>();
+        Map<String, List<CustomExpense>> expensesInEachCat = new HashMap<>();
         listOfCat = new ArrayList<>();
         for (int i = 0; i < results.getCount(); i++) {
             results.moveToNext();
-            int id = Integer.valueOf(results.getString(0));
+            int id = Integer.parseInt(results.getString(0));
             String category = results.getString(2);
             String name = results.getString(4);
             String amount = results.getString(3);
             if (expensesInEachCat.get(category) != null) {
-                expensesInEachCat.get(category).add(new CustomExpense(id, name, Double.valueOf(amount)));
+                expensesInEachCat.get(category).add(new CustomExpense(id, name, Double.parseDouble(amount)));
             } else {
                 List<CustomExpense> temp = new ArrayList<>();
-                temp.add(new CustomExpense(id, name, Double.valueOf(amount)));
+                temp.add(new CustomExpense(id, name, Double.parseDouble(amount)));
                 expensesInEachCat.put(category, temp);
-                listOfCat.add(category);
             }
+        }
+        for (String s : expensesInEachCat.keySet()) {
+            assert expensesInEachCat.get(s) != null;
+            CustomExpenseCategory e = new CustomExpenseCategory(s, expensesInEachCat.get(s));
+            listOfCat.add(e);
         }
     }
 }

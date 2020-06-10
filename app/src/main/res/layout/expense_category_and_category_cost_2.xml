@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="0dp"
+    android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft">
+
+    <TextView
+        android:id="@+id/category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingHorizontal="10dp"
+        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+        android:text="category"
+        android:textColor="#4A4A4A"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/expense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingHorizontal="10dp"
+        android:text="expense"
+        android:textAlignment="textEnd"
+        android:textColor="#4A4A4A"
+        android:textSize="20dp" />
+</LinearLayout>

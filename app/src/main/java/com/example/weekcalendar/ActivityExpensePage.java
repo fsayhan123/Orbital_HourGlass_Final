@@ -33,9 +33,6 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     private LinearLayoutManager manager;
     private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
 
-    private final static String LIST_STATE_KEY = "recycler_list_state";
-    private Parcelable mListState;
-
     // FloatingActionButton to link to ActivityCreateExpense
     private FloatingActionButton floatingAddExpense;
 

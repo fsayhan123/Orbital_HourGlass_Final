@@ -1,32 +1,23 @@
 package com.example.weekcalendar;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Map;
 
 public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private List<String> listOfCat;
-    private Map<String, List<CustomExpense>> expensesInEachCat;
-    private SparseBooleanArray mSelectedItemsIds;
+    private List<CustomExpenseCategory> listOfCat;
 
-    public EachDayExpensesExListAdapter(Context context, List<String> listOfCat,
-                                        Map<String, List<CustomExpense>> expensesInEachCat) {
+    public EachDayExpensesExListAdapter(Context context, List<CustomExpenseCategory> listOfCat) {
         this.context = context;
         this.listOfCat = listOfCat;
-        this.expensesInEachCat = expensesInEachCat;
-        this.mSelectedItemsIds = new SparseBooleanArray();
     }
 
     @Override
@@ -36,8 +27,8 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        String cat = this.listOfCat.get(groupPosition);
-        return this.expensesInEachCat.get(cat).size();
+        CustomExpenseCategory expenseCategory = this.listOfCat.get(groupPosition);
+        return expenseCategory.getExpensesInCategory().size();
     }
 
     @Override
@@ -47,9 +38,8 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        String cat = this.listOfCat.get(groupPosition);
-        List<CustomExpense> list = this.expensesInEachCat.get(cat);
-        return list.get(childPosition);
+        CustomExpenseCategory expenseCategory = this.listOfCat.get(groupPosition);
+        return expenseCategory.getExpensesInCategory().get(childPosition);
     }
 
     @Override
@@ -69,15 +59,18 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        String listTitle = getGroup(groupPosition).toString();
+        CustomExpenseCategory e = (CustomExpenseCategory) getGroup(groupPosition);
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.list_group, null);
+            convertView = layoutInflater.inflate(R.layout.expense_category_and_category_cost_2, null);
         }
-        TextView listTitleTextView = convertView.findViewById(R.id.list_parent);
-        listTitleTextView.setTypeface(null, Typeface.BOLD);
-        listTitleTextView.setText(listTitle);
+        TextView categoryName = convertView.findViewById(R.id.category);
+        categoryName.setTypeface(null, Typeface.BOLD);
+        categoryName.setText(e.getName());
+        TextView cost = convertView.findViewById(R.id.expense);
+        cost.setTypeface(null, Typeface.BOLD);
+        cost.setText(String.format("%.2f", (e.getTotalCost())));
         return convertView;
     }
 
@@ -107,11 +100,16 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
     }
 
     public void remove(int groupPos, int childPos) {
-        String group = this.listOfCat.get(groupPos);
-        this.expensesInEachCat.get(group).remove(childPos);
+        CustomExpenseCategory group = this.listOfCat.get(groupPos);
+        group.removeExpense(childPos);
         if (this.getChildrenCount(groupPos) == 0) {
             this.listOfCat.remove(groupPos);
         }
+        setNewItems(this.listOfCat);
+    }
+
+    public void setNewItems(List<CustomExpenseCategory> listOfCat) {
+        this.listOfCat = listOfCat;
         notifyDataSetChanged();
     }
 }
