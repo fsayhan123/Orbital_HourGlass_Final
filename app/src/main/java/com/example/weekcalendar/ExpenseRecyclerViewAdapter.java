@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,11 +36,13 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
 
     public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
         private TextView date;
+        private TextView costToday;
         private RecyclerView categoryAndExpenses;
 
         public MyExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
             this.date = itemView.findViewById(R.id.date_header);
+            this.costToday = itemView.findViewById(R.id.total_cost_today);
             this.categoryAndExpenses = itemView.findViewById(R.id.category_and_expenses);
         }
     }
@@ -65,6 +69,13 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
             Toast.makeText(a, "empty!!!!!!", Toast.LENGTH_SHORT).show();
         }
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
+
+        double totalCost = 0;
+        for (int i = 0; i < expenditureOnDayD.size(); i++) {
+            totalCost += expenditureOnDayD.get(i).getTotalCost();
+        }
+
+        holder.costToday.setText(String.format("%.2f", totalCost));
 
         manager = new LinearLayoutManager(a);
         holder.categoryAndExpenses.setLayoutManager(manager);
