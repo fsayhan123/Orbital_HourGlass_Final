@@ -73,7 +73,7 @@ public class ActivityLoginPage extends AppCompatActivity {
                             Toast.makeText(ActivityLoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            /*UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(mName).build();
 
                             user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -83,7 +83,7 @@ public class ActivityLoginPage extends AppCompatActivity {
                                         Log.d(TAG, "User profile updated.");
                                     }
                                 }
-                            });
+                            });*/
 
                             Intent i = new Intent(getApplicationContext(), ActivityUpcomingPage.class);
                             i.putExtra("user", user.getDisplayName());

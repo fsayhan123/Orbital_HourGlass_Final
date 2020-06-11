@@ -1,11 +1,14 @@
 package com.example.weekcalendar;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<CustomDay> expandableListTitle;
     private Map<CustomDay, List<String>> expandableListDetail;
+    private  final Set<Pair<Long, Long>> CheckedItems = new HashSet<Pair<Long, Long>>();
 
     public ToDoListViewAdapter(Context context, List<CustomDay> expandableListTitle,
                                        Map<CustomDay, List<String>> expandableListDetail) {
@@ -46,9 +50,25 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.list_item, null);
         }
-        TextView expandedListTextView = (CheckBox) convertView
-                .findViewById(R.id.list_child);
+        TextView expandedListTextView = (CheckBox) convertView.findViewById(R.id.list_child);
         expandedListTextView.setText(expandedListText);
+
+        Pair<Long, Long> tag = new Pair<Long, Long>(
+                getGroupId(listPosition),
+                getChildId(listPosition, expandedListPosition));
+        expandedListTextView.setTag(tag);
+        expandedListTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CheckBox cb = (CheckBox) v;
+                final Pair<Long, Long> tag = (Pair<Long, Long>) v.getTag();
+                if (cb.isChecked()) {
+                    CheckedItems.add(tag);
+                } else {
+                    CheckedItems.remove(tag);
+                }
+            }
+        });
         return convertView;
     }
 
@@ -97,5 +117,9 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int listPosition, int expandedListPosition) {
         return true;
+    }
+
+    public Set<Pair<Long, Long>> getCheckedItems() {
+        return CheckedItems;
     }
 }

@@ -4,6 +4,7 @@ package com.example.weekcalendar;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ActivityToDoListPage extends AppCompatActivity {
 
@@ -113,6 +115,13 @@ public class ActivityToDoListPage extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void deleteToDo(View view) {
+
+
+        Intent intent = new Intent(this, ActivityToDoListPage.class);
+        startActivity(intent);
+    }
+
     public Map<CustomDay, List<String>> getData() {
         expandableListDetail = new HashMap<>();
         for (CustomDay d : this.listOfDays) {
@@ -131,4 +140,5 @@ public class ActivityToDoListPage extends AppCompatActivity {
         }
         return expandableListDetail;
     }
+
 }
