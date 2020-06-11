@@ -44,6 +44,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         setContentView(R.layout.activity_upcoming_page);
         myDB = new DatabaseHelper(this);
 
+        Intent i = getIntent();
+        String username = i.getStringExtra("user");
+        Toast.makeText(this, "Welcome " + username, Toast.LENGTH_SHORT).show();
+
         try {
             daysWithEvents = fetchDaysWithEvents();
             //daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));

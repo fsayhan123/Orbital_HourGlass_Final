@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "771713814035",
+    "firebase_url": "https://weekcalendar-a9adf.firebaseio.com",
+    "project_id": "weekcalendar-a9adf",
+    "storage_bucket": "weekcalendar-a9adf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771713814035:android:28fc590205c0ee728bf9e6",
+        "android_client_info": {
+          "package_name": "com.example.weekcalendar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "771713814035-taqrugfhs87crfv9vbsaqd6uc6c3matg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.weekcalendar",
+            "certificate_hash": "ee243eb76a117fde2960622965c5a248877f1562"
+          }
+        },
+        {
+          "client_id": "771713814035-rekmrr6hneskfv46k21lgh8snlb25pvf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwzQUkzWrBWnJ4X3v-pmB9lGTed-mYpSM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "771713814035-rekmrr6hneskfv46k21lgh8snlb25pvf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
