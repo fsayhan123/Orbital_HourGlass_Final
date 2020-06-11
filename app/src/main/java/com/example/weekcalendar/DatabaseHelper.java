@@ -267,4 +267,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor result = db.rawQuery("SELECT * FROM To_Do_Table WHERE DATE = \"" + date + "\" ORDER BY ID ASC", null);
         return result;
     }
+
+
+    public boolean deleteToDo(String detail, String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String[] dateArr = date.split(" ");
+        dateArr[1] = this.convertDate(dateArr[1].substring(0,3));
+        if (dateArr[0].length() == 1) {
+            dateArr[0] = "0" + dateArr[0];
+        }
+        String finalDate = String.join("-", dateArr[2], dateArr[1], dateArr[0]);
+        return db.delete(TO_DO_TABLE, "DETAILS = \"" + detail + "\"" + " and DATE = \"" + finalDate + "\"", null) != -1;
+    }
 }

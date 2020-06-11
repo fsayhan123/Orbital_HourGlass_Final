@@ -25,7 +25,7 @@ import java.util.Set;
 public class ActivityToDoListPage extends AppCompatActivity {
 
     private ExpandableListView expandableListView;
-    private ExpandableListAdapter expandableListAdapter;
+    private ToDoListViewAdapter expandableListAdapter;
     private Map<CustomDay, List<String>> expandableListDetail;
     private List<CustomDay> listOfDays;
 
@@ -116,7 +116,10 @@ public class ActivityToDoListPage extends AppCompatActivity {
     }
 
     public void deleteToDo(View view) {
-
+        Set<Pair<Long, Long>> setItems = expandableListAdapter.getCheckedItems();
+        for (Pair<Long, Long> pair : setItems) {
+            myDB.deleteToDo(expandableListAdapter.getChild((int) (long) pair.first, (int) (long) pair.second).toString(), expandableListAdapter.getGroup((int) (long) pair.first).toString());
+        }
 
         Intent intent = new Intent(this, ActivityToDoListPage.class);
         startActivity(intent);
