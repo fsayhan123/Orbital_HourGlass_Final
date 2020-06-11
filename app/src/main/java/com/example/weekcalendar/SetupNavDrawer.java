@@ -2,6 +2,8 @@ package com.example.weekcalendar;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -10,6 +12,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+
+import javax.annotation.Nullable;
 
 public class SetupNavDrawer {
     private Activity a;
@@ -25,6 +35,9 @@ public class SetupNavDrawer {
     }
 
     public void setupNavDrawerPane() {
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+
         ((AppCompatActivity) a).setSupportActionBar(toolbar);
 
         dl = a.findViewById(R.id.drawer_layout);
@@ -56,10 +69,31 @@ public class SetupNavDrawer {
                     Intent i3 = new Intent(a, ActivityToDoListPage.class);
                     a.startActivity(i3);
                     break;
+                case R.id.logout_button:
+                    Toast.makeText(a, "Logout",Toast.LENGTH_SHORT).show();
+                    FirebaseAuth.getInstance().signOut();
+                    Intent i4 = new Intent(a, ActivityLoginPage.class);
+                    a.startActivity(i4);
+                    break;
                 default:
                     break;
             }
             return true;
+        });
+
+        View hView =  nv.getHeaderView(0);
+        TextView nav_user = hView.findViewById(R.id.user);
+
+        String userID = fAuth.getCurrentUser().getUid();
+
+        DocumentReference docRef = fStore.collection("users").document(userID);
+        docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                // accessing via key value pairs
+                String username = documentSnapshot.getString("fName");
+                nav_user.setText(username);
+            }
         });
     }
 }

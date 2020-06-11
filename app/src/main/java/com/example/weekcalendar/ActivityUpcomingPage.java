@@ -12,6 +12,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -20,11 +26,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
     // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
     private List<CustomDay> daysWithEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
+    private FirebaseAuth fAuth;
+    private FirebaseFirestore fStore;
+    private String userID;
 
     // FloatingActionButton to link to ActivityCreateEvent
     private FloatingActionButton floatingCreateEvent;
@@ -43,10 +54,21 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
         myDB = new DatabaseHelper(this);
+        fAuth = FirebaseAuth.getInstance();
+        fStore = FirebaseFirestore.getInstance();
 
-        Intent i = getIntent();
-        String username = i.getStringExtra("user");
-        Toast.makeText(this, "Welcome " + username, Toast.LENGTH_SHORT).show();
+        userID = fAuth.getCurrentUser().getUid();
+
+        // reference to a document in the database
+        DocumentReference docRef = fStore.collection("users").document(userID);
+        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                // accessing via key value pairs
+                String username = documentSnapshot.getString("fName");
+                Toast.makeText(ActivityUpcomingPage.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         try {
             daysWithEvents = fetchDaysWithEvents();

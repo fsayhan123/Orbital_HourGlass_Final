@@ -22,11 +22,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class ActivityLoginPage extends AppCompatActivity {
-    EditText mEmail, mPassword;
-    Button mLoginButton;
-    FirebaseAuth fAuth;
-    ProgressBar progressBar;
-    TextView mRegister;
+    private EditText mEmail, mPassword;
+    private Button mLoginButton;
+    private FirebaseAuth fAuth;
+    private ProgressBar progressBar;
+    private TextView mRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,22 +71,7 @@ public class ActivityLoginPage extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(ActivityLoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                            /*UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(mName).build();
-
-                            user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d(TAG, "User profile updated.");
-                                    }
-                                }
-                            });*/
-
                             Intent i = new Intent(getApplicationContext(), ActivityUpcomingPage.class);
-                            i.putExtra("user", user.getDisplayName());
                             startActivity(i);
                         } else {
                             Toast.makeText(ActivityLoginPage.this, "Error! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -94,6 +79,8 @@ public class ActivityLoginPage extends AppCompatActivity {
                         }
                     }
                 });
+            } else {
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
