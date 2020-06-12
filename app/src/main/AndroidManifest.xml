@@ -10,13 +10,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ActivityRegisterPage"></activity>
-        <activity android:name=".ActivityLoginPage">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".ActivityLoginPage"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity android:name=".ActivityEachDayExpenses" />
         <activity android:name=".ActivityCreateToDoPage" />
         <activity
@@ -26,7 +21,13 @@
         <activity android:name=".ActivityCreateExpensePage" />
         <activity android:name=".ActivityEventDetailsPage" />
         <activity android:name=".ActivityCreateEventPage" />
-        <activity android:name=".ActivityUpcomingPage"/>
+        <activity android:name=".ActivityUpcomingPage">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
     </application>
 
 </manifest>

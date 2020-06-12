@@ -14,7 +14,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Calendar.db";
 
     // Database Version
-    public static final int DATABASE_VERSION = 19;
+    public static final int DATABASE_VERSION = 22;
 
     // Table Names
     public static final String EXPENSE_TABLE = "Expense_Table";
@@ -24,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // To Do Table Columns
     public static final String TO_DO_1 = "DATE";
     public static final String TO_DO_2 = "DETAILS";
+    public static final String TO_DO_3 = "EVENT_ID";
 
     // CustomExpense Table Columns
     public static final String EXPENSE_1 = "DATE";
@@ -37,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String EVENTS_3 = "START_TIME";
     public static final String EVENTS_4 = "END_TIME";
     public static final String EVENTS_5 = "ACTIVITY";
+    public static final String EVENTS_6 = "PARENT_EVENT_ID";
 
     // static variable to prevent reinitialising every time the method is called
     private static final HashMap<String, String> mapper = new HashMap<>();
@@ -60,9 +62,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + EVENTS_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, START_DATE TEXT, END_DATE TEXT, START_TIME TEXT, END_TIME TEXT, ACTIVITY TEXT)");
+        db.execSQL("create table " + EVENTS_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, START_DATE TEXT, END_DATE TEXT, START_TIME TEXT, END_TIME TEXT, ACTIVITY TEXT, PARENT_EVENT_ID INTEGER)");
         db.execSQL("create table " + EXPENSE_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, CATEGORY TEXT, AMOUNT INTEGER, NAME TEXT)");
-        db.execSQL("create table " + TO_DO_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, DETAILS TEXT)");
+        db.execSQL("create table " + TO_DO_TABLE + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, DATE TEXT, DETAILS TEXT, EVENT_ID TEXT)");
     }
 
     @Override
@@ -95,7 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
 
     // Adds event in EVENTS_TABLE, date in DD-MMM-YYYY format
-    public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime) {
+    public boolean addEvent(String eventTitle, String startDate, String endDate, String startTime, String endTime, String toDo) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String[] startDateArr = startDate.split(" ");
@@ -116,21 +118,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         numDaysQuery.moveToLast();
         int numDays = numDaysQuery.getInt(0);
 
-        if (numDays > 0) {
-            for (int i = 1; i < numDays+1; i++) {
-                Cursor newDateQuery = db.rawQuery(String.format("SELECT Date(\"%s\", \"+%s days\")", editedStartDate, i), null);
-                newDateQuery.moveToLast();
-                String newStartDate = newDateQuery.getString(0);
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(EVENTS_1, newStartDate);
-                contentValues.put(EVENTS_2, editedEndDate);
-                contentValues.put(EVENTS_3, "All Day");
-                contentValues.put(EVENTS_4, "All Day");
-                contentValues.put(EVENTS_5, eventTitle);
-                db.insert(EVENTS_TABLE, null, contentValues);
-            }
-        }
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENTS_1, editedStartDate);
         contentValues.put(EVENTS_2, editedEndDate);
@@ -138,6 +125,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(EVENTS_4, endTime);
         contentValues.put(EVENTS_5, eventTitle);
         long result = db.insert(EVENTS_TABLE, null, contentValues);
+        Cursor eventCursor = db.rawQuery("SELECT ID FROM EVENTS_TABLE ORDER BY ID DESC LIMIT 1", null);
+        eventCursor.moveToLast();
+        String event_id = eventCursor.getString(0);
+
+        if (numDays > 0) {
+            for (int i = 1; i < numDays+1; i++) {
+                Cursor newDateQuery = db.rawQuery(String.format("SELECT Date(\"%s\", \"+%s days\")", editedStartDate, i), null);
+                newDateQuery.moveToLast();
+                String newStartDate = newDateQuery.getString(0);
+                ContentValues contentValuesChild = new ContentValues();
+                contentValuesChild.put(EVENTS_1, newStartDate);
+                contentValuesChild.put(EVENTS_2, editedEndDate);
+                contentValuesChild.put(EVENTS_3, "All Day");
+                contentValuesChild.put(EVENTS_4, "All Day");
+                contentValuesChild.put(EVENTS_5, eventTitle);
+                contentValuesChild.put(EVENTS_6, event_id);
+                db.insert(EVENTS_TABLE, null, contentValuesChild);
+            }
+        }
+
+
+        if (!(toDo.equals(""))) {
+            this.addToDo(startDate, toDo, event_id);
+            eventCursor.close();
+        }
+
         if (result == -1) {
             return false;
         } return true;
@@ -159,8 +172,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getEventDataByID(String eventID) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID + "\"", null );
+        Cursor result = db.rawQuery("SELECT * FROM Events_Table WHERE ID = " + eventID, null );
         return result;
+    }
+
+    //Delete Event and dependent To-Do's
+    public void deleteEvent(String eventID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(EVENTS_TABLE, "ID = " + eventID + " OR PARENT_EVENT_ID = " + eventID, null);
+        db.delete(TO_DO_TABLE, "EVENT_ID = " + eventID, null);
     }
 
     /*
@@ -236,7 +256,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     Database methods for To Do page
      */
 
-    public boolean addToDo(String date, String details) {
+    public boolean addToDo(String date, String details, String eventId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         String[] todoDateArr = date.split(" ");
@@ -250,6 +270,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues cV = new ContentValues();
         cV.put(TO_DO_1, editedToDoDate);
         cV.put(TO_DO_2, details);
+
+        if (!(eventId.equals(""))) {
+            cV.put(TO_DO_3, eventId);
+        }
 
         return db.insert(TO_DO_TABLE, null, cV) != -1;
     }

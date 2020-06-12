@@ -47,7 +47,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
             Toast.makeText(this, "Please insert to do details", Toast.LENGTH_SHORT).show();
         } else {
             // insert SQL insertion function here
-            boolean result = myDB.addToDo(date.getText().toString(), description.getText().toString());
+            boolean result = myDB.addToDo(date.getText().toString(), description.getText().toString(), "");
             if (result) {
                 Toast.makeText(this, "added to do", Toast.LENGTH_SHORT).show();
             }

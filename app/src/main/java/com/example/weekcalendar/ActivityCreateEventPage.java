@@ -61,16 +61,16 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         } else if (selectEndTime.getText().toString().equals("Select End Time")) {
             Toast.makeText(this, "Please choose an end time!", Toast.LENGTH_SHORT).show();
         } else {
-            String s = todo1.getText().toString();
+            String toDo = todo1.getText().toString();
             String startDate = selectStartDate.getText().toString();
             String endDate = selectEndDate.getText().toString();
             String startTime = selectStartTime.getText().toString();
             String endTime = selectEndTime.getText().toString();
-            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime);
+            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime, toDo);
             if (result == true) {
                 Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
             }
-            Toast.makeText(this, "Event created with " + s, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Event created with " + toDo, Toast.LENGTH_SHORT).show();
 //            e = new CustomEvent(eventTitle, selectedCustomDay.toString(), eventDescr);
             Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);

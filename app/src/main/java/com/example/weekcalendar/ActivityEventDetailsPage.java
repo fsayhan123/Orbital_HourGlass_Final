@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 public class ActivityEventDetailsPage extends AppCompatActivity {
@@ -14,6 +15,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventTitle;
     private TextView eventDate;
     private TextView eventTime;
+    private String eventFieldID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +26,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
 
         Intent intent = getIntent();
         String eventID = intent.getStringExtra("eventId");
-        Log.d("EventID", eventID);
+        this.eventFieldID = eventID;
 
         eventTitle = findViewById(R.id.event_title);
         eventDate = findViewById(R.id.event_date);
@@ -41,5 +43,11 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
             eventDate.setText("Date: " + result.getString(1));
             eventTime.setText("Time: " + result.getString(3));
         }
+    }
+
+    public void deleteEvent(View view) {
+        myDB.deleteEvent(this.eventFieldID);
+        Intent intent = new Intent(this, ActivityUpcomingPage.class);
+        startActivity(intent);
     }
 }
