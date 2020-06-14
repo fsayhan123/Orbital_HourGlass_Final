@@ -1,6 +1,7 @@
 package com.example.weekcalendar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +21,17 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_to_do_page);
+
         myDB = new DatabaseHelper(this);
+
+        Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityToDoListPage.class));
+        });
 
         date = findViewById(R.id.date_header);
         date.setOnClickListener(v -> openSelectDateDialog(v, date));

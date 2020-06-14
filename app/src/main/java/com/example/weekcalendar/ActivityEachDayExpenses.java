@@ -7,7 +7,6 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,10 +17,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ActivityEachDayExpenses extends AppCompatActivity {
     private DatabaseHelper myDB;
@@ -33,7 +30,6 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 
     private ExpandableListView allExpenseCategories;
     private EachDayExpensesExListAdapter adapter;
-    private SparseBooleanArray selectedItems;
     private List<int[]> listOfPos = new ArrayList<>();
 
     @Override
@@ -121,9 +117,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         if (item.getItemId() == R.id.delete) {
             Toast.makeText(this, "toggle delete", Toast.LENGTH_SHORT).show();
             if (canDelete) {
-                if (listOfPos.size() == 0) {
-                    canDelete = false;
-                } else {
+                if (listOfPos.size() > 0) {
                     for (int i = listOfPos.size() - 1; i >= 0; i--) {
                         int[] pair = listOfPos.get(i);
                         Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
@@ -140,8 +134,11 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
                         adapter.getGroupView(i, true, null, null);
                     }
                 }
+                item.setIcon(R.drawable.ic_baseline_delete_24_transparent);
+                canDelete = false;
             } else {
                 canDelete = true;
+                item.setIcon(R.drawable.ic_baseline_delete_24);
             }
             return true;
         }
@@ -184,7 +181,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
 //        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
 //            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
 //                    .addSwipeLeftBackgroundColor(R.color.Pink)
-//                    .addSwipeLeftActionIcon(R.drawable.ic_baseline_delete_24)
+//                    .addSwipeLeftActionIcon(R.drawable.ic_baseline_delete_24_transparent)
 //                    .addSwipeRightBackgroundColor(R.color.green)
 //                    .addSwipeRightActionIcon(R.drawable.ic_baseline_edit_24)
 //                    .create()

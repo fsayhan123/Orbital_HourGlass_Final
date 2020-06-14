@@ -1,6 +1,7 @@
 package com.example.weekcalendar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -38,6 +39,15 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         setContentView(R.layout.activity_create_expense_page);
 
         myDB = new DatabaseHelper(this);
+
+        Toolbar tb = findViewById(R.id.toolbar);
+        setSupportActionBar(tb);
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityExpensePage.class));
+        });
 
         s = findViewById(R.id.category_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);

@@ -1,6 +1,7 @@
 package com.example.weekcalendar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,6 +46,15 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         createEvent.setOnClickListener(v -> createEvent());
 
         myDB = new DatabaseHelper(this);
+
+        Toolbar tb = findViewById(R.id.event_creation_toolbar);
+        setSupportActionBar(tb);
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityUpcomingPage.class));
+        });
     }
 
     private void createEvent() {

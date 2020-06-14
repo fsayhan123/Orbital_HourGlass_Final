@@ -43,10 +43,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // Database handler
     private DatabaseHelper myDB;
 
-    // Navigation drawer pane
-//    private DrawerLayout dl;
-//    private ActionBarDrawerToggle t;
-//    private NavigationView nv;
     private SetupNavDrawer navDrawer;
 
     @Override
