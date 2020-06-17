@@ -77,15 +77,17 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
         // reference to document "events" in the database
         try {
-
+            Toast.makeText(this, "before fetch", Toast.LENGTH_SHORT).show();
             daysWithEvents = fetchDaysWithEvents();
             //daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
-            Toast.makeText(this, Arrays.toString(daysWithEvents.toArray()), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "after fetch", Toast.LENGTH_SHORT).show();
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
             daysWithEvents = new ArrayList<>();
         }
+        Toast.makeText(this, Arrays.toString(daysWithEvents.toArray()), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
 
         mRecyclerView = findViewById(R.id.week_view);
         mAdapter = new WeekRecyclerViewAdapter(daysWithEvents, this, ActivityUpcomingPage.this, getApplicationContext());
@@ -127,7 +129,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 //            CustomDay customDay = new CustomDay(date);
 //            daysWithEvents.add(customDay);
 //        }
-
+        Toast.makeText(this, "before firebase", Toast.LENGTH_SHORT).show();
         c.whereEqualTo("userID", userID)
                 .get()
                 .addOnCompleteListener(task -> {
@@ -143,12 +145,14 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                             CustomDay day = new CustomDay(d);
                             Toast.makeText(this, day.toString(), Toast.LENGTH_SHORT).show();
                             daysWithEvents.add(day);
+                            Toast.makeText(this, Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
                             Log.d(TAG, document.getId() + " => " + document.getData());
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
+        Toast.makeText(this, "hi" + Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
         return daysWithEvents;
     }
 
