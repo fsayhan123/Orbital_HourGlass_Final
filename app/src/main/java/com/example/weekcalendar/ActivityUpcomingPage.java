@@ -13,29 +13,36 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
+    private static final String TAG = ActivityUpcomingPage.class.getSimpleName();
+
     // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
     private List<CustomDay> daysWithEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
+
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
+    private CollectionReference c;
 
     // FloatingActionButton to link to ActivityCreateEvent
     private FloatingActionButton floatingCreateEvent;
@@ -49,15 +56,17 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
+
         myDB = new DatabaseHelper(this);
+
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
-
         userID = fAuth.getCurrentUser().getUid();
+        c = fStore.collection("events");
 
-        // reference to a document in the database
-        DocumentReference docRef = fStore.collection("users").document(userID);
-        docRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+        // reference to document "users" in the database
+        DocumentReference docRefUser = fStore.collection("users").document(userID);
+        docRefUser.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 // accessing via key value pairs
@@ -66,9 +75,12 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             }
         });
 
+        // reference to document "events" in the database
         try {
+
             daysWithEvents = fetchDaysWithEvents();
             //daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
+            Toast.makeText(this, Arrays.toString(daysWithEvents.toArray()), Toast.LENGTH_SHORT).show();
         }
         catch(ParseException e) {
             Log.d("hello", "Hello");
@@ -99,22 +111,44 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     private List<CustomDay> fetchDaysWithEvents() throws ParseException {
         daysWithEvents = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        Cursor query = this.myDB.getEventData();
-        if (query.getCount() == 0) {
-            Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
-            return daysWithEvents;
-        }
+//        Cursor query = this.myDB.getEventData();
+//        if (query.getCount() == 0) {
+////            Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
+//            return daysWithEvents;
+//        }
+//
+//        for (int i = 0; i < 30; i++) { // further: fetch on demand
+//            if (i >= query.getCount()) {
+//                break;
+//            }
+//            query.moveToNext();
+//            String result = query.getString(0);
+//            Date date = dateFormatter.parse(result);
+//            CustomDay customDay = new CustomDay(date);
+//            daysWithEvents.add(customDay);
+//        }
 
-        for (int i = 0; i < 30; i++) { // further: fetch on demand
-            if (i >= query.getCount()) {
-                break;
-            }
-            query.moveToNext();
-            String result = query.getString(0);
-            Date date = dateFormatter.parse(result);
-            CustomDay customDay = new CustomDay(date);
-            daysWithEvents.add(customDay);
-        }
+        c.whereEqualTo("userID", userID)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String date = (String) document.get("startDate");
+                            Date d = null;
+                            try {
+                                d = dateFormatter.parse(date);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            CustomDay day = new CustomDay(d);
+                            Toast.makeText(this, day.toString(), Toast.LENGTH_SHORT).show();
+                            daysWithEvents.add(day);
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                });
         return daysWithEvents;
     }
 

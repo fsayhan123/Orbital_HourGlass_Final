@@ -92,6 +92,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return mapper.get(month);
     }
 
+    // check that input is "18 June 2020" format
+    public String formatDate(String date) {
+        String[] startDateArr = date.split(" ");
+        startDateArr[1] = this.convertDate(startDateArr[1].substring(0,3));
+        if (startDateArr[0].length() == 1) {
+            startDateArr[0] = "0" + startDateArr[0];
+        }
+        String editedStartDate = String.join("-", startDateArr[2], startDateArr[1], startDateArr[0]);
+        return editedStartDate;
+    }
+
     /*
     Database methods for Events page
      */

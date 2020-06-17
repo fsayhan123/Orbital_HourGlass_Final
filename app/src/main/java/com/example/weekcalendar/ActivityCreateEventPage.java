@@ -5,26 +5,49 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
-    Button selectStartDate;
-    Button selectEndDate;
-    Button selectStartTime;
-    Button selectEndTime;
-    Button createEvent;
-    EditText todo1;
-    CustomDay selectedCustomDay;
-    CustomEvent e;
-    DatabaseHelper myDB;
+    private static final String TAG = ActivityCreateEventPage.class.getSimpleName();
+
+    private Button selectStartDate;
+    private Button selectEndDate;
+    private Button selectStartTime;
+    private Button selectEndTime;
+    private Button createEvent;
+    private EditText todo1;
+    private CustomDay selectedCustomDay;
+    private DatabaseHelper myDB;
+
+    private FirebaseAuth fAuth;
+    private FirebaseFirestore fStore;
+    private String userID;
+    private CollectionReference c;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event_page);
+
+        myDB = new DatabaseHelper(this);
+
+        fAuth = FirebaseAuth.getInstance();
+        fStore = FirebaseFirestore.getInstance();
+        userID = fAuth.getCurrentUser().getUid();
+        c = fStore.collection("events");
 
         this.setTitle("Create Event");
 
@@ -45,7 +68,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         createEvent = findViewById(R.id.create_event_button);
         createEvent.setOnClickListener(v -> createEvent());
 
-        myDB = new DatabaseHelper(this);
+//        myDB = new DatabaseHelper(this);
 
         Toolbar tb = findViewById(R.id.event_creation_toolbar);
         setSupportActionBar(tb);
@@ -59,7 +82,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
     private void createEvent() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
-//        String eventDescr = ((EditText) findViewById(R.id.insert_event_description)).getText().toString();`
         if (eventTitle.equals("")) {
             Toast.makeText(this, "Please insert event title!", Toast.LENGTH_SHORT).show();
         } else if (selectStartDate.getText().toString().equals("Select Start Date")) {
@@ -76,12 +98,23 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             String endDate = selectEndDate.getText().toString();
             String startTime = selectStartTime.getText().toString();
             String endTime = selectEndTime.getText().toString();
-            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime, toDo);
-            if (result == true) {
-                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
-            }
+
+            Map<String, Object> details = new HashMap<>();
+            details.put("userID", userID);
+            details.put("toDo", toDo);
+            details.put("startDate", myDB.formatDate(startDate));
+            details.put("endDate", myDB.formatDate(endDate));
+            details.put("startTime", startTime);
+            details.put("endTime", endTime);
+            c.add(details)
+                    .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+
+//            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime, toDo);
+//            if (result == true) {
+//                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
+//            }
             Toast.makeText(this, "Event created with " + toDo, Toast.LENGTH_SHORT).show();
-//            e = new CustomEvent(eventTitle, selectedCustomDay.toString(), eventDescr);
             Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);
         }
