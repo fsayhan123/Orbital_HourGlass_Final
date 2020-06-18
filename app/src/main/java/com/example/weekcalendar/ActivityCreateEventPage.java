@@ -32,7 +32,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
-    private CollectionReference c;
+    private CollectionReference cEvents;
+    private CollectionReference cToDo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();
-        this.c = this.fStore.collection("events");
+        this.cEvents = this.fStore.collection("events");
+        this.cToDo = this.fStore.collection("todo");
 
         // Links to XML
         this.selectStartDate = findViewById(R.id.select_start_date);
@@ -73,6 +75,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         });
     }
 
+    // need to have a check for start day >= end day, start time >= end time
     private boolean checkFields() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
         if (eventTitle.equals("")) {
@@ -91,27 +94,45 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         return false;
     }
 
+    // need to implement multi day here
     private void createEvent() {
         if (checkFields()) {
             String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
-            String toDo = todo1.getText().toString();
-            String startDate = selectStartDate.getText().toString();
-            String endDate = selectEndDate.getText().toString();
-            String startTime = selectStartTime.getText().toString();
-            String endTime = selectEndTime.getText().toString();
+            String toDo = this.todo1.getText().toString();
+            String startDate = HelperMethods.formatDate(this.selectStartDate.getText().toString());
+            String endDate = HelperMethods.formatDate(this.selectEndDate.getText().toString());
+            String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
+            String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());
 
-            Map<String, Object> details = new HashMap<>();
-            details.put("userID", userID);
-            details.put("eventTitle", eventTitle);
-            details.put("toDo", toDo);
-            details.put("startDate", HelperMethods.formatDate(startDate));
-            details.put("endDate", HelperMethods.formatDate(endDate));
-            details.put("startTime", startTime);
-            details.put("endTime", endTime);
+            Map<String, Object> eventDetails = new HashMap<>();
+            eventDetails.put("userID", this.userID);
+            eventDetails.put("eventTitle", eventTitle);
+            eventDetails.put("startDate", startDate);
+            eventDetails.put("endDate", endDate);
+            eventDetails.put("startTime", startTime);
+            eventDetails.put("endTime", endTime);
 
-            c.add(details)
-                    .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+            Map<String, Object> toDoDetails = new HashMap<>();
+            if (!toDo.equals("")) {
+                toDoDetails.put("userID", this.userID);
+                toDoDetails.put("date", startDate);
+                toDoDetails.put("title", toDo);
+            }
+
+            cEvents.add(eventDetails)
+                    .addOnSuccessListener(docRef -> {
+                        if (!toDo.equals("")) {
+                            toDoDetails.put("eventID", docRef.getId());
+                            cToDo.add(toDoDetails)
+                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                        }
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+
+
+
             Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);
         }

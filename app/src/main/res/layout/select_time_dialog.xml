@@ -22,7 +22,7 @@
         app:picker_displayMonthNumbers="false"
         app:picker_displayYears="false"
         app:picker_itemSpacing="15dp"
-        app:picker_mustBeOnFuture="true"
+        app:picker_mustBeOnFuture="false"
         app:picker_selectorHeight="30dp"
         app:picker_stepSizeMinutes="15"
         app:picker_visibleItemCount="7">

@@ -25,11 +25,26 @@ public class HelperMethods {
     }
 
     public static String formatDate(String date) {
-        String[] startDateArr = date.split(" ");
-        startDateArr[1] = convertMonth(startDateArr[1].substring(0,3));
-        if (startDateArr[0].length() == 1) {
-            startDateArr[0] = "0" + startDateArr[0];
+        String[] dateArr = date.split(" ");
+        dateArr[1] = convertMonth(dateArr[1].substring(0,3));
+        if (dateArr[0].length() == 1) {
+            dateArr[0] = "0" + dateArr[0];
         }
-        return String.join("-", startDateArr[2], startDateArr[1], startDateArr[0]);
+        return String.join("-", dateArr[2], dateArr[1], dateArr[0]);
+    }
+
+    // ensure is 12h format, with AM/ PM notation, specifically of this format: " xx:yy AM "
+    public static String formatTimeTo24H(String time) {
+        assert time.substring(time.length() - 2).equalsIgnoreCase("AM") || time.substring(time.length() - 2).equalsIgnoreCase("PM");
+        String[] getAMOrPm = time.split(" ");
+        String amOrPM = getAMOrPm[1];
+        String[] timeArr = getAMOrPm[0].split(":");
+        if (amOrPM.equalsIgnoreCase("PM") && Integer.parseInt(timeArr[0]) < 12) {
+            timeArr[0] = String.valueOf(Integer.parseInt(timeArr[0]) + 12);
+        }
+        if (amOrPM.equalsIgnoreCase("AM") && timeArr[0].length() == 1) {
+            timeArr[0] = "0" + timeArr[0];
+        }
+        return timeArr[0] + ":" + timeArr[1];
     }
 }
