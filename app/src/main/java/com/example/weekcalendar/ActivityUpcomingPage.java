@@ -39,13 +39,14 @@ import javax.annotation.Nullable;
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
     private static final String TAG = ActivityUpcomingPage.class.getSimpleName();
 
-    // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
+    // RecyclerView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
 
+    // Firebase variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
@@ -54,7 +55,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // FloatingActionButton to link to ActivityCreateEvent
     private FloatingActionButton floatingCreateEvent;
 
+    // Set up navigation drawer
     private SetupNavDrawer navDrawer;
+
+    // To transform String to Date
+    private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +75,8 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         // Fetches data from Firebase
         fetchEvents();
 
+        // Links to XML
         this.mRecyclerView = findViewById(R.id.week_view);
-
         LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
         this.mRecyclerView.setHasFixedSize(true);
         this.mRecyclerView.setLayoutManager(manager);
@@ -89,6 +94,30 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
+    private void processDocument(QueryDocumentSnapshot document) {
+        String title = (String) document.get("eventTitle");
+        String date = (String) document.get("startDate");
+        String time = (String) document.get("startTime");
+        CustomEvent event = new CustomEvent(title, date, time);
+        Date d = null;
+        try {
+            d = dateFormatter.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        CustomDay day = new CustomDay(d);
+        if (!this.setOfDays.contains(day)) {
+            this.setOfDays.add(day);
+            this.listOfDays.add(day);
+            List<CustomEvent> temp = new ArrayList<>();
+            temp.add(event);
+            this.mapOfEvents.put(day, temp);
+        } else {
+            this.mapOfEvents.get(day).add(event);
+        }
+    }
+
+    // Fetches events from Firebase
     private void fetchEvents() {
         this.listOfDays = new ArrayList<>();
         this.mapOfEvents = new HashMap<>();
@@ -105,33 +134,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                String title = (String) document.get("eventTitle");
-                                String date = (String) document.get("startDate");
-                                String time = (String) document.get("startTime");
-                                CustomEvent event = new CustomEvent(title, date, time);
-                                Date d = null;
-                                try {
-                                    d = dateFormatter.parse(date);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                CustomDay day = new CustomDay(d);
-                                if (!setOfDays.contains(day)) {
-                                    setOfDays.add(day);
-                                    listOfDays.add(day);
-                                    List<CustomEvent> temp = new ArrayList<>();
-                                    temp.add(event);
-                                    mapOfEvents.put(day, temp);
-                                } else {
-                                    mapOfEvents.get(day).add(event);
-                                }
-//                                if (mapOfEvents.get(day) == null) {
-//                                List<CustomEvent> temp = new ArrayList<>();
-//                                temp.add(event);
-//                                mapOfEvents.put(day, temp);
-//                                } else {
-//                                    mapOfEvents.get(day).add(event);
-//                                }
+                                processDocument(document);
                             }
                             mAdapter = new WeekRecyclerViewAdapter(listOfDays, mapOfEvents,
                                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);

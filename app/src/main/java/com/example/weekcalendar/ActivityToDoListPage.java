@@ -42,13 +42,17 @@ public class ActivityToDoListPage extends AppCompatActivity {
     private ExpandableListView expandableListView;
     private ToDoListViewAdapter mAdapter;
 
-    //
+    // Firebase variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
 
+    // Set up navigation drawer
     private SetupNavDrawer navDrawer;
+
+    // To transform String to Date
+    private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         // Fetches data from Firebase
         fetchToDos();
 
+        // Link to XML
         this.expandableListView = findViewById(R.id.expandableListView);
 
 //        this.expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
@@ -104,11 +109,31 @@ public class ActivityToDoListPage extends AppCompatActivity {
         this.navDrawer.setupNavDrawerPane();
     }
 
-    public void fetchToDos() {
+    private void processDocument(QueryDocumentSnapshot document) {
+        String date = (String) document.get("date");
+        String title = (String) document.get("title");
+        Date d = null;
+        try {
+            d = dateFormatter.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        CustomDay day = new CustomDay(d);
+        if (!this.setOfDays.contains(day)) {
+            this.setOfDays.add(day);
+            this.listOfDays.add(day);
+            List<String> temp = new ArrayList<>();
+            temp.add(title);
+            this.mapOfToDo.put(day, temp);
+        } else {
+            this.mapOfToDo.get(day).add(title);
+        }
+    }
+
+    private void fetchToDos() {
         this.listOfDays = new ArrayList<>();
         this.mapOfToDo = new HashMap<>();
         this.setOfDays = new HashSet<>();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
         c.whereEqualTo("userID", userID)
                 .orderBy("date")
@@ -120,24 +145,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                String date = (String) document.get("date");
-                                String title = (String) document.get("title");
-                                Date d = null;
-                                try {
-                                    d = dateFormatter.parse(date);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                                CustomDay day = new CustomDay(d);
-                                if (!setOfDays.contains(day)) {
-                                    setOfDays.add(day);
-                                    listOfDays.add(day);
-                                    List<String> temp = new ArrayList<>();
-                                    temp.add(title);
-                                    mapOfToDo.put(day, temp);
-                                } else {
-                                    mapOfToDo.get(day).add(title);
-                                }
+                                processDocument(document);
                             }
                             mAdapter = new ToDoListViewAdapter(ActivityToDoListPage.this, listOfDays, mapOfToDo);
                             expandableListView.setAdapter(mAdapter);
