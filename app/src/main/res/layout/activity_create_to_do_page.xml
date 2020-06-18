@@ -7,7 +7,7 @@
     tools:context=".ActivityCreateToDoPage">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/create_todo_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -17,13 +17,12 @@
         app:titleTextColor="#FFFFFF" />
 
     <Button
-        android:id="@+id/submit_to_do"
+        android:id="@+id/create_todo_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:onClick="submitToDo"
         android:paddingHorizontal="20dp"
         android:text="Create To Do Item" />
 
@@ -34,7 +33,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/to_do_description"
+            android:id="@+id/todo_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
@@ -44,7 +43,7 @@
             android:inputType="textPersonName" />
 
         <Button
-            android:id="@+id/date_header"
+            android:id="@+id/select_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center|center_horizontal"

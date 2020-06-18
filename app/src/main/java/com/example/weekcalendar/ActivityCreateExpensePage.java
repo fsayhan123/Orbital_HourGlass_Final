@@ -40,7 +40,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
 
         myDB = new DatabaseHelper(this);
 
-        Toolbar tb = findViewById(R.id.toolbar);
+        Toolbar tb = findViewById(R.id.create_todo_toolbar);
         setSupportActionBar(tb);
         // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -53,7 +53,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        date = findViewById(R.id.date_header);
+        date = findViewById(R.id.select_date);
         date.setOnClickListener(v -> openSelectDateDialog(v, date));
 
         addExpenditure = findViewById(R.id.submit_expenditure);
@@ -73,7 +73,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
             expenditure = findViewById(R.id.expenditure);
             expenditure.setText(results.getString(4));
 
-            dateDialog = findViewById(R.id.date_header);
+            dateDialog = findViewById(R.id.select_date);
             String date = results.getString(1);
             try {
                 Date d = stringToDate.parse(date);

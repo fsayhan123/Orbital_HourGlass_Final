@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +44,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
 
     // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
     private List<CustomDay> listOfDays;
+    private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
@@ -72,15 +75,12 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 String username = documentSnapshot.getString("fName");
-                Toast.makeText(ActivityUpcomingPage.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(ActivityUpcomingPage.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
             }
         });
 
-        try {
-            fetchEvents();
-        } catch (ParseException e) {
-            listOfDays = new ArrayList<>();
-        }
+        // Fetches data from Firebase
+        fetchEvents();
 
         mRecyclerView = findViewById(R.id.week_view);
 
@@ -91,7 +91,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         floatingCreateEvent = findViewById(R.id.create_event);
         floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
 
-        // Navigation pane drawer setup
+        // Set up navigation drawer
         navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
         navDrawer.setupNavDrawerPane();
     }
@@ -101,9 +101,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
-    private void fetchEvents() throws ParseException {
-        listOfDays = new ArrayList<>();
-        mapOfEvents = new HashMap<>();
+    private void fetchEvents() {
+        this.listOfDays = new ArrayList<>();
+        this.mapOfEvents = new HashMap<>();
+        this.setOfDays = new HashSet<>();
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         c.whereEqualTo("userID", userID)
                 .orderBy("startDate")
@@ -127,14 +128,22 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                                     e.printStackTrace();
                                 }
                                 CustomDay day = new CustomDay(d);
-                                listOfDays.add(day);
-                                if (mapOfEvents.get(day) == null) {
+                                if (!setOfDays.contains(day)) {
+                                    setOfDays.add(day);
+                                    listOfDays.add(day);
                                     List<CustomEvent> temp = new ArrayList<>();
                                     temp.add(event);
                                     mapOfEvents.put(day, temp);
                                 } else {
                                     mapOfEvents.get(day).add(event);
                                 }
+//                                if (mapOfEvents.get(day) == null) {
+//                                List<CustomEvent> temp = new ArrayList<>();
+//                                temp.add(event);
+//                                mapOfEvents.put(day, temp);
+//                                } else {
+//                                    mapOfEvents.get(day).add(event);
+//                                }
                             }
                             mAdapter = new WeekRecyclerViewAdapter(listOfDays, mapOfEvents,
                                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);

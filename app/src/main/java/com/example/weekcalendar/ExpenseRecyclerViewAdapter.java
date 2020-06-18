@@ -11,8 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +39,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
 
         public MyExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.date = itemView.findViewById(R.id.date_header);
+            this.date = itemView.findViewById(R.id.select_date);
             this.costToday = itemView.findViewById(R.id.total_cost_today);
             this.categoryAndExpenses = itemView.findViewById(R.id.category_and_expenses);
         }

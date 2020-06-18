@@ -25,11 +25,11 @@
             android:id="@+id/expandableListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_alignTop="@id/todo_toolbar"
             android:layout_marginTop="60dp"
             android:divider="@android:color/darker_gray"
             android:dividerHeight="0.5dp"
-            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft">
-        </ExpandableListView>
+            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft"></ExpandableListView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/create_to_do_button"

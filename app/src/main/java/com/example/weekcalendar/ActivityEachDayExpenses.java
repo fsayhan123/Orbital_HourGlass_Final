@@ -40,7 +40,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         Intent intent = getIntent();
         String expenseDate = intent.getStringExtra("date clicked");
 
-        Toolbar tb = findViewById(R.id.date_header);
+        Toolbar tb = findViewById(R.id.select_date);
         setSupportActionBar(tb);
         getSupportActionBar().setTitle("Expenses on " + expenseDate);
         // sets up back button

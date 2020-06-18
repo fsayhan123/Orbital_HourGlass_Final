@@ -6,15 +6,12 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -23,6 +20,7 @@ import java.util.Map;
 public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
     private static final String TAG = ActivityCreateEventPage.class.getSimpleName();
 
+    // XML variables
     private Button selectStartDate;
     private Button selectEndDate;
     private Button selectStartTime;
@@ -30,6 +28,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button createEvent;
     private EditText todo1;
 
+    // Firebase variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
@@ -40,32 +39,32 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event_page);
 
-        // setup link to Firebase
-        fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
-        userID = fAuth.getCurrentUser().getUid();
-        c = fStore.collection("events");
+        // Setup link to Firebase
+        this.fAuth = FirebaseAuth.getInstance();
+        this.fStore = FirebaseFirestore.getInstance();
+        this.userID = this.fAuth.getCurrentUser().getUid();
+        this.c = this.fStore.collection("events");
 
-        this.setTitle("Create Event");
+        // Links to XML
+        this.selectStartDate = findViewById(R.id.select_start_date);
+        this.selectStartDate.setOnClickListener(v -> openSelectDateDialog(this.selectStartDate));
 
-        selectStartDate = findViewById(R.id.select_start_date);
-        selectStartDate.setOnClickListener(v -> openSelectDateDialog(selectStartDate));
+        this.selectEndDate = findViewById(R.id.select_end_date);
+        this.selectEndDate.setOnClickListener(v -> openSelectDateDialog(this.selectEndDate));
 
-        selectEndDate = findViewById(R.id.select_end_date);
-        selectEndDate.setOnClickListener(v -> openSelectDateDialog(selectEndDate));
+        this.selectStartTime = findViewById(R.id.select_start_time);
+        this.selectStartTime.setOnClickListener(v -> openSelectTimeDialog(this.selectStartTime));
 
-        selectStartTime = findViewById(R.id.select_start_time);
-        selectStartTime.setOnClickListener(v -> openSelectTimeDialog(selectStartTime));
+        this.selectEndTime = findViewById(R.id.select_end_time);
+        this.selectEndTime.setOnClickListener(v -> openSelectTimeDialog(this.selectEndTime));
 
-        selectEndTime = findViewById(R.id.select_end_time);
-        selectEndTime.setOnClickListener(v -> openSelectTimeDialog(selectEndTime));
+        this.todo1 = findViewById(R.id.todo_item);
 
-        todo1 = findViewById(R.id.todo_item);
+        this.createEvent = findViewById(R.id.create_event_button);
+        this.createEvent.setOnClickListener(v -> createEvent());
 
-        createEvent = findViewById(R.id.create_event_button);
-        createEvent.setOnClickListener(v -> createEvent());
-
-        Toolbar tb = findViewById(R.id.event_creation_toolbar);
+        // Setup toolbar with working back button
+        Toolbar tb = findViewById(R.id.create_event_toolbar);
         setSupportActionBar(tb);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -74,7 +73,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         });
     }
 
-    private boolean areFieldsFilled() {
+    private boolean checkFields() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
         if (eventTitle.equals("")) {
             Toast.makeText(this, "Please insert event title!", Toast.LENGTH_SHORT).show();
@@ -93,7 +92,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     private void createEvent() {
-        if (areFieldsFilled()) {
+        if (checkFields()) {
             String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
             String toDo = todo1.getText().toString();
             String startDate = selectStartDate.getText().toString();

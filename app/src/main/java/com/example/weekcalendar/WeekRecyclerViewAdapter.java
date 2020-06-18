@@ -83,27 +83,9 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull final WeekRecyclerViewAdapter.MyViewHolder holder, int position) {
-        if (listOfDates.isEmpty()) {
-            Toast.makeText(a, "binding but empty", Toast.LENGTH_SHORT).show();
-        }
         final CustomDay d = listOfDates.get(position);
-        Toast.makeText(a, "binding " + d.toString(), Toast.LENGTH_SHORT).show();
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
-//        String day = d.getdd();
-//        if (day.length() == 1) {
-//            day = "0" + day;
-//        }
-//        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
-//        Cursor result = myDB.getEventData(daySQL);
-//        List<CustomEvent> temp = new ArrayList<>();
-//        for (int i = 0; i < result.getCount(); i++) {
-//            result.moveToNext();
-//            String id = result.getString(0);
-//            String title = result.getString(5);
-//            String startTime = result.getString(3);
-//            temp.add(new CustomEvent(id, title, startTime, ""));
-//        }
 
         EventRecyclerViewAdapter e = new EventRecyclerViewAdapter(this.mapOfEvents.get(d), (MyOnEventClickListener) a); // can store in holder?
         LinearLayoutManager LLM = new LinearLayoutManager(a); // can store in holder?

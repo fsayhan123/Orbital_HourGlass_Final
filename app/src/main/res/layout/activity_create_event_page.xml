@@ -9,7 +9,7 @@
     tools:context=".ActivityCreateEventPage">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/event_creation_toolbar"
+        android:id="@+id/create_event_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -22,7 +22,7 @@
         android:id="@+id/event_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/event_creation_toolbar"
+        android:layout_below="@id/create_event_toolbar"
         android:orientation="vertical">
 
         <EditText

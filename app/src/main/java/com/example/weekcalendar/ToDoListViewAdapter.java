@@ -1,6 +1,5 @@
 package com.example.weekcalendar;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +20,10 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     private Context context;
     private List<CustomDay> expandableListTitle;
     private Map<CustomDay, List<String>> expandableListDetail;
-    private  final Set<Pair<Long, Long>> CheckedItems = new HashSet<Pair<Long, Long>>();
+    private final Set<Pair<Long, Long>> checkedItems = new HashSet<>();
 
     public ToDoListViewAdapter(Context context, List<CustomDay> expandableListTitle,
-                                       Map<CustomDay, List<String>> expandableListDetail) {
+                               Map<CustomDay, List<String>> expandableListDetail) {
         this.context = context;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
@@ -53,8 +52,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         TextView expandedListTextView = (CheckBox) convertView.findViewById(R.id.list_child);
         expandedListTextView.setText(expandedListText);
 
-        Pair<Long, Long> tag = new Pair<Long, Long>(
-                getGroupId(listPosition),
+        Pair<Long, Long> tag = new Pair<>(getGroupId(listPosition),
                 getChildId(listPosition, expandedListPosition));
         expandedListTextView.setTag(tag);
         expandedListTextView.setOnClickListener(new View.OnClickListener() {
@@ -63,9 +61,9 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                 CheckBox cb = (CheckBox) v;
                 final Pair<Long, Long> tag = (Pair<Long, Long>) v.getTag();
                 if (cb.isChecked()) {
-                    CheckedItems.add(tag);
+                    checkedItems.add(tag);
                 } else {
-                    CheckedItems.remove(tag);
+                    checkedItems.remove(tag);
                 }
             }
         });
@@ -102,8 +100,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.list_group, null);
         }
-        TextView listTitleTextView = (TextView) convertView
-                .findViewById(R.id.list_parent);
+        TextView listTitleTextView = convertView.findViewById(R.id.list_parent);
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);
         return convertView;
@@ -120,6 +117,6 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     }
 
     public Set<Pair<Long, Long>> getCheckedItems() {
-        return CheckedItems;
+        return checkedItems;
     }
 }

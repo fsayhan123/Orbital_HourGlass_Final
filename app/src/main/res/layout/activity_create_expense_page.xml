@@ -13,7 +13,7 @@
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/create_todo_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
@@ -49,7 +49,7 @@
                 android:numeric="decimal" />
 
             <Button
-                android:id="@+id/date_header"
+                android:id="@+id/select_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
