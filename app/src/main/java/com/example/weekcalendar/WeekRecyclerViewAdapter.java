@@ -30,12 +30,6 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
     private MyOnDateClickListener mDateClickListener;
     private Activity a;
     private View eachDayView;
-    private DatabaseHelper myDB;
-
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
-    private String userID;
-    private CollectionReference c;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -57,7 +51,6 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         this.mapOfEvents = mapOfEvents;
         this.mDateClickListener = dateClicker;
         this.a = a;
-        this.myDB = new DatabaseHelper(a);
     }
 
     @NonNull

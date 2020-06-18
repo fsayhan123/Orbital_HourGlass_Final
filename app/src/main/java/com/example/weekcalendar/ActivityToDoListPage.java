@@ -1,6 +1,5 @@
 package com.example.weekcalendar;
 
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -36,12 +35,14 @@ import java.util.Set;
 public class ActivityToDoListPage extends AppCompatActivity {
     private static final String TAG = ActivityToDoListPage.class.getSimpleName();
 
+    // ExpandableListView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<String>> mapOfToDo;
     private ExpandableListView expandableListView;
     private ToDoListViewAdapter mAdapter;
 
+    //
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;

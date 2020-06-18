@@ -6,11 +6,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -65,35 +62,26 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         setContentView(R.layout.activity_upcoming_page);
 
         // Setup link to Firebase
-        fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
-        userID = fAuth.getCurrentUser().getUid();
-        c = fStore.collection("events");
-
-        DocumentReference docRefUser = fStore.collection("users").document(userID);
-        docRefUser.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                String username = documentSnapshot.getString("fName");
-//                Toast.makeText(ActivityUpcomingPage.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
-            }
-        });
+        this.fAuth = FirebaseAuth.getInstance();
+        this.fStore = FirebaseFirestore.getInstance();
+        this.userID = this.fAuth.getCurrentUser().getUid();
+        this.c = this.fStore.collection("events");
 
         // Fetches data from Firebase
         fetchEvents();
 
-        mRecyclerView = findViewById(R.id.week_view);
+        this.mRecyclerView = findViewById(R.id.week_view);
 
         LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(manager);
+        this.mRecyclerView.setHasFixedSize(true);
+        this.mRecyclerView.setLayoutManager(manager);
 
-        floatingCreateEvent = findViewById(R.id.create_event);
-        floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
+        this.floatingCreateEvent = findViewById(R.id.create_event);
+        this.floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
 
         // Set up navigation drawer
-        navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
-        navDrawer.setupNavDrawerPane();
+        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
+        this.navDrawer.setupNavDrawerPane();
     }
 
     private void moveToCreateEventPage() {
