@@ -1,5 +1,6 @@
 package com.example.weekcalendar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -8,9 +9,18 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,7 +41,8 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     private RecyclerView expensesByDay;
     private ExpenseRecyclerViewAdapter dayExpenseAdapter;
     private LinearLayoutManager manager;
-    private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
+    //private List<CustomExpenseCategory> customExpenseCategoriesList = new ArrayList<>();
+    private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay = new HashMap<>();
 
     // FloatingActionButton to link to ActivityCreateExpense
     private FloatingActionButton floatingAddExpense;
@@ -41,29 +52,39 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
 
     private SetupNavDrawer navDrawer;
 
+    //Firebase fields
+    private FirebaseFirestore db;
+    private FirebaseAuth fAuth;
+    private String userID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_page);
         myDB = new DatabaseHelper(this);
 
+        //Setup firebase fields
+        db = FirebaseFirestore.getInstance();
+        fAuth = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid();
+
         try {
-            daysWithExpenditure = getSpendingDays();
+            getSpendingDays();
             //daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2));
         } catch (ParseException e) {
             daysWithExpenditure = new ArrayList<>();
         }
 
-        spendingEachDay = getSpendingEachDay();
+        //spendingEachDay = getSpendingEachDay();
 
         expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
-                ActivityExpensePage.this, this);
+        //dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
+        //        ActivityExpensePage.this, this);
 
         manager = new LinearLayoutManager(ActivityExpensePage.this);
         expensesByDay.setHasFixedSize(true);
         expensesByDay.setLayoutManager(manager);
-        expensesByDay.setAdapter(dayExpenseAdapter);
+        //expensesByDay.setAdapter(dayExpenseAdapter);
 
         floatingAddExpense = findViewById(R.id.to_add_expense);
         floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
@@ -79,7 +100,7 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     }
 
     // Returns a Map of each day along with expense category
-    private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
+    /*private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
         spendingEachDay = new HashMap<>();
         for (CustomDay d : daysWithExpenditure) {
             String day = d.getdd();
@@ -117,34 +138,105 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
             spendingEachDay.put(d, temp);
         }
         return spendingEachDay;
-    }
+    }*/
 
     // Returns a List<CustomDay> that user has a spending;
-    private List<CustomDay> getSpendingDays() throws ParseException {
+    private void getSpendingDays() throws ParseException {
         daysWithExpenditure = new ArrayList<>();
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        Cursor query = this.myDB.getDayExpenseData();
-        if (query.getCount() == 0) {
-            return daysWithExpenditure;
+        db.collection("expense")
+                .whereEqualTo("userID", this.userID)
+                .orderBy("Date")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d("TAG", "onSuccess: LIST EMPTY");
+                        } else {
+                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                processDocument(document);
+                            } for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
+                                System.out.println(daysWithExpenditure);
+                                prepHashMap(daysWithExpenditure);
+                                prepSpending(document);
+                            }
+                            System.out.println(spendingEachDay);
+                            dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
+                                    ActivityExpensePage.this, ActivityExpensePage.this);
+                            expensesByDay.setAdapter(dayExpenseAdapter);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("TAG", "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                    }
+                });
+    }
+
+    //Get the days with expenditure and add them into the list
+    private void processDocument(QueryDocumentSnapshot document) {
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        String date = document.get("Date").toString();
+        Date d = null;
+        try {
+            d = dateFormatter.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        for (int i = 0; i < 30; i++) {
-            if (i >= query.getCount()) {
-                break;
+        CustomDay day = new CustomDay(d);
+        if (!(daysWithExpenditure.contains(day))) {
+            daysWithExpenditure.add(day);
+        }
+    }
+
+    //Fill Hashmap with days
+    private void prepHashMap(List<CustomDay> dayList) {
+        for (CustomDay day:dayList) {
+            if (!(spendingEachDay.containsKey(day))) {
+                List<CustomExpenseCategory> customCategoryList = new ArrayList<>();
+                spendingEachDay.put(day, customCategoryList);
             }
-            query.moveToNext();
-            String result = query.getString(0);
-            Date date = dateFormatter.parse(result);
-            CustomDay customDay = new CustomDay(date);
-            daysWithExpenditure.add(customDay);
         }
-        return daysWithExpenditure;
+    }
+
+    //Prepare hashmap
+    private void prepSpending(QueryDocumentSnapshot document) {
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        String date = document.get("Date").toString();
+        String category = document.get("Category").toString();
+        String name = document.get("Name").toString();
+        double amount = new Double(document.get("Amount").toString());
+        Date d = null;
+        try {
+            d = dateFormatter.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        CustomDay day = new CustomDay(d);
+        List<CustomExpenseCategory> customExpenseCategoriesList = spendingEachDay.get(day);
+        boolean flag = false;
+        for (CustomExpenseCategory cat : customExpenseCategoriesList) {
+            if (cat.getName().equals(category)) {
+                cat.addExpense(new CustomExpense(document.getId(), name, amount));
+                flag = true;
+            }
+        }
+
+        if (!(flag)) {
+            CustomExpenseCategory newCat = new CustomExpenseCategory(category, new ArrayList<>());
+            newCat.addExpense(new CustomExpense(document.getId(), name, amount));
+            customExpenseCategoriesList.add(newCat);
+        }
     }
 
     @Override
     public void onDateClickListener(String date) {
         Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, ActivityEachDayExpenses.class);
-        i.putExtra("date clicked", date);
-        startActivity(i);
+        //Intent i = new Intent(this, ActivityEachDayExpenses.class);
+        //i.putExtra("date clicked", date);
+        //startActivity(i);
     }
 }

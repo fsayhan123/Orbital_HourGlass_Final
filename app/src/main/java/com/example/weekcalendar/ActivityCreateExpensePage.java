@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -16,10 +17,14 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActivityCreateExpensePage extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MyDateDialog.MyDateDialogEventListener {
     private Spinner s;
@@ -32,17 +37,25 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
     private DatabaseHelper myDB;
     private SimpleDateFormat stringToDate = new SimpleDateFormat("yyyy-MM-dd");
     private SimpleDateFormat dateToString = new SimpleDateFormat("dd MMMMM yyyy");
+    private FirebaseFirestore db;
+    private FirebaseAuth fAuth;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_expense_page);
 
+        //Setup Link to firebase
+        db = FirebaseFirestore.getInstance();
+        fAuth = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid();
+
         myDB = new DatabaseHelper(this);
 
+        // sets up toolbar with working back button
         Toolbar tb = findViewById(R.id.create_todo_toolbar);
         setSupportActionBar(tb);
-        // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         tb.setNavigationOnClickListener(v -> {
@@ -130,28 +143,29 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         return false;
     }
 
+    //Adds a document for expenses into the firebase collection called "expense"
     private void addExpense() {
         if (checkValidInput()) {
-            String expenseName = ((EditText) findViewById(R.id.expenditure)).getText().toString();
-            boolean result = myDB.addExpense(expenseName, cost.getText().toString(), s.getSelectedItem().toString(), date.getText().toString());
-            if (result == true) {
-                Toast.makeText(this, "Added expense", Toast.LENGTH_SHORT).show();
-            }
-            Intent i = new Intent(this, ActivityExpensePage.class);
-            startActivity(i);
+            Map<String, Object> expense =  new HashMap<>();
+            String datePreEdited = date.getText().toString();
+            String editedDate = HelperMethods.formatDate(datePreEdited);
+
+            expense.put("userID", this.userID);
+            expense.put("Date", editedDate);
+            expense.put("Category", s.getSelectedItem().toString());
+            expense.put("Amount", cost.getText().toString());
+            expense.put("Name", ((EditText) findViewById(R.id.expenditure)).getText().toString());
+
+            db.collection("expense").add(expense)
+                    .addOnSuccessListener(v -> Log.d("Log", "DocumentSnapshot successfully written!"))
+                    .addOnFailureListener(e -> Log.w("Log", "Error writing document", e));;
+            Intent intent = new Intent(this, ActivityExpensePage.class);
+            startActivity(intent);
         }
     }
 
     private void updateExpense(int ID) {
-        if (checkValidInput()) {
-            String expenseName = ((EditText) findViewById(R.id.expenditure)).getText().toString();
-            boolean result = myDB.updateExpense(ID, expenseName, cost.getText().toString(), s.getSelectedItem().toString(), date.getText().toString());
-            if (result == true) {
-                Toast.makeText(this, "Updated expense", Toast.LENGTH_SHORT).show();
-            }
-            Intent i = new Intent(this, ActivityExpensePage.class);
-            startActivity(i);
-        }
+
     }
 
     @Override

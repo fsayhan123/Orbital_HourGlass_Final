@@ -1,4 +1,4 @@
-package com.example.weekcalendar;
+/*package com.example.weekcalendar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -222,4 +222,4 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
             listOfCat.add(e);
         }
     }
-}
+}*/

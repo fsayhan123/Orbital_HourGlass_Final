@@ -6,9 +6,9 @@ import android.os.Parcelable;
 public class CustomExpense implements Parcelable {
     private String expenseName;
     private double cost;
-    private int ID;
+    private String ID;
 
-    public CustomExpense(int ID, String expenseName, double cost) {
+    public CustomExpense(String ID, String expenseName, double cost) {
         this.ID = ID;
         this.expenseName = expenseName;
         this.cost = cost;
@@ -50,7 +50,7 @@ public class CustomExpense implements Parcelable {
         dest.writeDouble(cost);
     }
 
-    public int getID() {
+    public String getID() {
         return this.ID;
     }
 }
