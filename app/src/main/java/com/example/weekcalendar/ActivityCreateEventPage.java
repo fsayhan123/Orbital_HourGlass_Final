@@ -29,8 +29,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectEndTime;
     private Button createEvent;
     private EditText todo1;
-    private CustomDay selectedCustomDay;
-    private DatabaseHelper myDB;
 
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
@@ -42,8 +40,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event_page);
 
-        myDB = new DatabaseHelper(this);
-
+        // setup link to Firebase
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         userID = fAuth.getCurrentUser().getUid();
@@ -52,27 +49,24 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.setTitle("Create Event");
 
         selectStartDate = findViewById(R.id.select_start_date);
-        selectStartDate.setOnClickListener(v -> openSelectDateDialog(v, selectStartDate));
+        selectStartDate.setOnClickListener(v -> openSelectDateDialog(selectStartDate));
 
         selectEndDate = findViewById(R.id.select_end_date);
-        selectEndDate.setOnClickListener(v -> openSelectDateDialog(v, selectEndDate));
+        selectEndDate.setOnClickListener(v -> openSelectDateDialog(selectEndDate));
 
         selectStartTime = findViewById(R.id.select_start_time);
-        selectStartTime.setOnClickListener(v -> openSelectTimeDialog(v, selectStartTime));
+        selectStartTime.setOnClickListener(v -> openSelectTimeDialog(selectStartTime));
 
         selectEndTime = findViewById(R.id.select_end_time);
-        selectEndTime.setOnClickListener(v -> openSelectTimeDialog(v, selectEndTime));
+        selectEndTime.setOnClickListener(v -> openSelectTimeDialog(selectEndTime));
 
         todo1 = findViewById(R.id.todo_item);
 
         createEvent = findViewById(R.id.create_event_button);
         createEvent.setOnClickListener(v -> createEvent());
 
-//        myDB = new DatabaseHelper(this);
-
         Toolbar tb = findViewById(R.id.event_creation_toolbar);
         setSupportActionBar(tb);
-        // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         tb.setNavigationOnClickListener(v -> {
@@ -80,7 +74,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         });
     }
 
-    private void createEvent() {
+    private boolean areFieldsFilled() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
         if (eventTitle.equals("")) {
             Toast.makeText(this, "Please insert event title!", Toast.LENGTH_SHORT).show();
@@ -93,6 +87,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         } else if (selectEndTime.getText().toString().equals("Select End Time")) {
             Toast.makeText(this, "Please choose an end time!", Toast.LENGTH_SHORT).show();
         } else {
+            return true;
+        }
+        return false;
+    }
+
+    private void createEvent() {
+        if (areFieldsFilled()) {
+            String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
             String toDo = todo1.getText().toString();
             String startDate = selectStartDate.getText().toString();
             String endDate = selectEndDate.getText().toString();
@@ -101,33 +103,27 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
             Map<String, Object> details = new HashMap<>();
             details.put("userID", userID);
+            details.put("eventTitle", eventTitle);
             details.put("toDo", toDo);
-            details.put("startDate", myDB.formatDate(startDate));
-            details.put("endDate", myDB.formatDate(endDate));
+            details.put("startDate", HelperMethods.formatDate(startDate));
+            details.put("endDate", HelperMethods.formatDate(endDate));
             details.put("startTime", startTime);
             details.put("endTime", endTime);
+
             c.add(details)
                     .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-
-//            boolean result = myDB.addEvent(eventTitle, startDate, endDate, startTime, endTime, toDo);
-//            if (result == true) {
-//                Toast.makeText(this, "success", Toast.LENGTH_SHORT).show();
-//            }
-            Toast.makeText(this, "Event created with " + toDo, Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);
         }
     }
 
-    private void openSelectDateDialog(View v, Button b) {
-        Toast.makeText(this, "opened date dialog", Toast.LENGTH_SHORT).show();
+    private void openSelectDateDialog(Button b) {
         MyDateDialog myDateDialog = new MyDateDialog(b);
         myDateDialog.show(getSupportFragmentManager(), "date dialog");
     }
 
-    private void openSelectTimeDialog(View v, Button b) {
-        Toast.makeText(this, "opened time dialog", Toast.LENGTH_SHORT).show();
+    private void openSelectTimeDialog(Button b) {
         MyTimeDialog myTimeDialog = new MyTimeDialog(b);
         myTimeDialog.show(getSupportFragmentManager(), "time dialog");
     }
@@ -135,12 +131,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     @Override
     public void applyDateText(CustomDay d, Button b) {
         b.setText(d.getDate());
-        selectedCustomDay = d;
     }
 
     @Override
     public void applyTimeText(CustomDay d, Button b) {
         b.setText(d.getTime());
-        selectedCustomDay = d;
     }
 }

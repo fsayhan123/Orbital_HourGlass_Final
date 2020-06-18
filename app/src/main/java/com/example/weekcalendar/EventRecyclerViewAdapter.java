@@ -56,7 +56,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
     public void onBindViewHolder(@NonNull EventRecyclerViewAdapter.MyEventViewHolder holder, int position) {
         CustomEvent e = this.listOfEvents.get(position);
         holder.id = e.getId();
-        holder.time.setText(e.getDate());
+        holder.time.setText(e.getTime());
         holder.eventTitle.setText(e.getTitle());
     }
 

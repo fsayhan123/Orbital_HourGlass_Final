@@ -8,19 +8,22 @@ public class CustomEvent {
     private String id;
     private String title;
     private String date;
-    private String description;
+    private String time;
 
-    public CustomEvent(String id, String title, String d, String description) {
-        this.id = id;
+    public CustomEvent(String title, String date, String time) {
         this.title = title;
-        this.date = d;
-        this.description = description;
+        this.date = date;
+        this.time = time;
     }
 
     public String getId() { return this.id; }
 
     public String getDate() {
         return this.date;
+    }
+
+    public String getTime() {
+        return this.time;
     }
 
     public String getTitle() {

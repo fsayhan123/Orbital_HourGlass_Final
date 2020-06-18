@@ -36,10 +36,6 @@ public class CustomDay implements Comparable<CustomDay> {
         return "" + this.dd;
     }
 
-    public String getMMMMMM() {
-        return this.MMMMMM;
-    }
-
     public String getMMM() {
         return this.MMM;
     }

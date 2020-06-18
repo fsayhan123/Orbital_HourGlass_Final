@@ -8,61 +8,56 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerViewAdapter.MyViewHolder> {
 
     private List<CustomDay> listOfDates;
+    private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private MyOnDateClickListener mDateClickListener;
     private Activity a;
     private View eachDayView;
     private DatabaseHelper myDB;
 
+    private FirebaseAuth fAuth;
+    private FirebaseFirestore fStore;
+    private String userID;
+    private CollectionReference c;
+
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private View view;
         private Button date;
         private Button month;
         private RecyclerView dayEvents;
 
-        private LinearLayout.LayoutParams timeLayoutFormat;
-        private LinearLayout.LayoutParams lastTimeLayoutFormat;
-        private LinearLayout.LayoutParams eventLayoutFormat;
-
         private MyViewHolder(View itemView) {
-
             super(itemView);
             date = itemView.findViewById(R.id.date_button);
             month = itemView.findViewById(R.id.month_button);
             dayEvents = itemView.findViewById(R.id.all_events_layout);
-
-//            timeLayoutFormat = new LinearLayout.LayoutParams
-//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-//            timeLayoutFormat.setMargins(10, 0, 0, 50);
-//
-//            lastTimeLayoutFormat = new LinearLayout.LayoutParams
-//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-//            lastTimeLayoutFormat.setMargins(10, 0, 0, 0);
-//
-//            eventLayoutFormat = new LinearLayout.LayoutParams
-//                    (LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 100f);
-//            eventLayoutFormat.setMargins(5, 0, 0, 0);
-
-//            eventLayout = eachDayView.findViewById(R.id.all_events_layout);
         }
     }
 
-    public WeekRecyclerViewAdapter(List<CustomDay> list, MyOnDateClickListener dateClicker, Activity a, Context context) {
-        this.listOfDates = list;
+    public WeekRecyclerViewAdapter(List<CustomDay> listOfDates, Map<CustomDay, List<CustomEvent>> mapOfEvents,
+                                   MyOnDateClickListener dateClicker, Activity a) {
+        this.listOfDates = listOfDates;
+        this.mapOfEvents = mapOfEvents;
         this.mDateClickListener = dateClicker;
         this.a = a;
-        this.myDB = new DatabaseHelper(context);
+        this.myDB = new DatabaseHelper(a);
     }
 
     @NonNull
@@ -88,26 +83,29 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull final WeekRecyclerViewAdapter.MyViewHolder holder, int position) {
+        if (listOfDates.isEmpty()) {
+            Toast.makeText(a, "binding but empty", Toast.LENGTH_SHORT).show();
+        }
         final CustomDay d = listOfDates.get(position);
+        Toast.makeText(a, "binding " + d.toString(), Toast.LENGTH_SHORT).show();
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
-        String day = d.getdd();
-        if (day.length() == 1) {
-            day = "0" + day;
-        }
-        // todo can we prepare this on create?
-        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
-        Cursor result = myDB.getEventData(daySQL);
-        List<CustomEvent> temp = new ArrayList<>();
-        for (int i = 0; i < result.getCount(); i++) {
-            result.moveToNext();
-            String id = result.getString(0);
-            String title = result.getString(5);
-            String startTime = result.getString(3);
-            temp.add(new CustomEvent(id, title, startTime, ""));
-        }
+//        String day = d.getdd();
+//        if (day.length() == 1) {
+//            day = "0" + day;
+//        }
+//        String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
+//        Cursor result = myDB.getEventData(daySQL);
+//        List<CustomEvent> temp = new ArrayList<>();
+//        for (int i = 0; i < result.getCount(); i++) {
+//            result.moveToNext();
+//            String id = result.getString(0);
+//            String title = result.getString(5);
+//            String startTime = result.getString(3);
+//            temp.add(new CustomEvent(id, title, startTime, ""));
+//        }
 
-        EventRecyclerViewAdapter e = new EventRecyclerViewAdapter(temp, (MyOnEventClickListener) a); // can store in holder?
+        EventRecyclerViewAdapter e = new EventRecyclerViewAdapter(this.mapOfEvents.get(d), (MyOnEventClickListener) a); // can store in holder?
         LinearLayoutManager LLM = new LinearLayoutManager(a); // can store in holder?
         holder.dayEvents.setLayoutManager(LLM);
         holder.dayEvents.setAdapter(e);

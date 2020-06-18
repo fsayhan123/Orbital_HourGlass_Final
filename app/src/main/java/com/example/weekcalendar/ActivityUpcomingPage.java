@@ -1,5 +1,6 @@
 package com.example.weekcalendar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +12,8 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -20,6 +23,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -27,7 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +41,8 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     private static final String TAG = ActivityUpcomingPage.class.getSimpleName();
 
     // RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates)
-    private List<CustomDay> daysWithEvents;
+    private List<CustomDay> listOfDays;
+    private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private WeekRecyclerViewAdapter mAdapter;
 
@@ -47,9 +54,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // FloatingActionButton to link to ActivityCreateEvent
     private FloatingActionButton floatingCreateEvent;
 
-    // Database handler
-    private DatabaseHelper myDB;
-
     private SetupNavDrawer navDrawer;
 
     @Override
@@ -57,45 +61,32 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
 
-        myDB = new DatabaseHelper(this);
-
+        // Setup link to Firebase
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         userID = fAuth.getCurrentUser().getUid();
         c = fStore.collection("events");
 
-        // reference to document "users" in the database
         DocumentReference docRefUser = fStore.collection("users").document(userID);
         docRefUser.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                // accessing via key value pairs
                 String username = documentSnapshot.getString("fName");
                 Toast.makeText(ActivityUpcomingPage.this, "Welcome " + username, Toast.LENGTH_SHORT).show();
             }
         });
 
-        // reference to document "events" in the database
         try {
-            Toast.makeText(this, "before fetch", Toast.LENGTH_SHORT).show();
-            daysWithEvents = fetchDaysWithEvents();
-            //daysWithEvents.sort((d1, d2) -> d1.compareTo(d2));
-            Toast.makeText(this, "after fetch", Toast.LENGTH_SHORT).show();
+            fetchEvents();
+        } catch (ParseException e) {
+            listOfDays = new ArrayList<>();
         }
-        catch(ParseException e) {
-            Log.d("hello", "Hello");
-            daysWithEvents = new ArrayList<>();
-        }
-        Toast.makeText(this, Arrays.toString(daysWithEvents.toArray()), Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
 
         mRecyclerView = findViewById(R.id.week_view);
-        mAdapter = new WeekRecyclerViewAdapter(daysWithEvents, this, ActivityUpcomingPage.this, getApplicationContext());
 
         LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.setAdapter(mAdapter);
 
         floatingCreateEvent = findViewById(R.id.create_event);
         floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
@@ -110,56 +101,58 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
-    private List<CustomDay> fetchDaysWithEvents() throws ParseException {
-        daysWithEvents = new ArrayList<>();
+    private void fetchEvents() throws ParseException {
+        listOfDays = new ArrayList<>();
+        mapOfEvents = new HashMap<>();
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-//        Cursor query = this.myDB.getEventData();
-//        if (query.getCount() == 0) {
-////            Toast.makeText(this, "empty", Toast.LENGTH_SHORT).show();
-//            return daysWithEvents;
-//        }
-//
-//        for (int i = 0; i < 30; i++) { // further: fetch on demand
-//            if (i >= query.getCount()) {
-//                break;
-//            }
-//            query.moveToNext();
-//            String result = query.getString(0);
-//            Date date = dateFormatter.parse(result);
-//            CustomDay customDay = new CustomDay(date);
-//            daysWithEvents.add(customDay);
-//        }
-        Toast.makeText(this, "before firebase", Toast.LENGTH_SHORT).show();
         c.whereEqualTo("userID", userID)
+                .orderBy("startDate")
+                .orderBy("startTime")
                 .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String date = (String) document.get("startDate");
-                            Date d = null;
-                            try {
-                                d = dateFormatter.parse(date);
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d(TAG, "onSuccess: LIST EMPTY");
+                        } else {
+                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                String title = (String) document.get("eventTitle");
+                                String date = (String) document.get("startDate");
+                                String time = (String) document.get("startTime");
+                                CustomEvent event = new CustomEvent(title, date, time);
+                                Date d = null;
+                                try {
+                                    d = dateFormatter.parse(date);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                CustomDay day = new CustomDay(d);
+                                listOfDays.add(day);
+                                if (mapOfEvents.get(day) == null) {
+                                    List<CustomEvent> temp = new ArrayList<>();
+                                    temp.add(event);
+                                    mapOfEvents.put(day, temp);
+                                } else {
+                                    mapOfEvents.get(day).add(event);
+                                }
                             }
-                            CustomDay day = new CustomDay(d);
-                            Toast.makeText(this, day.toString(), Toast.LENGTH_SHORT).show();
-                            daysWithEvents.add(day);
-                            Toast.makeText(this, Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            mAdapter = new WeekRecyclerViewAdapter(listOfDays, mapOfEvents,
+                                    ActivityUpcomingPage.this, ActivityUpcomingPage.this);
+                            mRecyclerView.setAdapter(mAdapter);
                         }
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
                     }
                 });
-        Toast.makeText(this, "hi" + Integer.toString(daysWithEvents.size()), Toast.LENGTH_SHORT).show();
-        return daysWithEvents;
     }
 
     // To link to ActivityCreateEventPage upon clicking a date in the RecyclerView
     @Override
     public void onDateClickListener(String date) {
-        Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, ActivityCreateEventPage.class);
         i.putExtra("date clicked", date);
         startActivity(i);
@@ -168,7 +161,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // To link to ActivityEventDetailsPage upon clicking an event in the RecyclerView
     @Override
     public void onEventClickListener(String eventId) {
-        Toast.makeText(this, "clicked " + eventId, Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
         i.putExtra("eventId", eventId);
         startActivity(i);
