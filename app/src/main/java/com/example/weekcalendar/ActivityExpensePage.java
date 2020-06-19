@@ -235,8 +235,8 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     @Override
     public void onDateClickListener(String date) {
         Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
-        //Intent i = new Intent(this, ActivityEachDayExpenses.class);
-        //i.putExtra("date clicked", date);
-        //startActivity(i);
+        Intent i = new Intent(this, ActivityEachDayExpenses.class);
+        i.putExtra("date clicked", date);
+        startActivity(i);
     }
 }

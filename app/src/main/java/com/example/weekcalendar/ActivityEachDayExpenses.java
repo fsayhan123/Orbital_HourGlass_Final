@@ -1,4 +1,4 @@
-/*package com.example.weekcalendar;
+package com.example.weekcalendar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,12 +7,20 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,15 +30,19 @@ import java.util.Map;
 
 public class ActivityEachDayExpenses extends AppCompatActivity {
     private DatabaseHelper myDB;
-    private List<CustomExpenseCategory> listOfCat;
+    private List<CustomExpenseCategory> listOfCat = new ArrayList<>();
     private boolean canDelete = false;
-//    private EachDayExpensesAdapter adapter;
-//    private LinearLayoutManager manager;
-//    private RecyclerView allExpenseCategories;
+
 
     private ExpandableListView allExpenseCategories;
     private EachDayExpensesExListAdapter adapter;
     private List<int[]> listOfPos = new ArrayList<>();
+
+
+    //Firebase fields
+    private FirebaseFirestore db;
+    private FirebaseAuth fAuth;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +52,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         Intent intent = getIntent();
         String expenseDate = intent.getStringExtra("date clicked");
 
+        //sets up toolbar
         Toolbar tb = findViewById(R.id.select_date);
         setSupportActionBar(tb);
         getSupportActionBar().setTitle("Expenses on " + expenseDate);
@@ -47,62 +60,21 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        //Setup firebase fields
+        db = FirebaseFirestore.getInstance();
+        fAuth = FirebaseAuth.getInstance();
+        userID = fAuth.getCurrentUser().getUid();
+
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
         });
 
         myDB = new DatabaseHelper(this);
 
+        //Get a particular date as given from the top
         String parsedDate = parseDate(expenseDate);
-        Cursor results = myDB.getDayExpenseData(parsedDate);
-        populateCategories(results);
+        populateCategories(parsedDate);
 
-        allExpenseCategories = findViewById(R.id.all_expense_categories);
-
-//        adapter = new EachDayExpensesAdapter(this.listOfCat, this.expensesInEachCat, this);
-//        manager = new LinearLayoutManager(this);
-//        allExpenseCategories.setHasFixedSize(true);
-//        allExpenseCategories.setLayoutManager(manager);
-//        allExpenseCategories.setAdapter(adapter);
-
-//        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-//        itemTouchHelper.attachToRecyclerView(allExpenseCategories);
-
-        adapter = new EachDayExpensesExListAdapter(this, this.listOfCat);
-        allExpenseCategories.setAdapter(adapter);
-
-        for (int i = 0; i < adapter.getGroupCount(); i++) {
-            allExpenseCategories.expandGroup(i);
-        }
-
-        allExpenseCategories.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                if (canDelete) {
-                    long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
-                    int pos = parent.getFlatListPosition(packedPos);
-                    boolean isChecked = parent.isItemChecked(pos);
-                    if (isChecked) {
-                        parent.setItemChecked(pos, false);
-                        for (int i = 0; i < listOfPos.size(); i++) {
-                            if (listOfPos.get(i)[0] == groupPosition && listOfPos.get(i)[1] == childPosition) {
-                                listOfPos.remove(i);
-                                break;
-                            }
-                        }
-                    } else {
-                        parent.setItemChecked(pos, true);
-                        listOfPos.add(new int[] {groupPosition, childPosition});
-                    }
-                } else {
-                    Intent i = new Intent(ActivityEachDayExpenses.this, ActivityCreateExpensePage.class);
-                    CustomExpense e = (CustomExpense) adapter.getChild(groupPosition, childPosition);
-                    i.putExtra("expense ID", e.getID());
-                    startActivity(i);
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -122,7 +94,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
                         int[] pair = listOfPos.get(i);
                         Toast.makeText(this, "deleting " + Arrays.toString(pair), Toast.LENGTH_SHORT).show();
                         CustomExpense e = (CustomExpense) (adapter.getChild(pair[0], pair[1]));
-                        myDB.deleteExpense(e.getID());
+                        db.collection("expense").document(e.getID()).delete();
                         adapter.remove(pair[0], pair[1]);
                     }
                     listOfPos.clear();
@@ -145,51 +117,6 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //    String deleted = null;
-//    String edit = null;
-//
-//    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-//        @Override
-//        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-//            return false;
-//        }
-//
-//        @Override
-//        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-//            int position = viewHolder.getAdapterPosition();
-//
-//            switch (direction) {
-//                case ItemTouchHelper.LEFT:
-//                    deleted = listOfCat.get(position);
-//                    listOfCat.remove(position);
-//                    adapter.notifyDataSetChanged();
-//                    Snackbar.make(allExpenseCategories, deleted, Snackbar.LENGTH_LONG)
-//                            .setAction("Undo", v -> {
-//                                listOfCat.add(position, deleted);
-//                                adapter.notifyItemInserted(position);
-//                            })
-//                    .show();
-//                    break;
-//                case ItemTouchHelper.RIGHT:
-//                    edit = listOfCat.get(position);
-//                    adapter.notifyDataSetChanged();
-//                    break;
-//            }
-//        }
-//
-//        @Override
-//        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-//            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-//                    .addSwipeLeftBackgroundColor(R.color.Pink)
-//                    .addSwipeLeftActionIcon(R.drawable.ic_baseline_delete_24_transparent)
-//                    .addSwipeRightBackgroundColor(R.color.green)
-//                    .addSwipeRightActionIcon(R.drawable.ic_baseline_edit_24)
-//                    .create()
-//                    .decorate();
-//            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-//        }
-//    };
-
     public String parseDate(String date) {
         String[] expenseDateArr = date.split(" ");
         expenseDateArr[1] = myDB.convertDate(expenseDateArr[1].substring(0,3));
@@ -199,27 +126,83 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         return String.join("-", expenseDateArr[2], expenseDateArr[1], expenseDateArr[0]);
     }
 
-    public void populateCategories(Cursor results) {
-        Map<String, List<CustomExpense>> expensesInEachCat = new HashMap<>();
-        listOfCat = new ArrayList<>();
-        for (int i = 0; i < results.getCount(); i++) {
-            results.moveToNext();
-            int id = Integer.parseInt(results.getString(0));
-            String category = results.getString(2);
-            String name = results.getString(4);
-            String amount = results.getString(3);
-            if (expensesInEachCat.get(category) != null) {
-                expensesInEachCat.get(category).add(new CustomExpense(id, name, Double.parseDouble(amount)));
-            } else {
-                List<CustomExpense> temp = new ArrayList<>();
-                temp.add(new CustomExpense(id, name, Double.parseDouble(amount)));
-                expensesInEachCat.put(category, temp);
+    public void populateCategories(String date) {
+        db.collection("expense")
+                .whereEqualTo("userID", this.userID)
+                .whereEqualTo("Date", date)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d("TAG", "onSuccess: LIST EMPTY");
+                        } else {
+                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                processDocument(document);
+                            }
+                            allExpenseCategories = findViewById(R.id.all_expense_categories);
+                            adapter = new EachDayExpensesExListAdapter(ActivityEachDayExpenses.this, ActivityEachDayExpenses.this.listOfCat);
+                            allExpenseCategories.setAdapter(adapter);
+                            for (int i = 0; i < adapter.getGroupCount(); i++) {
+                                allExpenseCategories.expandGroup(i);
+                            }
+
+                            allExpenseCategories.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                                @Override
+                                public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                                    if (canDelete) {
+                                        long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
+                                        int pos = parent.getFlatListPosition(packedPos);
+                                        boolean isChecked = parent.isItemChecked(pos);
+                                        if (isChecked) {
+                                            parent.setItemChecked(pos, false);
+                                            for (int i = 0; i < listOfPos.size(); i++) {
+                                                if (listOfPos.get(i)[0] == groupPosition && listOfPos.get(i)[1] == childPosition) {
+                                                    listOfPos.remove(i);
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            parent.setItemChecked(pos, true);
+                                            listOfPos.add(new int[] {groupPosition, childPosition});
+                                        }
+                                    } else {
+                                        Intent i = new Intent(ActivityEachDayExpenses.this, ActivityCreateExpensePage.class);
+                                        CustomExpense e = (CustomExpense) adapter.getChild(groupPosition, childPosition);
+                                        i.putExtra("expense ID", e.getID());
+                                        startActivity(i);
+                                    }
+                                    return false;
+                                }
+                            });
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("TAG", "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                    }
+                });
+    }
+
+    public void processDocument(QueryDocumentSnapshot document) {
+        //String date = document.get("Date").toString();
+        String category = document.get("Category").toString();
+        String name = document.get("Name").toString();
+        double amount = new Double(document.get("Amount").toString());
+        boolean flag = false;
+        for (CustomExpenseCategory customCat : this.listOfCat) {
+            if (customCat.getName().equals(category)) {
+                customCat.addExpense(new CustomExpense(document.getId(), name, amount));
+                flag = true;
             }
         }
-        for (String s : expensesInEachCat.keySet()) {
-            assert expensesInEachCat.get(s) != null;
-            CustomExpenseCategory e = new CustomExpenseCategory(s, expensesInEachCat.get(s));
-            listOfCat.add(e);
+        //No cat is existing inside thelist
+        if (!(flag)) {
+            CustomExpenseCategory newCat = new CustomExpenseCategory(category, new ArrayList<>());
+            newCat.addExpense(new CustomExpense(document.getId(), name, amount));
+            this.listOfCat.add(newCat);
         }
     }
-}*/
+}
