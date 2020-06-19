@@ -19,12 +19,13 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ActivityEventDetailsPage extends AppCompatActivity {
+    private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
 
-    private DatabaseHelper myDB;
     private TextView eventTitle;
     private TextView eventDate;
     private TextView eventTime;
-    private String eventFieldID;
+
+    private CustomEvent event;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -37,8 +38,6 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_details_page);
 
-        myDB = new DatabaseHelper(this);
-
         // Setup link to Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
@@ -47,14 +46,14 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
 
         // Get Intent of the event item selected
         Intent intent = getIntent();
-        CustomEvent event = intent.getParcelableExtra("event");
+        this.event = intent.getParcelableExtra("event");
 
         // Links to XML
-        eventTitle = findViewById(R.id.event_title);
-        eventDate = findViewById(R.id.event_date);
-        eventTime = findViewById(R.id.event_time);
+        this.eventTitle = findViewById(R.id.event_title);
+        this.eventDate = findViewById(R.id.event_date);
+        this.eventTime = findViewById(R.id.event_time);
 
-        this.setView(event);
+        this.setView(this.event);
 
         // Setup toolbar with working back button
         Toolbar tb = findViewById(R.id.event_details_toolbar);
@@ -75,7 +74,11 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
+        if (item.getItemId() == R.id.edit_event_topR) {
+            editEvent();
+        } else if (item.getItemId() == R.id.delete_event_topR) {
+            deleteEvent();
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -91,8 +94,17 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         eventTime.setText("Time: " + event.getStartTime() + " to " + event.getEndTime());
     }
 
-    private void deleteEvent(View view) {
-        myDB.deleteEvent(this.eventFieldID);
+    private void editEvent() {
+        Intent intent = new Intent(this, ActivityCreateEventPage.class);
+        intent.putExtra("event to edit", this.event);
+        startActivity(intent);
+    }
+
+    private void deleteEvent() {
+        this.c.document(this.event.getId())
+                .delete()
+                .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
         Intent intent = new Intent(this, ActivityUpcomingPage.class);
         startActivity(intent);
     }
