@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,6 +22,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private static final String TAG = ActivityCreateEventPage.class.getSimpleName();
 
     // XML variables
+    private EditText title;
     private Button selectStartDate;
     private Button selectEndDate;
     private Button selectStartTime;
@@ -48,6 +50,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.cToDo = this.fStore.collection("todo");
 
         // Links to XML
+        this.title = findViewById(R.id.insert_event_name);
+
         this.selectStartDate = findViewById(R.id.select_start_date);
         this.selectStartDate.setOnClickListener(v -> openSelectDateDialog(this.selectStartDate));
 
@@ -73,11 +77,21 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(this, ActivityUpcomingPage.class));
         });
+
+        Intent i = getIntent();
+        CustomEvent event = i.getParcelableExtra("event to edit");
+        if (event != null) {
+            this.title.setText(event.getTitle());
+            this.selectStartDate.setText(HelperMethods.formatDateForView(event.getStartDate()));
+            this.selectEndDate.setText(HelperMethods.formatDateForView(event.getEndDate()));
+            this.selectStartTime.setText(HelperMethods.formatTimeTo12H(event.getStartTime()));
+            this.selectEndTime.setText(HelperMethods.formatTimeTo12H(event.getEndTime()));
+        }
     }
 
     // need to have a check for start day >= end day, start time >= end time
     private boolean checkFields() {
-        String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
+        String eventTitle = this.title.getText().toString();
         if (eventTitle.equals("")) {
             Toast.makeText(this, "Please insert event title!", Toast.LENGTH_SHORT).show();
         } else if (selectStartDate.getText().toString().equals("Select Start Date")) {

@@ -33,11 +33,9 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
     private List<CustomExpenseCategory> listOfCat = new ArrayList<>();
     private boolean canDelete = false;
 
-
     private ExpandableListView allExpenseCategories;
     private EachDayExpensesExListAdapter adapter;
     private List<int[]> listOfPos = new ArrayList<>();
-
 
     //Firebase fields
     private FirebaseFirestore db;

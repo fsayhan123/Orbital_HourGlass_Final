@@ -45,9 +45,9 @@ public class HelperMethods {
     // ensure is 12h format, with AM/ PM notation, specifically of this format: " xx:yy AM "
     public static String formatTimeTo24H(String time) {
         assert time.substring(time.length() - 2).equalsIgnoreCase("AM") || time.substring(time.length() - 2).equalsIgnoreCase("PM");
-        String[] getAMOrPm = time.split(" ");
-        String amOrPM = getAMOrPm[1];
-        String[] timeArr = getAMOrPm[0].split(":");
+        String[] getAMOrPM = time.split(" ");
+        String amOrPM = getAMOrPM[1];
+        String[] timeArr = getAMOrPM[0].split(":");
         if (amOrPM.equalsIgnoreCase("PM") && Integer.parseInt(timeArr[0]) < 12) {
             timeArr[0] = String.valueOf(Integer.parseInt(timeArr[0]) + 12);
         }
@@ -55,5 +55,20 @@ public class HelperMethods {
             timeArr[0] = "0" + timeArr[0];
         }
         return timeArr[0] + ":" + timeArr[1];
+    }
+
+    public static String formatTimeTo12H(String time) {
+        String[] timeArr = time.split(":");
+        String amOrPM;
+        if (timeArr[0].equals("00")) {
+            timeArr[0] = "12";
+            amOrPM = "AM";
+        } else if (Integer.parseInt(timeArr[0]) > 12) {
+            timeArr[0] = String.format("%02d", Integer.parseInt(timeArr[0]) - 12);
+            amOrPM = "PM";
+        } else {
+            amOrPM = "AM";
+        }
+        return timeArr[0] + ":" + timeArr[1] + " " + amOrPM;
     }
 }

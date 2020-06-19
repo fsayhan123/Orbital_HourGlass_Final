@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
@@ -34,6 +37,7 @@ import java.util.Set;
 
 public class ActivityToDoListPage extends AppCompatActivity {
     private static final String TAG = ActivityToDoListPage.class.getSimpleName();
+    private boolean canDelete = false;
 
     // ExpandableListView variables
     private List<CustomDay> listOfDays;
@@ -164,13 +168,35 @@ public class ActivityToDoListPage extends AppCompatActivity {
                 });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.top_right_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.delete) {
+            if (this.canDelete) {
+                deleteToDo();
+                item.setIcon(R.drawable.ic_baseline_delete_24_transparent);
+                canDelete = false;
+            } else {
+                canDelete = true;
+                item.setIcon(R.drawable.ic_baseline_delete_24);
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public void createToDo(View view) {
         Intent intent = new Intent(this, ActivityCreateToDoPage.class);
         startActivity(intent);
     }
 
-    public void deleteToDo(View view) {
-//        Set<Pair<Long, Long>> setItems = this.mAdapter.getCheckedItems();
+    public void deleteToDo() {
+        Set<Pair<Long, Long>> setItems = this.mAdapter.getCheckedItems();
 //        for (Pair<Long, Long> pair : setItems) {
 //            myDB.deleteToDo(this.mAdapter.getChild((int) (long) pair.first, (int) (long) pair.second).toString(),
 //                    this.mAdapter.getGroup((int) (long) pair.first).toString());
@@ -202,5 +228,4 @@ public class ActivityToDoListPage extends AppCompatActivity {
         Intent i = new Intent(this, ActivityCreateToDoPage.class);
         startActivity(i);
     }
-
 }
