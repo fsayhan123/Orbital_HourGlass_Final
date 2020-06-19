@@ -1,5 +1,6 @@
 package com.example.weekcalendar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -17,8 +18,16 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -78,38 +87,54 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         time_scroller = inflatedView.findViewById(R.id.date_selector_time);
 
         Intent i = getIntent();
-        int num = i.getIntExtra("expense ID", -1);
+        String num = i.getStringExtra("expense ID");
         Toast.makeText(this, String.valueOf(num), Toast.LENGTH_SHORT).show();
-        if (num != -1) {
-            Cursor results = myDB.getExpenseDetails(num);
-            results.moveToNext();
-            expenditure = findViewById(R.id.expenditure);
-            expenditure.setText(results.getString(4));
+        if (num != null) {
+            System.out.println(num);
+            DocumentReference docRef = db.collection("expense").document(num);
+            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            String category = document.get("Category").toString();
+                            s.setAdapter(adapter);
+                            s.setSelection(getIndex(s, category));
 
-            dateDialog = findViewById(R.id.select_date);
-            String date = results.getString(1);
-            try {
-                Date d = stringToDate.parse(date);
-                CustomDay myDay = new CustomDay(d);
-//                Toast.makeText(this, d.toString(), Toast.LENGTH_SHORT).show();
-                String output = dateToString.format(d);
-//                Toast.makeText(this, output, Toast.LENGTH_SHORT).show();
-                dateDialog.setText(myDay.getDate());
-                // why doesnt this work?
-//                time_scroller.setDefaultDate(d);
-//                Toast.makeText(this, time_scroller.getDate().toString(), Toast.LENGTH_SHORT).show();
-            } catch (ParseException e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+                            String date = document.get("Date").toString();
+                            dateDialog = findViewById(R.id.select_date);
+                            try {
+                                Date d = stringToDate.parse(date);
+                                CustomDay myDay = new CustomDay(d);
+                                String output = dateToString.format(d);
+                                dateDialog.setText(myDay.getDate());
+                            } catch (ParseException e) {
+                                System.out.println(e);
+                            }
 
-            cost.setText(String.format("%.2f", Double.parseDouble(results.getString(3))));
+                            String name = document.get("Name").toString();
+                            expenditure = findViewById(R.id.expenditure);
+                            expenditure.setText(name);
 
-            s.setAdapter(adapter);
-            String category = results.getString(2);
-            s.setSelection(getIndex(s, category));
+                            String amount = document.get("Amount").toString();
+                            cost.setText(amount);
 
-            addExpenditure.setText("Update Expenditure");
+
+                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
+                        } else {
+                            Log.d("TAG", "No such document");
+                        }
+                    } else {
+                        Log.d("TAG", "get failed with ", task.getException());
+                    }
+                }
+            });
+
+
+            System.out.println(num);
             addExpenditure.setOnClickListener(v -> updateExpense(num));
+            addExpenditure.setText("Update Expenditure");
         } else {
             s.setAdapter(new NothingSelectedSpinnerAdapter(adapter, R.layout.spinner_nothing_selected, this));
 
@@ -164,8 +189,21 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         }
     }
 
-    private void updateExpense(int ID) {
+    private void updateExpense(String ID) {
+        if (checkValidInput()) {
+            Map<String, Object> expense = new HashMap<>();
+            String datePreEdited = date.getText().toString();
+            String editedDate = HelperMethods.formatDateForFirebase(datePreEdited);
+            expense.put("userID", this.userID);
+            expense.put("Date", editedDate);
+            expense.put("Category", s.getSelectedItem().toString());
+            expense.put("Amount", cost.getText().toString());
+            expense.put("Name", ((EditText) findViewById(R.id.expenditure)).getText().toString());
 
+            db.collection("expense").document(ID).set(expense);
+            Intent intent = new Intent(this, ActivityExpensePage.class);
+            startActivity(intent);
+        }
     }
 
     @Override

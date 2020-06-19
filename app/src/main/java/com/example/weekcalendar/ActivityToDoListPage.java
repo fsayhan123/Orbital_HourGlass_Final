@@ -198,4 +198,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
 //        }
 //    }
 
+    public void updateToDo() {
+        Intent i = new Intent(this, ActivityCreateToDoPage.class);
+        startActivity(i);
+    }
+
 }

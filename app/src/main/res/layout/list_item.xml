@@ -13,5 +13,6 @@
         android:layout_height="wrap_content"
         android:paddingLeft="30dp"
         android:text="TextView"
+        android:longClickable="true"
         android:textSize="20sp" />
 </LinearLayout>

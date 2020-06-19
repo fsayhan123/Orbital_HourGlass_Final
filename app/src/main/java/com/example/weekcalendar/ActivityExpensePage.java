@@ -99,46 +99,6 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
         startActivity(i);
     }
 
-    // Returns a Map of each day along with expense category
-    /*private Map<CustomDay, List<CustomExpenseCategory>> getSpendingEachDay() {
-        spendingEachDay = new HashMap<>();
-        for (CustomDay d : daysWithExpenditure) {
-            String day = d.getdd();
-            if (day.length() == 1) {
-                day = "0" + day;
-            }
-            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
-            Cursor result = myDB.getDayExpenseData(daySQL);
-
-            HashMap<String, List<CustomExpense>> catHashMap = new HashMap<>();
-            List<CustomExpenseCategory> temp = new ArrayList<>();
-            CustomExpenseCategory exCat;
-
-            for (int i = 0; i < result.getCount(); i++) {
-                result.moveToNext();
-                int id = Integer.parseInt(result.getString(0));
-                String category = result.getString(2);
-                String name = result.getString(4);
-                String amount = result.getString(3);
-                if (catHashMap.containsKey(category)) {
-                    catHashMap.get(category).add(new CustomExpense(id, name, Double.parseDouble(amount)));
-                } else {
-                    List<CustomExpense> customExpenseCategory = new ArrayList<>();
-                    customExpenseCategory.add(new CustomExpense(id, name, Double.parseDouble(amount)));
-                    catHashMap.put(category, customExpenseCategory);
-                }
-            }
-
-            for (Map.Entry<String, List<CustomExpense>> entry : catHashMap.entrySet()) {
-                String key = entry.getKey();
-                List<CustomExpense> value = entry.getValue();
-                exCat = new CustomExpenseCategory(key, value);
-                temp.add(exCat);
-            }
-            spendingEachDay.put(d, temp);
-        }
-        return spendingEachDay;
-    }*/
 
     // Returns a List<CustomDay> that user has a spending;
     private void getSpendingDays() throws ParseException {

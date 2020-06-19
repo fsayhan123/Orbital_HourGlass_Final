@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -14,6 +15,9 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
@@ -51,6 +55,15 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         }
         TextView expandedListTextView = (CheckBox) convertView.findViewById(R.id.list_child);
         expandedListTextView.setText(expandedListText);
+
+        expandedListTextView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Intent i = new Intent(context, ActivityCreateToDoPage.class);
+                context.startActivity(i);
+                return true;
+            }
+        });
 
         Pair<Long, Long> tag = new Pair<>(getGroupId(listPosition),
                 getChildId(listPosition, expandedListPosition));
