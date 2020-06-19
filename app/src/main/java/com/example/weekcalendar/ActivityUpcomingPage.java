@@ -14,19 +14,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
     private static final String TAG = ActivityUpcomingPage.class.getSimpleName();
@@ -44,7 +40,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
-    private WeekRecyclerViewAdapter mAdapter;
+    private UpcomingRecyclerViewAdapter mAdapter;
+
+    // Store local copy of events data
+    private Map<String, CustomEvent> cache;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -94,18 +93,14 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
-    private void processDocument(QueryDocumentSnapshot document) {
-        String title = (String) document.get("eventTitle");
-        String date = (String) document.get("startDate");
-        String time = (String) document.get("startTime");
-        CustomEvent event = new CustomEvent(title, date, time);
-        Date d = null;
+    private void addToMap(CustomEvent event) {
+        Date startD = null;
         try {
-            d = dateFormatter.parse(date);
+            startD = dateFormatter.parse(event.getStartDate());
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        CustomDay day = new CustomDay(d);
+        CustomDay day = new CustomDay(startD);
         if (!this.setOfDays.contains(day)) {
             this.setOfDays.add(day);
             this.listOfDays.add(day);
@@ -114,6 +109,37 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             this.mapOfEvents.put(day, temp);
         } else {
             this.mapOfEvents.get(day).add(event);
+        }
+        if (this.cache.get(event.getId()) == null) {
+            this.cache.put(event.getId(), event);
+        }
+    }
+
+    private void processDocument(QueryDocumentSnapshot document) {
+        String title = (String) document.get("eventTitle");
+        String startDate = (String) document.get("startDate");
+        String endDate = (String) document.get("endDate");
+        String startTime = (String) document.get("startTime");
+        String endTime = (String) document.get("endTime");
+        String docID = document.getId();
+        if (startDate.equals(endDate)) { // just one day
+            CustomEvent event = new CustomEvent(title, startDate, endDate, startTime, endTime, docID);
+            addToMap(event);
+        } else { // > 1 day
+            LocalDate first = LocalDate.parse(startDate);
+            LocalDate last = LocalDate.parse(endDate);
+            long numDays = DAYS.between(first, last);
+            for (int i = 0; i <= numDays; i++) {
+                String newDate;
+                if (i == 0) {
+                    newDate = startDate;
+                } else {
+                    newDate = first.plusDays(i).toString();
+                    startTime = "All Day"; // change later to support end time
+                }
+                CustomEvent event = new CustomEvent(title, newDate, endDate, startTime, endTime, docID);
+                addToMap(event);
+            }
         }
     }
 
@@ -133,10 +159,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                         if (queryDocumentSnapshots.isEmpty()) {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
+                            cache = new HashMap<>();
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processDocument(document);
                             }
-                            mAdapter = new WeekRecyclerViewAdapter(listOfDays, mapOfEvents,
+                            mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
                                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);
                             mRecyclerView.setAdapter(mAdapter);
                         }
@@ -162,7 +189,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     @Override
     public void onEventClickListener(String eventId) {
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
-        i.putExtra("eventId", eventId);
+        i.putExtra("event", this.cache.get(eventId));
         startActivity(i);
     }
 }

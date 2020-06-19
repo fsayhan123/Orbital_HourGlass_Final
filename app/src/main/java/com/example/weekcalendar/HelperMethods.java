@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HelperMethods {
-    private static Map<String, String> mapper = new HashMap<String, String>()
+    private static Map<String, String> stringToNumMonth = new HashMap<String, String>()
     {{
         put("Jan", "01");
         put("Feb", "02");
@@ -20,17 +20,26 @@ public class HelperMethods {
         put("Dec", "12");
     }};
 
+    private static String[] numToStringMonth = new String[] { "",
+            "January", "February", "March", "April", "May", "June", "July",
+            "August", "September", "October", "November", "December" };
+
     public static String convertMonth(String month) {
-        return mapper.get(month);
+        return stringToNumMonth.get(month);
     }
 
-    public static String formatDate(String date) {
+    public static String formatDateForFirebase(String date) {
         String[] dateArr = date.split(" ");
         dateArr[1] = convertMonth(dateArr[1].substring(0,3));
         if (dateArr[0].length() == 1) {
             dateArr[0] = "0" + dateArr[0];
         }
         return String.join("-", dateArr[2], dateArr[1], dateArr[0]);
+    }
+
+    public static String formatDateForView(String date) {
+        String[] dateArr = date.split("-");
+        return String.join(" ", dateArr[2], numToStringMonth[Integer.parseInt(dateArr[1])], dateArr[0]);
     }
 
     // ensure is 12h format, with AM/ PM notation, specifically of this format: " xx:yy AM "

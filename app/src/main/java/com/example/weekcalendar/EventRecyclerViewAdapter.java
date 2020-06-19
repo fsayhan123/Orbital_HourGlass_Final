@@ -3,6 +3,7 @@ package com.example.weekcalendar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,11 +19,13 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
         private String id;
         private TextView time;
         private TextView eventTitle;
+        private LinearLayout eachEventlayout;
 
         public MyEventViewHolder(@NonNull View itemView) {
             super(itemView);
             time = itemView.findViewById(R.id.time);
-            eventTitle = itemView.findViewById(R.id.event_details);
+            eventTitle = itemView.findViewById(R.id.event_details_toolbar);
+            eachEventlayout = itemView.findViewById(R.id.each_event_layout);
         }
     }
 
@@ -37,17 +40,13 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_event, parent, false);
         EventRecyclerViewAdapter.MyEventViewHolder holder = new EventRecyclerViewAdapter.MyEventViewHolder(view);
 
-        holder.time.setOnClickListener(v -> {
-            String time = holder.time.getText().toString();
-            String event = holder.eventTitle.getText().toString();
-            mEventClickListener.onEventClickListener(holder.id);
+        holder.eachEventlayout.setOnClickListener(v -> {
+
         });
 
-        holder.eventTitle.setOnClickListener(v -> {
-            String time = holder.time.getText().toString();
-            String event = holder.eventTitle.getText().toString();
-            mEventClickListener.onEventClickListener(holder.id);
-        });
+        holder.time.setOnClickListener(v -> mEventClickListener.onEventClickListener(holder.id));
+
+        holder.eventTitle.setOnClickListener(v -> mEventClickListener.onEventClickListener(holder.id));
 
         return holder;
     }
@@ -56,7 +55,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
     public void onBindViewHolder(@NonNull EventRecyclerViewAdapter.MyEventViewHolder holder, int position) {
         CustomEvent e = this.listOfEvents.get(position);
         holder.id = e.getId();
-        holder.time.setText(e.getTime());
+        holder.time.setText(e.getStartTime());
         holder.eventTitle.setText(e.getTitle());
     }
 

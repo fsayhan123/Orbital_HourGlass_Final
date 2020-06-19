@@ -79,7 +79,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
              Map<String, Object> details = new HashMap<>();
              details.put("userID", userID);
-             details.put("date", HelperMethods.formatDate(date));
+             details.put("date", HelperMethods.formatDateForFirebase(date));
              details.put("title", title);
 
              c.add(details)

@@ -1,29 +1,19 @@
 package com.example.weekcalendar;
 
 import android.app.Activity;
-import android.content.Context;
-import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerViewAdapter.MyViewHolder> {
+public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRecyclerViewAdapter.MyViewHolder> {
 
     private List<CustomDay> listOfDates;
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
@@ -45,8 +35,8 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
         }
     }
 
-    public WeekRecyclerViewAdapter(List<CustomDay> listOfDates, Map<CustomDay, List<CustomEvent>> mapOfEvents,
-                                   MyOnDateClickListener dateClicker, Activity a) {
+    public UpcomingRecyclerViewAdapter(List<CustomDay> listOfDates, Map<CustomDay, List<CustomEvent>> mapOfEvents,
+                                       MyOnDateClickListener dateClicker, Activity a) {
         this.listOfDates = listOfDates;
         this.mapOfEvents = mapOfEvents;
         this.mDateClickListener = dateClicker;
@@ -55,9 +45,9 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
 
     @NonNull
     @Override
-    public WeekRecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public UpcomingRecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_day, parent, false);
-        WeekRecyclerViewAdapter.MyViewHolder holder = new MyViewHolder(eachDayView);
+        UpcomingRecyclerViewAdapter.MyViewHolder holder = new MyViewHolder(eachDayView);
 
         holder.date.setOnClickListener(v -> {
             String day = holder.date.getText().toString();
@@ -75,7 +65,7 @@ public class WeekRecyclerViewAdapter extends RecyclerView.Adapter<WeekRecyclerVi
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final WeekRecyclerViewAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final UpcomingRecyclerViewAdapter.MyViewHolder holder, int position) {
         final CustomDay d = listOfDates.get(position);
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());

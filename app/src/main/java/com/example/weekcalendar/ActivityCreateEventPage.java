@@ -99,8 +99,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         if (checkFields()) {
             String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
             String toDo = this.todo1.getText().toString();
-            String startDate = HelperMethods.formatDate(this.selectStartDate.getText().toString());
-            String endDate = HelperMethods.formatDate(this.selectEndDate.getText().toString());
+            String startDate = HelperMethods.formatDateForFirebase(this.selectStartDate.getText().toString());
+            String endDate = HelperMethods.formatDateForFirebase(this.selectEndDate.getText().toString());
             String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
             String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());
 

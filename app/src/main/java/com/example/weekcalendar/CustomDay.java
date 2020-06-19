@@ -16,7 +16,7 @@ public class CustomDay implements Comparable<CustomDay> {
     private String MMM;
     private int yyyy;
 
-    static String[] months = new String[] { "",
+    private static String[] months = new String[] { "",
             "January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December" };
 
