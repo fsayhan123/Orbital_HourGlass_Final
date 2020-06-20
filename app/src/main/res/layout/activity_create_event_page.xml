@@ -50,21 +50,50 @@
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/select_start_date"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectStartDateLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:text="Select Start Date"
-                    android:textColor="#4A4A4A" />
+                    android:gravity="center"
+                    android:textAlignment="gravity"
+                    app:counterEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="false"
+                    app:hintAnimationEnabled="false"
+                    app:hintEnabled="false">
 
-                <Button
-                    android:id="@+id/select_end_date"
+                    <Button
+                        android:id="@+id/select_start_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Select Start Date"
+                        android:textColor="#4A4A4A" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectEndDateLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:text="Select End Date"
-                    android:textColor="#4A4A4A" />
+                    android:gravity="center"
+                    android:textAlignment="gravity"
+                    app:counterEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="false"
+                    app:hintAnimationEnabled="false"
+                    app:hintEnabled="false"
+                    app:passwordToggleEnabled="false">
+
+                    <Button
+                        android:id="@+id/select_end_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Select End Date"
+                        android:textColor="#4A4A4A" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
 
