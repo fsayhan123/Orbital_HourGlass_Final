@@ -23,18 +23,18 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<CustomDay> expandableListTitle;
-    private Map<CustomDay, List<String>> expandableListDetail;
+    private Map<CustomDay, List<CustomToDo>> expandableListDetail;
     private final Set<Pair<Long, Long>> checkedItems = new HashSet<>();
 
     public ToDoListViewAdapter(Context context, List<CustomDay> expandableListTitle,
-                               Map<CustomDay, List<String>> expandableListDetail) {
+                               Map<CustomDay, List<CustomToDo>> expandableListDetail) {
         this.context = context;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
     }
 
     @Override
-    public Object getChild(int listPosition, int expandedListPosition) {
+    public CustomToDo getChild(int listPosition, int expandedListPosition) {
         return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
                 .get(expandedListPosition);
     }
@@ -47,7 +47,8 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
-        final String expandedListText = (String) getChild(listPosition, expandedListPosition);
+        CustomToDo toDo = getChild(listPosition, expandedListPosition);
+        final String expandedListText = toDo.getDetails();
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -60,6 +61,9 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
             @Override
             public boolean onLongClick(View v) {
                 Intent i = new Intent(context, ActivityCreateToDoPage.class);
+                i.putExtra("toDoID", toDo.getID());
+                i.putExtra("details", toDo.getDetails());
+                i.putExtra("date", toDo.getDate());
                 context.startActivity(i);
                 return true;
             }

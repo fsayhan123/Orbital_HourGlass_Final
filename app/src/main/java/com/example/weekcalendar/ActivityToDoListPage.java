@@ -42,7 +42,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
     // ExpandableListView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
-    private Map<CustomDay, List<String>> mapOfToDo;
+    private Map<CustomDay, List<CustomToDo>> mapOfToDo;
     private ExpandableListView expandableListView;
     private ToDoListViewAdapter mAdapter;
 
@@ -114,6 +114,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
     }
 
     private void processDocument(QueryDocumentSnapshot document) {
+        String ID = document.getId().toString();
         String date = (String) document.get("date");
         String title = (String) document.get("title");
         Date d = null;
@@ -126,11 +127,13 @@ public class ActivityToDoListPage extends AppCompatActivity {
         if (!this.setOfDays.contains(day)) {
             this.setOfDays.add(day);
             this.listOfDays.add(day);
-            List<String> temp = new ArrayList<>();
-            temp.add(title);
+            List<CustomToDo> temp = new ArrayList<>();
+            CustomToDo toDo = new CustomToDo(ID, title, date);
+            temp.add(toDo);
             this.mapOfToDo.put(day, temp);
         } else {
-            this.mapOfToDo.get(day).add(title);
+            CustomToDo toDo = new CustomToDo(ID, title, date);
+            this.mapOfToDo.get(day).add(toDo);
         }
     }
 

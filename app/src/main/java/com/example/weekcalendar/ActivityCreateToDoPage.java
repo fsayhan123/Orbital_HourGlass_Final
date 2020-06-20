@@ -59,6 +59,19 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(this, ActivityToDoListPage.class));
         });
+
+        Intent i = getIntent();
+        String ID = i.getStringExtra("toDoID");
+        String details = i.getStringExtra("details");
+        String date = i.getStringExtra("date");
+        date = HelperMethods.formatDateForView(date);
+        if (ID != null) {
+            this.toDoTitle.setText(details);
+            this.selectDate.setText(date);
+            this.createToDo.setOnClickListener(v -> updateToDo(ID));
+            this.createToDo.setText("Update To Do");
+
+        }
     }
 
     private boolean checkFields() {
@@ -93,6 +106,22 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     private void openSelectDateDialog(Button b) {
         MyDateDialog myDateDialog = new MyDateDialog(b);
         myDateDialog.show(getSupportFragmentManager(), "date dialog");
+    }
+
+    public void updateToDo(String ID) {
+        if (checkFields()) {
+            String date = selectDate.getText().toString();
+            String title = toDoTitle.getText().toString();
+
+            Map<String, Object> details = new HashMap<>();
+            details.put("userID", userID);
+            details.put("date", HelperMethods.formatDateForFirebase(date));
+            details.put("title", title);
+
+            fStore.collection("todo").document(ID).set(details);
+            Intent intent = new Intent(this, ActivityToDoListPage.class);
+            startActivity(intent);
+        }
     }
 
     @Override
