@@ -148,7 +148,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         this.listOfDays = new ArrayList<>();
         this.mapOfEvents = new HashMap<>();
         this.setOfDays = new HashSet<>();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         c.whereEqualTo("userID", userID)
                 .orderBy("startDate")
                 .orderBy("startTime")

@@ -4,9 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class CustomExpense implements Parcelable {
+    private String ID;
     private String expenseName;
     private double cost;
-    private String ID;
 
     public CustomExpense(String ID, String expenseName, double cost) {
         this.ID = ID;
@@ -15,8 +15,9 @@ public class CustomExpense implements Parcelable {
     }
 
     protected CustomExpense(Parcel in) {
-        expenseName = in.readString();
-        cost = in.readDouble();
+        this.ID = in.readString();
+        this.expenseName = in.readString();
+        this.cost = in.readDouble();
     }
 
     public static final Creator<CustomExpense> CREATOR = new Creator<CustomExpense>() {
@@ -46,8 +47,9 @@ public class CustomExpense implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(expenseName);
-        dest.writeDouble(cost);
+        dest.writeString(this.ID);
+        dest.writeString(this.expenseName);
+        dest.writeDouble(this.cost);
     }
 
     public String getID() {

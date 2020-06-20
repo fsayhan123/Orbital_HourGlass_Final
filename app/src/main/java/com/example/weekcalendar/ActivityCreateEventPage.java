@@ -200,10 +200,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             cEvents.add(eventDetails)
                     .addOnSuccessListener(docRef -> {
                         if (toDoDetails != null) {
-                            DocumentReference toDoDocRef = cToDo.document();
                             toDoDetails.put("eventID", docRef.getId());
-                            toDoDetails.put("todoID", toDoDocRef.getId());
-                            toDoDocRef.set(toDoDetails)
+                            cToDo.add(toDoDetails)
                                     .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }

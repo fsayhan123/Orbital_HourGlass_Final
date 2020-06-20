@@ -31,6 +31,8 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     private String userID;
     private CollectionReference c;
 
+    private CustomToDo toDo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,16 +63,12 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         });
 
         Intent i = getIntent();
-        String ID = i.getStringExtra("toDoID");
-        String details = i.getStringExtra("details");
-        String date = i.getStringExtra("date");
-        date = HelperMethods.formatDateForView(date);
-        if (ID != null) {
-            this.toDoTitle.setText(details);
-            this.selectDate.setText(date);
-            this.createToDo.setOnClickListener(v -> updateToDo(ID));
+        this.toDo = i.getParcelableExtra("todo");
+        if (toDo != null) {
+            this.toDoTitle.setText(this.toDo.getDetails());
+            this.selectDate.setText(HelperMethods.formatDateForView(this.toDo.getDate()));
+            this.createToDo.setOnClickListener(v -> updateToDo());
             this.createToDo.setText("Update To Do");
-
         }
     }
 
@@ -108,17 +106,17 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         myDateDialog.show(getSupportFragmentManager(), "date dialog");
     }
 
-    public void updateToDo(String ID) {
+    public void updateToDo() {
         if (checkFields()) {
-            String date = selectDate.getText().toString();
-            String title = toDoTitle.getText().toString();
+            String date = this.selectDate.getText().toString();
+            String title = this.toDoTitle.getText().toString();
 
             Map<String, Object> details = new HashMap<>();
             details.put("userID", userID);
             details.put("date", HelperMethods.formatDateForFirebase(date));
             details.put("title", title);
 
-            fStore.collection("todo").document(ID).set(details);
+            fStore.collection("todo").document(this.toDo.getID()).set(details);
             Intent intent = new Intent(this, ActivityToDoListPage.class);
             startActivity(intent);
         }

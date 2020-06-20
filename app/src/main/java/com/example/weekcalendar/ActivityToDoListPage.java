@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -75,46 +76,25 @@ public class ActivityToDoListPage extends AppCompatActivity {
         // Link to XML
         this.expandableListView = findViewById(R.id.expandableListView);
 
-//        this.expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-//            @Override
-//            public void onGroupExpand(int groupPosition) {
-//                Toast.makeText(getApplicationContext(),
-//                        listOfDays.get(groupPosition) + " List Expanded.",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//        this.expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
-//            @Override
-//            public void onGroupCollapse(int groupPosition) {
-//                Toast.makeText(getApplicationContext(),
-//                        listOfDays.get(groupPosition) + " List Collapsed.",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//        this.expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-//            @Override
-//            public boolean onChildClick(ExpandableListView parent, View v,
-//                                        int groupPosition, int childPosition, long id) {
-//                Toast.makeText(
-//                        getApplicationContext(),
-//                        listOfDays.get(groupPosition)
-//                                + " -> "
-//                                + mapOfToDo.get(
-//                                listOfDays.get(groupPosition)).get(childPosition), Toast.LENGTH_SHORT
-//                ).show();
-//                return false;
-//            }
-//        });
-
         // Set up navigation drawer
         this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
         this.navDrawer.setupNavDrawerPane();
     }
 
+    private void addToMap(CustomDay day, CustomToDo toDo) {
+        if (!this.setOfDays.contains(day)) {
+            this.setOfDays.add(day);
+            this.listOfDays.add(day);
+            List<CustomToDo> temp = new ArrayList<>();
+            temp.add(toDo);
+            this.mapOfToDo.put(day, temp);
+        } else {
+            this.mapOfToDo.get(day).add(toDo);
+        }
+    }
+
     private void processDocument(QueryDocumentSnapshot document) {
-        String ID = document.getId().toString();
+        String ID = document.getId();
         String date = (String) document.get("date");
         String title = (String) document.get("title");
         Date d = null;
@@ -124,17 +104,8 @@ public class ActivityToDoListPage extends AppCompatActivity {
             e.printStackTrace();
         }
         CustomDay day = new CustomDay(d);
-        if (!this.setOfDays.contains(day)) {
-            this.setOfDays.add(day);
-            this.listOfDays.add(day);
-            List<CustomToDo> temp = new ArrayList<>();
-            CustomToDo toDo = new CustomToDo(ID, title, date);
-            temp.add(toDo);
-            this.mapOfToDo.put(day, temp);
-        } else {
-            CustomToDo toDo = new CustomToDo(ID, title, date);
-            this.mapOfToDo.get(day).add(toDo);
-        }
+        CustomToDo toDo = new CustomToDo(ID, title, date);
+        addToMap(day, toDo);
     }
 
     private void fetchToDos() {
@@ -200,35 +171,17 @@ public class ActivityToDoListPage extends AppCompatActivity {
 
     public void deleteToDo() {
         Set<Pair<Long, Long>> setItems = this.mAdapter.getCheckedItems();
-//        for (Pair<Long, Long> pair : setItems) {
-//            myDB.deleteToDo(this.mAdapter.getChild((int) (long) pair.first, (int) (long) pair.second).toString(),
-//                    this.mAdapter.getGroup((int) (long) pair.first).toString());
-//        }
-//
-//        Intent intent = new Intent(this, ActivityToDoListPage.class);
-//        startActivity(intent);
-    }
-
-//    public void getData() {
-//        this.mapOfToDo = new HashMap<>();
-//        for (CustomDay d : this.listOfDays) {
-//            String day = d.getdd();
-//            if (day.length() == 1) {
-//                day = "0" + day;
-//            }
-//            String daySQL = d.getyyyy() + "-" + myDB.convertDate(d.getMMM()) + "-" + day;
-//            Cursor result = myDB.getToDo(daySQL);
-//            this.mapOfToDo.put(d, new ArrayList<>());
-//            for (int i = 0; i < result.getCount(); i++) {
-//                result.moveToNext();
-//                String description = result.getString(2);
-//                this.mapOfToDo.get(d).add(description);
-//            }
-//        }
-//    }
-
-    public void updateToDo() {
-        Intent i = new Intent(this, ActivityCreateToDoPage.class);
-        startActivity(i);
+        for (Pair<Long, Long> pair : setItems) {
+            int groupPos = (int) (long) pair.first;
+            int childPos = (int) (long) pair.second;
+            CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
+            this.mAdapter.remove(groupPos, childPos);
+            this.c.document(todo.getID())
+                    .delete()
+                    .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+        }
+        setItems.clear();
+        this.mAdapter.resetCheckBoxes();
     }
 }

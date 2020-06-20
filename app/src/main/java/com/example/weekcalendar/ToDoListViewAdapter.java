@@ -1,5 +1,6 @@
 package com.example.weekcalendar;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     private List<CustomDay> expandableListTitle;
     private Map<CustomDay, List<CustomToDo>> expandableListDetail;
     private final Set<Pair<Long, Long>> checkedItems = new HashSet<>();
+
+    private Set<CheckBox> myCheckBoxes = new HashSet<>();
 
     public ToDoListViewAdapter(Context context, List<CustomDay> expandableListTitle,
                                Map<CustomDay, List<CustomToDo>> expandableListDetail) {
@@ -61,9 +64,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
             @Override
             public boolean onLongClick(View v) {
                 Intent i = new Intent(context, ActivityCreateToDoPage.class);
-                i.putExtra("toDoID", toDo.getID());
-                i.putExtra("details", toDo.getDetails());
-                i.putExtra("date", toDo.getDate());
+                i.putExtra("todo", toDo);
                 context.startActivity(i);
                 return true;
             }
@@ -79,8 +80,10 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                 final Pair<Long, Long> tag = (Pair<Long, Long>) v.getTag();
                 if (cb.isChecked()) {
                     checkedItems.add(tag);
+                    myCheckBoxes.add(cb);
                 } else {
                     checkedItems.remove(tag);
+                    myCheckBoxes.remove(cb);
                 }
             }
         });
@@ -89,7 +92,8 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int listPosition) {
-        return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
+        return this.expandableListDetail
+                .get(this.expandableListTitle.get(listPosition))
                 .size();
     }
 
@@ -135,5 +139,27 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     public Set<Pair<Long, Long>> getCheckedItems() {
         return checkedItems;
+    }
+
+    public void remove(int groupPos, int childPos) {
+        CustomDay group = this.expandableListTitle.get(groupPos);
+        List<CustomToDo> toDos = this.expandableListDetail.get(group);
+        toDos.remove(childPos);
+        if (this.getChildrenCount(groupPos) == 0) {
+            this.expandableListTitle.remove(groupPos);
+        }
+        setNewItems(this.expandableListTitle);
+    }
+
+    public void setNewItems(List<CustomDay> listOfCat) {
+        this.expandableListTitle = listOfCat;
+        notifyDataSetChanged();
+    }
+
+    public void resetCheckBoxes() {
+        for (CheckBox box : this.myCheckBoxes) {
+            box.setChecked(false);
+        }
+        this.myCheckBoxes.clear();
     }
 }
