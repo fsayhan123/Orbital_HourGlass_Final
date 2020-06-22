@@ -87,14 +87,14 @@ public class SetupNavDrawer {
         TextView nav_user = hView.findViewById(R.id.user);
 
 
-//        if (fAuth.getCurrentUser() == null) {
-//            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
-//            if (acct != null) {
-//                String personName = acct.getDisplayName();
-//                Toast.makeText(a, personName, Toast.LENGTH_SHORT).show();
-//                nav_user.setText(personName);
-//            }
-//        } else {
+        if (fAuth.getCurrentUser() == null) {
+            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
+            if (acct != null) {
+                String personName = acct.getDisplayName();
+                Toast.makeText(a, personName, Toast.LENGTH_SHORT).show();
+                nav_user.setText(personName);
+            }
+        } else {
             String userID = fAuth.getCurrentUser().getUid();
             DocumentReference docRef = fStore.collection("users").document(userID);
             docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
@@ -105,8 +105,6 @@ public class SetupNavDrawer {
                     nav_user.setText(username);
                 }
             });
-//        }
-
-
+        }
     }
 }
