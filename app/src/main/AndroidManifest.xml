@@ -15,7 +15,13 @@
         android:theme="@style/AppTheme">
         <activity android:name=".FetchGoogleCalendarEvents"></activity>
         <activity android:name=".ActivityRegisterPage" />
-        <activity android:name=".ActivityLoginPage" />
+        <activity android:name=".ActivityLoginPage">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ActivityEachDayExpenses" />
         <activity android:name=".ActivityCreateToDoPage" />
         <activity
@@ -26,11 +32,7 @@
         <activity android:name=".ActivityEventDetailsPage" />
         <activity android:name=".ActivityCreateEventPage" />
         <activity android:name=".ActivityUpcomingPage">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data

@@ -13,6 +13,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,6 +41,12 @@ public class SetupNavDrawer {
     public void setupNavDrawerPane() {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(a.getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(a, gso);
 
         ((AppCompatActivity) a).setSupportActionBar(toolbar);
 
@@ -73,7 +81,7 @@ public class SetupNavDrawer {
                     break;
                 case R.id.logout_button:
                     Toast.makeText(a, "Logout",Toast.LENGTH_SHORT).show();
-                    FirebaseAuth.getInstance().signOut();
+                    mGoogleSignInClient.signOut();
                     Intent i4 = new Intent(a, ActivityLoginPage.class);
                     a.startActivity(i4);
                     break;
@@ -86,15 +94,13 @@ public class SetupNavDrawer {
         View hView =  nv.getHeaderView(0);
         TextView nav_user = hView.findViewById(R.id.user);
 
-
-        if (fAuth.getCurrentUser() == null) {
-            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
-            if (acct != null) {
-                String personName = acct.getDisplayName();
-                Toast.makeText(a, personName, Toast.LENGTH_SHORT).show();
-                nav_user.setText(personName);
-            }
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
+        if (acct != null) {
+            String personName = acct.getDisplayName();
+            Toast.makeText(a, "logged in with Google account", Toast.LENGTH_SHORT).show();
+            nav_user.setText(personName);
         } else {
+            Toast.makeText(a, "logged in with Firebase account", Toast.LENGTH_SHORT).show();
             String userID = fAuth.getCurrentUser().getUid();
             DocumentReference docRef = fStore.collection("users").document(userID);
             docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
@@ -106,5 +112,7 @@ public class SetupNavDrawer {
                 }
             });
         }
+
+
     }
 }

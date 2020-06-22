@@ -18,8 +18,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -30,34 +32,55 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-public class ActivityLoginPage extends AppCompatActivity implements View.OnClickListener {
+public class ActivityLoginPage extends AppCompatActivity {
     private static final String TAG = ActivityLoginPage.class.getSimpleName();
 
     private EditText mEmail, mPassword;
     private Button mLoginButton;
-    private FirebaseAuth fAuth;
     private ProgressBar progressBar;
     private TextView mRegister;
 
-    private static final int RC_SIGN_IN = 9001;
+    private FirebaseAuth fAuth;
+    private static final int RC_SIGN_IN = 1;
 
     // Google sign in
     private SignInButton signInButton;
     private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth.AuthStateListener authStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-//                .requestScopes()
-                .build();
+        fAuth = FirebaseAuth.getInstance();
+//        not necessary: https://stackoverflow.com/questions/48794132/is-it-necessary-to-add-an-authstatelistener-in-every-activity-of-android-firebas
+//        authStateListener = new FirebaseAuth.AuthStateListener() {
+//            @Override
+//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                FirebaseUser user = fAuth.getCurrentUser();
+//                if (user != null) {
+//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+//                } else {
+//                    // means user is signed out
+//                    Log.d(TAG, "onAuthStateChanged:signed_out");
+//                }
+//            }
+//        };
 
+        String serverClientId = getString(R.string.default_web_client_id);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"))
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
         signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setOnClickListener(this);
+        signInButton.setOnClickListener(v -> {
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
 
         mEmail = findViewById(R.id.email);
         mPassword = findViewById(R.id.password);
@@ -67,8 +90,6 @@ public class ActivityLoginPage extends AppCompatActivity implements View.OnClick
 
 
         mRegister.setOnClickListener(v -> toRegister());
-
-        fAuth = FirebaseAuth.getInstance();
 
         mLoginButton.setOnClickListener(v -> {
             String email = mEmail.getText().toString().trim();
@@ -126,18 +147,6 @@ public class ActivityLoginPage extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.sign_in_button) {
-            signIn();
-        }
-    }
-
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
@@ -146,6 +155,7 @@ public class ActivityLoginPage extends AppCompatActivity implements View.OnClick
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+                String authCode = account.getServerAuthCode();
                 Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
@@ -164,6 +174,9 @@ public class ActivityLoginPage extends AppCompatActivity implements View.OnClick
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fAuth.getCurrentUser();
+                            Toast.makeText(ActivityLoginPage.this, "Logging in as " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                            Intent i = new Intent(getApplicationContext(), ActivityUpcomingPage.class);
+                            startActivity(i);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -171,6 +184,14 @@ public class ActivityLoginPage extends AppCompatActivity implements View.OnClick
                         }
                     }
                 });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (authStateListener != null){
+            fAuth.removeAuthStateListener(authStateListener);
+        }
     }
 
 }
