@@ -6,9 +6,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -68,17 +72,26 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         // Setup link to Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
-        this.c = this.fStore.collection("events");
+        if (this.fAuth.getCurrentUser() != null) {
+            this.userID = this.fAuth.getCurrentUser().getUid();
+            this.c = this.fStore.collection("events");
+        }
+//        else {
+//            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+//            if (acct != null) {
+//                String personName = acct.getDisplayName();
+//                Toast.makeText(this, personName, Toast.LENGTH_SHORT).show();
+//            }
+//        }
 
         // Fetches data from Firebase
-        fetchEvents();
+//        fetchEvents();
 
-        // Links to XML
-        this.mRecyclerView = findViewById(R.id.week_view);
-        LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
-        this.mRecyclerView.setHasFixedSize(true);
-        this.mRecyclerView.setLayoutManager(manager);
+//        // Links to XML
+//        this.mRecyclerView = findViewById(R.id.week_view);
+//        LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
+//        this.mRecyclerView.setHasFixedSize(true);
+//        this.mRecyclerView.setLayoutManager(manager);
 
         this.floatingCreateEvent = findViewById(R.id.create_event);
         this.floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());

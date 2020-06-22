@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -84,16 +86,27 @@ public class SetupNavDrawer {
         View hView =  nv.getHeaderView(0);
         TextView nav_user = hView.findViewById(R.id.user);
 
-        String userID = fAuth.getCurrentUser().getUid();
 
-        DocumentReference docRef = fStore.collection("users").document(userID);
-        docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                // accessing via key value pairs
-                String username = documentSnapshot.getString("fName");
-                nav_user.setText(username);
-            }
-        });
+//        if (fAuth.getCurrentUser() == null) {
+//            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
+//            if (acct != null) {
+//                String personName = acct.getDisplayName();
+//                Toast.makeText(a, personName, Toast.LENGTH_SHORT).show();
+//                nav_user.setText(personName);
+//            }
+//        } else {
+            String userID = fAuth.getCurrentUser().getUid();
+            DocumentReference docRef = fStore.collection("users").document(userID);
+            docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    // accessing via key value pairs
+                    String username = documentSnapshot.getString("fName");
+                    nav_user.setText(username);
+                }
+            });
+//        }
+
+
     }
 }
