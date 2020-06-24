@@ -5,7 +5,7 @@
     android:id="@+id/register_toolbar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ActivityRegisterPage">
+    tools:context=".activities.ActivityRegisterPage">
 
     <TextView
         android:id="@+id/already_registered"

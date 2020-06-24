@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingBottom="20dp"
-    tools:context=".ActivityCreateEventPage">
+    tools:context=".activities.ActivityCreateEventPage">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/create_event_toolbar"

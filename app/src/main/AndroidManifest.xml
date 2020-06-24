@@ -16,24 +16,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".FetchGoogleCalendarEvents"></activity>
-        <activity android:name=".ActivityRegisterPage" />
-        <activity android:name=".ActivityLoginPage">
+        <activity android:name=".activities.ActivityRegisterPage" />
+        <activity android:name=".activities.ActivityLoginPage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityEachDayExpenses" />
-        <activity android:name=".ActivityCreateToDoPage" />
+        <activity android:name=".activities.ActivityEachDayExpenses" />
+        <activity android:name=".activities.ActivityCreateToDoPage" />
         <activity
-            android:name=".ActivityToDoListPage"
-            android:parentActivityName=".ActivityUpcomingPage" />
-        <activity android:name=".ActivityExpensePage" />
-        <activity android:name=".ActivityCreateExpensePage" />
-        <activity android:name=".ActivityEventDetailsPage" />
-        <activity android:name=".ActivityCreateEventPage" />
-        <activity android:name=".ActivityUpcomingPage">
+            android:name=".activities.ActivityToDoListPage"
+            android:parentActivityName=".activities.ActivityUpcomingPage" />
+        <activity android:name=".activities.ActivityExpensePage" />
+        <activity android:name=".activities.ActivityCreateExpensePage" />
+        <activity android:name=".activities.ActivityEventDetailsPage" />
+        <activity android:name=".activities.ActivityCreateEventPage" />
+        <activity android:name=".activities.ActivityUpcomingPage">
 
         </activity>
 
