@@ -108,10 +108,9 @@ public class SetupNavDrawer {
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(a);
         if (acct != null) {
             String personName = acct.getDisplayName();
-            Toast.makeText(a, "logged in with Google account", Toast.LENGTH_SHORT).show();
             nav_user.setText(personName);
         } else {
-            Toast.makeText(a, "logged in with Firebase account", Toast.LENGTH_SHORT).show();
+            Toast.makeText(a, "Firebase", Toast.LENGTH_SHORT).show();
             String userID = fAuth.getCurrentUser().getUid();
             DocumentReference docRef = fStore.collection("users").document(userID);
             docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {

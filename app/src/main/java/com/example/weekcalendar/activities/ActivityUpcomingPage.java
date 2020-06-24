@@ -12,13 +12,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.MyOnDateClickListener;
 import com.example.weekcalendar.helperclasses.MyOnEventClickListener;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.example.weekcalendar.adapters.UpcomingRecyclerViewAdapter;
 import com.example.weekcalendar.customclasses.CustomDay;
-import com.example.weekcalendar.customclasses.CustomEvent;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -73,12 +73,12 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // RecyclerView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
-    private Map<CustomDay, List<CustomEvent>> mapOfEvents;
+    private Map<CustomDay, List<CustomEventFromFirebase>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private UpcomingRecyclerViewAdapter mAdapter;
 
     // Store local copy of events data
-    private Map<String, CustomEvent> cache;
+    private Map<String, CustomEventFromFirebase> cache;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -160,7 +160,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     }
 
     private void eventToCustomEvent(Event e) {
-//        return new CustomEvent();
+//        return new CustomEventFromFirebase();
     }
 
     private void moveToCreateEventPage() {
@@ -168,7 +168,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
-    private void addToMap(CustomEvent event) {
+    private void addToMap(CustomEventFromFirebase event) {
         Date startD = null;
         try {
             startD = dateFormatter.parse(event.getStartDate());
@@ -179,7 +179,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         if (!this.setOfDays.contains(day)) {
             this.setOfDays.add(day);
             this.listOfDays.add(day);
-            List<CustomEvent> temp = new ArrayList<>();
+            List<CustomEventFromFirebase> temp = new ArrayList<>();
             temp.add(event);
             this.mapOfEvents.put(day, temp);
         } else {
@@ -198,7 +198,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String endTime = (String) document.get("endTime");
         String docID = document.getId();
         if (startDate.equals(endDate)) { // just one day
-            CustomEvent event = new CustomEvent(title, startDate, endDate, startTime, endTime, docID);
+            CustomEventFromFirebase event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
             addToMap(event);
         } else { // > 1 day
             LocalDate first = LocalDate.parse(startDate);
@@ -212,7 +212,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     newDate = first.plusDays(i).toString();
                     startTime = "All Day"; // change later to support end time
                 }
-                CustomEvent event = new CustomEvent(title, newDate, endDate, startTime, endTime, docID);
+                CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
                 addToMap(event);
             }
         }

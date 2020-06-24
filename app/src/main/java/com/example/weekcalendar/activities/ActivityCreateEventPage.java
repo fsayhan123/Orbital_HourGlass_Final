@@ -9,12 +9,12 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.MyDateDialog;
 import com.example.weekcalendar.helperclasses.MyTimeDialog;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
-import com.example.weekcalendar.customclasses.CustomEvent;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -47,7 +47,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private CollectionReference cEvents;
     private CollectionReference cToDo;
 
-    private CustomEvent event;
+    private CustomEventFromFirebase event;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

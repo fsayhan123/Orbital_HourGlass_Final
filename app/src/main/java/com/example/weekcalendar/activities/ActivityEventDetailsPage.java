@@ -12,9 +12,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.R;
-import com.example.weekcalendar.customclasses.CustomEvent;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,7 +26,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventDate;
     private TextView eventTime;
 
-    private CustomEvent event;
+    private CustomEventFromFirebase event;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -83,7 +83,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setView(CustomEvent event) {
+    private void setView(CustomEventFromFirebase event) {
         eventTitle.setText(event.getTitle());
         String startDate = HelperMethods.formatDateForView(event.getStartDate());
         String endDate = HelperMethods.formatDateForView(event.getEndDate());
