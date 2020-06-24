@@ -85,6 +85,11 @@ public class SetupNavDrawer {
                     Intent i4 = new Intent(a, ActivityLoginPage.class);
                     a.startActivity(i4);
                     break;
+                case R.id.fetch_button:
+                    Toast.makeText(a, "Fetch Events",Toast.LENGTH_SHORT).show();
+                    Intent i5 = new Intent(a, FetchGoogleCalendarEvents.class);
+                    a.startActivity(i5);
+                    break;
                 default:
                     break;
             }
