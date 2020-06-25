@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.MyOnDateClickListener;
 import com.example.weekcalendar.helperclasses.MyOnEventClickListener;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRecyclerViewAdapter.MyViewHolder> {
 
     private List<CustomDay> listOfDates;
-    private Map<CustomDay, List<CustomEventFromFirebase>> mapOfEvents;
+    private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private MyOnDateClickListener mDateClickListener;
     private Activity a;
     private View eachDayView;
@@ -41,7 +42,7 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
         }
     }
 
-    public UpcomingRecyclerViewAdapter(List<CustomDay> listOfDates, Map<CustomDay, List<CustomEventFromFirebase>> mapOfEvents,
+    public UpcomingRecyclerViewAdapter(List<CustomDay> listOfDates, Map<CustomDay, List<CustomEvent>> mapOfEvents,
                                        MyOnDateClickListener dateClicker, Activity a) {
         this.listOfDates = listOfDates;
         this.mapOfEvents = mapOfEvents;

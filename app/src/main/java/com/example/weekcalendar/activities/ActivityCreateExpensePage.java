@@ -175,7 +175,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         if (checkValidInput()) {
             Map<String, Object> expense =  new HashMap<>();
             String datePreEdited = date.getText().toString();
-            String editedDate = HelperMethods.formatDateForFirebase(datePreEdited);
+            String editedDate = HelperMethods.formatDateWithDash(datePreEdited);
 
             expense.put("userID", this.userID);
             expense.put("Date", editedDate);
@@ -195,7 +195,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         if (checkValidInput()) {
             Map<String, Object> expense = new HashMap<>();
             String datePreEdited = date.getText().toString();
-            String editedDate = HelperMethods.formatDateForFirebase(datePreEdited);
+            String editedDate = HelperMethods.formatDateWithDash(datePreEdited);
             expense.put("userID", this.userID);
             expense.put("Date", editedDate);
             expense.put("Category", s.getSelectedItem().toString());

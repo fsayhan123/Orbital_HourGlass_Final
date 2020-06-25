@@ -79,5 +79,7 @@ public abstract class CustomEvent implements Parcelable {
         return this.description;
     }
 
+    public abstract String getId();
+
     // CustomEvent methods END
 }

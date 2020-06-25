@@ -44,7 +44,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 public class FetchGoogleCalendarEvents extends AppCompatActivity {
     private static final String APPLICATION_NAME = "WeekCalendar";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";

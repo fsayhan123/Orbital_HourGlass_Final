@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.MyOnEventClickListener;
 import com.example.weekcalendar.R;
@@ -16,7 +17,7 @@ import com.example.weekcalendar.R;
 import java.util.List;
 
 public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecyclerViewAdapter.MyEventViewHolder> {
-    private List<CustomEventFromFirebase> listOfEvents;
+    private List<CustomEvent> listOfEvents;
     private MyOnEventClickListener mEventClickListener;
 
     public class MyEventViewHolder extends RecyclerView.ViewHolder {
@@ -33,7 +34,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
         }
     }
 
-    public EventRecyclerViewAdapter(List<CustomEventFromFirebase> listOfEvents, MyOnEventClickListener eventClicker) {
+    public EventRecyclerViewAdapter(List<CustomEvent> listOfEvents, MyOnEventClickListener eventClicker) {
         this.listOfEvents = listOfEvents;
         this.mEventClickListener = eventClicker;
     }
@@ -57,7 +58,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
 
     @Override
     public void onBindViewHolder(@NonNull EventRecyclerViewAdapter.MyEventViewHolder holder, int position) {
-        CustomEventFromFirebase e = this.listOfEvents.get(position);
+        CustomEvent e = this.listOfEvents.get(position);
         holder.id = e.getId();
         holder.time.setText(e.getStartTime());
         holder.eventTitle.setText(e.getTitle());

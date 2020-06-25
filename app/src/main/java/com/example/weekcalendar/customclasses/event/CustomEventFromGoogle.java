@@ -4,9 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class CustomEventFromGoogle extends CustomEvent implements Parcelable {
+    private String eventID;
 
-    public CustomEventFromGoogle(String title, String startDate, String endDate, String startTime, String endTime) {
+    public CustomEventFromGoogle(String title, String startDate, String endDate, String startTime, String endTime, String eventID) {
         super(title, startDate, endDate, startTime, endTime);
+        this.eventID = eventID;
     }
 
     // Parcelable methods START
@@ -37,7 +39,11 @@ public class CustomEventFromGoogle extends CustomEvent implements Parcelable {
 
     // CustomEventFromFirebase methods START
 
+    public void setId(String eventID) {
+        this.eventID = eventID;
+    }
 
+    public String getId() { return this.eventID; }
 
     // CustomEventFromFirebase methods END
 }

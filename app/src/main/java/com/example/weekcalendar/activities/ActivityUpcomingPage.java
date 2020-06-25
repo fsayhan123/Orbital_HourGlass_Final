@@ -12,7 +12,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
+import com.example.weekcalendar.customclasses.event.CustomEventFromGoogle;
 import com.example.weekcalendar.helperclasses.MyOnDateClickListener;
 import com.example.weekcalendar.helperclasses.MyOnEventClickListener;
 import com.example.weekcalendar.R;
@@ -21,6 +23,7 @@ import com.example.weekcalendar.adapters.UpcomingRecyclerViewAdapter;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -50,7 +53,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -73,12 +75,12 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // RecyclerView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
-    private Map<CustomDay, List<CustomEventFromFirebase>> mapOfEvents;
+    private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private UpcomingRecyclerViewAdapter mAdapter;
 
     // Store local copy of events data
-    private Map<String, CustomEventFromFirebase> cache;
+    private Map<String, CustomEvent> cache;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -95,55 +97,16 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     // To transform String to Date
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    // Get dataa from Google
+    // Get data from Google
     private static final String APPLICATION_NAME = "WeekCalendar";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
-
-    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
-
-        // Setup link to Firebase
-        this.fAuth = FirebaseAuth.getInstance();
-        this.fStore = FirebaseFirestore.getInstance();
-        if (this.fAuth.getCurrentUser() != null) {
-            this.userID = this.fAuth.getCurrentUser().getUid();
-            this.c = this.fStore.collection("events");
-            fetchEvents();
-        }
-        else {
-            GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
-
-            if (acct != null) {
-                List<Event> fetchedEvents;
-                try {
-                    fetchedEvents = new ActivityUpcomingPage.RequestAuth().execute().get();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                    fetchedEvents = new ArrayList<>();
-                    Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    fetchedEvents = new ArrayList<>();
-                    Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                }
-
-                for (Event e : fetchedEvents) {
-                    try {
-                        Toast.makeText(this, e.getStart().toPrettyString() + " " + e.getEnd().toString(), Toast.LENGTH_SHORT).show();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            } else {
-                Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
-            }
-        }
 
         // Links to XML
         this.mRecyclerView = findViewById(R.id.week_view);
@@ -157,10 +120,42 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         // Set up navigation drawer
         this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
         this.navDrawer.setupNavDrawerPane();
-    }
 
-    private void eventToCustomEvent(Event e) {
-//        return new CustomEventFromFirebase();
+        // Setup link to Firebase
+        this.fAuth = FirebaseAuth.getInstance();
+        this.fStore = FirebaseFirestore.getInstance();
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        // logging in to google will also result in this.fAuth.getCurrentUser() != null being true
+        if (acct != null) {
+            List<Event> fetchedEvents;
+            try {
+                fetchedEvents = new ActivityUpcomingPage.RequestAuth().execute().get();
+                this.listOfDays = new ArrayList<>();
+                this.mapOfEvents = new HashMap<>();
+                this.setOfDays = new HashSet<>();
+                this.cache = new HashMap<>();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                fetchedEvents = new ArrayList<>();
+                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                fetchedEvents = new ArrayList<>();
+                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
+            for (Event e : fetchedEvents) {
+                processGoogleEvent(e);
+            }
+            this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
+                    ActivityUpcomingPage.this, ActivityUpcomingPage.this);
+            this.mRecyclerView.setAdapter(mAdapter);
+        } else if (this.fAuth.getCurrentUser() != null){
+            this.userID = this.fAuth.getCurrentUser().getUid();
+            this.c = this.fStore.collection("events");
+            fetchEventsFromFirebase();
+        } else {
+            Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void moveToCreateEventPage() {
@@ -168,7 +163,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(intent);
     }
 
-    private void addToMap(CustomEventFromFirebase event) {
+    private void addToMap(CustomEvent event) {
         Date startD = null;
         try {
             startD = dateFormatter.parse(event.getStartDate());
@@ -179,7 +174,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         if (!this.setOfDays.contains(day)) {
             this.setOfDays.add(day);
             this.listOfDays.add(day);
-            List<CustomEventFromFirebase> temp = new ArrayList<>();
+            List<CustomEvent> temp = new ArrayList<>();
             temp.add(event);
             this.mapOfEvents.put(day, temp);
         } else {
@@ -190,7 +185,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
-    private void processDocument(QueryDocumentSnapshot document) {
+    private void processFirebaseDocument(QueryDocumentSnapshot document) {
         String title = (String) document.get("eventTitle");
         String startDate = (String) document.get("startDate");
         String endDate = (String) document.get("endDate");
@@ -218,8 +213,40 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
+    private void processGoogleEvent(Event e) {
+        String title = e.getSummary();
+        String startDateTime = e.getStart().get("dateTime").toString();
+        String[] startDateAndTimeSplit = startDateTime.split("T");
+        String startDate = startDateAndTimeSplit[0];
+        String startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
+        String endDateTime = e.getEnd().get("dateTime").toString();
+        String[] endDateAndTimeSplit = endDateTime.split("T");
+        String endDate = endDateAndTimeSplit[0];
+        String endTime = endDateAndTimeSplit[1].substring(0, 5);
+        String eventID = e.getICalUID();
+        if (startDate.equals(endDate)) { // just one day
+            CustomEventFromGoogle event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
+            addToMap(event);
+        } else { // > 1 day
+            LocalDate first = LocalDate.parse(startDate);
+            LocalDate last = LocalDate.parse(endDate);
+            long numDays = DAYS.between(first, last);
+            for (int i = 0; i <= numDays; i++) {
+                String newDate;
+                if (i == 0) {
+                    newDate = startDate;
+                } else {
+                    newDate = first.plusDays(i).toString();
+                    startTime = "All Day"; // change later to support end time
+                }
+                CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
+                addToMap(event);
+            }
+        }
+    }
+
     // Fetches events from Firebase
-    private void fetchEvents() {
+    private void fetchEventsFromFirebase() {
         this.listOfDays = new ArrayList<>();
         this.mapOfEvents = new HashMap<>();
         this.setOfDays = new HashSet<>();
@@ -235,7 +262,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                         } else {
                             cache = new HashMap<>();
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                processDocument(document);
+                                processFirebaseDocument(document);
                             }
                             mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
                                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);
@@ -273,14 +300,30 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         @Override
         protected List<Event> doInBackground(String... strings) {
             try {
-                test();
+                pullData();
                 return myList;
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (GeneralSecurityException e) {
-                e.printStackTrace();
             }
             return null;
+        }
+
+        private void pullData() throws IOException {
+            // Build a new authorized API client service.
+            final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
+            Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+
+            // List the next 10 events from the primary calendar.
+            DateTime now = new DateTime(System.currentTimeMillis());
+            Events events = service.events().list("primary")
+                    .setMaxResults(10)
+                    .setTimeMin(now)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute();
+            myList = events.getItems();
         }
 
         /**
@@ -298,71 +341,22 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
             File tokenFolder = new File(ActivityUpcomingPage.this.getFilesDir(), "tokens");
 
-            if (!tokenFolder.exists()) {
-//                Toast.makeText(FetchGoogleCalendarEvents.this, "folder does not exist", Toast.LENGTH_SHORT).show();
-                tokenFolder.setWritable(true, true);
-                tokenFolder.setReadable(true, true);
-                tokenFolder.setExecutable(true, false);
-                boolean b = tokenFolder.mkdirs();
-//                Toast.makeText(FetchGoogleCalendarEvents.this, "created directory is " + b, Toast.LENGTH_SHORT).show();
-            }
-
-            // https://stackoverflow.com/questions/59925288/filedatastorefactory-and-posix-on-android
-
-            FileDataStoreFactory temp;
-            try {
-                tokenFolder.setWritable(true);
-                tokenFolder.setReadable(true);
-                tokenFolder.setExecutable(true);
-                temp = new FileDataStoreFactory((tokenFolder));
-            } catch (IOException e) {
-//                Toast.makeText(FetchGoogleCalendarEvents.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-//                Toast.makeText(FetchGoogleCalendarEvents.this, Boolean.toString(tokenFolder.mkdirs()), Toast.LENGTH_SHORT).show();
-                temp = new FileDataStoreFactory((tokenFolder));
-            }
-
-//            Toast.makeText(FetchGoogleCalendarEvents.this, "datastore created", Toast.LENGTH_SHORT).show();
-
             // Build flow and trigger user authorization request.
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                     HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(temp)
+                    .setDataStoreFactory(new FileDataStoreFactory(tokenFolder))
                     .setAccessType("offline")
                     .build();
-//            Toast.makeText(FetchGoogleCalendarEvents.this, "flowing", Toast.LENGTH_SHORT).show();
             LocalServerReceiver receiver = new LocalServerReceiver();
             AuthorizationCodeInstalledApp ab = new AuthorizationCodeInstalledApp(flow, receiver){
                 @Override
                 protected void onAuthorization(AuthorizationCodeRequestUrl authorizationUrl) {
-//                    Toast.makeText(FetchGoogleCalendarEvents.this, "a", Toast.LENGTH_SHORT).show();
                     String url = (authorizationUrl.build());
-//                    Toast.makeText(FetchGoogleCalendarEvents.this, "b", Toast.LENGTH_SHORT).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-//                    Toast.makeText(FetchGoogleCalendarEvents.this, "c", Toast.LENGTH_SHORT).show();
                     startActivity(browserIntent);
                 }
             };
             return ab.authorize("user");
-//        return null;
-        }
-
-        private void test() throws IOException, GeneralSecurityException {
-            // Build a new authorized API client service.
-            final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
-            Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                    .setApplicationName(APPLICATION_NAME)
-                    .build();
-//            Toast.makeText(FetchGoogleCalendarEvents.this, "authorised", Toast.LENGTH_SHORT).show();
-
-            // List the next 10 events from the primary calendar.
-            DateTime now = new DateTime(System.currentTimeMillis());
-            Events events = service.events().list("primary")
-                    .setMaxResults(10)
-                    .setTimeMin(now)
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .execute();
-            myList = events.getItems();
         }
     }
 }

@@ -66,9 +66,8 @@ public class ActivityLoginPage extends AppCompatActivity {
 //            }
 //        };
 
-        String serverClientId = getString(R.string.default_web_client_id);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"))
+                .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"), new Scope("https://www.googleapis.com/auth/calendar.events"))
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();

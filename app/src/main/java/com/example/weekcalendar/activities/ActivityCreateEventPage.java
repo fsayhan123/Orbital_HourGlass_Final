@@ -4,25 +4,54 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
+import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.MyDateDialog;
 import com.example.weekcalendar.helperclasses.MyTimeDialog;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.Events;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
     private static final String TAG = ActivityCreateEventPage.class.getSimpleName();
@@ -47,7 +76,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private CollectionReference cEvents;
     private CollectionReference cToDo;
 
-    private CustomEventFromFirebase event;
+    private CustomEvent event;
+
+    // Get data from Google
+    private static final String APPLICATION_NAME = "WeekCalendar";
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final Set<String> SCOPES = CalendarScopes.all();
+    private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +95,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.userID = this.fAuth.getCurrentUser().getUid();
         this.cEvents = this.fStore.collection("events");
         this.cToDo = this.fStore.collection("todo");
+
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
 
         // Links to XML
         this.title = findViewById(R.id.insert_event_name);
@@ -84,7 +121,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.todo1 = findViewById(R.id.todo_item);
 
         this.createEvent = findViewById(R.id.create_event_button);
-        this.createEvent.setOnClickListener(v -> createEvent());
+        if (acct != null) {
+            this.createEvent.setOnClickListener(v -> new RequestAuth().execute()); // to do: on success navigate back
+        } else {
+            this.createEvent.setOnClickListener(v -> createFirebaseEvent());
+        }
+
 
         // Setup toolbar with working back button
         Toolbar tb = findViewById(R.id.create_event_toolbar);
@@ -104,7 +146,11 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.selectStartTime.setText(HelperMethods.formatTimeTo12H(event.getStartTime()));
             this.selectEndTime.setText(HelperMethods.formatTimeTo12H(event.getEndTime()));
             this.createEvent.setText("Update Event");
-            this.createEvent.setOnClickListener(v -> updateEvent());
+            if (acct != null) {
+//                this.createEvent.setOnClickListener(v -> updateGoogleEvent());
+            } else {
+                this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
+            }
         }
     }
 
@@ -133,8 +179,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
     private Map<String, Object> getEventDetails() {
         String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
-        String startDate = HelperMethods.formatDateForFirebase(this.selectStartDate.getText().toString());
-        String endDate = HelperMethods.formatDateForFirebase(this.selectEndDate.getText().toString());
+        String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
+        String endDate = HelperMethods.formatDateWithDash(this.selectEndDate.getText().toString());
         String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
         String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());
 
@@ -154,7 +200,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         if (!toDo.equals("")) {
             Map<String, Object> toDoDetails = new HashMap<>();
-            String startDate = HelperMethods.formatDateForFirebase(this.selectStartDate.getText().toString());
+            String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
             toDoDetails.put("userID", this.userID);
             toDoDetails.put("date", startDate);
             toDoDetails.put("title", toDo);
@@ -164,7 +210,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
-    private void updateEvent() {
+    private void updateFirebaseEvent() {
         if (checkFields()) {
             DocumentReference thisEventDoc = this.cEvents.document(this.event.getId());
 //            DocumentReference thisToDoDoc = this.cToDo.document(this.event.getId());
@@ -195,7 +241,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     // need to implement multi day here
-    private void createEvent() {
+    private void createFirebaseEvent() {
         if (checkFields()) {
             Map<String, Object> eventDetails = getEventDetails();
             Map<String, Object> toDoDetails = getToDoDetails();
@@ -235,5 +281,106 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     @Override
     public void applyTimeText(CustomDay d, Button b) {
         b.setText(d.getTime());
+    }
+
+    private class RequestAuth extends AsyncTask<CustomEvent, Void, Void> {
+
+        @Override
+        protected Void doInBackground(CustomEvent... events) {
+            try {
+                pushData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private void pushData() throws IOException {
+            // Build a new authorized API client service.
+            final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
+            Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+
+            createGoogleEvent(service);
+
+            // List the next 10 events from the primary calendar.
+//            DateTime now = new DateTime(System.currentTimeMillis());
+//            Events events = service.events().list("primary")
+//                    .setMaxResults(10)
+//                    .setTimeMin(now)
+//                    .setOrderBy("startTime")
+//                    .setSingleEvents(true)
+//                    .execute();
+        }
+
+        /**
+         * Creates an authorized Credential object.
+         * @param HTTP_TRANSPORT The network HTTP Transport.
+         * @return An authorized Credential object.
+         * @throws IOException If the credentials.json file cannot be found.
+         */
+        private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+            // Load client secrets.
+            InputStream in = ActivityCreateEventPage.this.getAssets().open(CREDENTIALS_FILE_PATH);
+            if (in == null) {
+                throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+            }
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+            File tokenFolder = new File(ActivityCreateEventPage.this.getFilesDir(), "tokens");
+
+            // Build flow and trigger user authorization request.
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                    .setDataStoreFactory(new FileDataStoreFactory(tokenFolder))
+                    .setAccessType("offline")
+                    .build();
+            LocalServerReceiver receiver = new LocalServerReceiver();
+            AuthorizationCodeInstalledApp ab = new AuthorizationCodeInstalledApp(flow, receiver){
+                @Override
+                protected void onAuthorization(AuthorizationCodeRequestUrl authorizationUrl) {
+                    String url = authorizationUrl.build();
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                }
+            };
+            return ab.authorize("user");
+        }
+
+        private void createGoogleEvent(Calendar service) throws IOException {
+            if (checkFields()) {
+                Map<String, Object> eventDetails = getEventDetails();
+//            Map<String, Object> toDoDetails = getToDoDetails();
+
+                Event e = new Event()
+                        .setSummary(eventDetails.get("eventTitle").toString());
+                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
+                        eventDetails.get("startTime").toString()));
+                EventDateTime start = new EventDateTime()
+                        .setDateTime(startDT)
+                        .setTimeZone("Asia/Singapore");
+                e.setStart(start);
+                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("endDate").toString(),
+                        eventDetails.get("endTime").toString()));
+                EventDateTime end = new EventDateTime()
+                        .setDateTime(endDT)
+                        .setTimeZone("Asia/Singapore");
+                e.setEnd(end);
+                String calID = "primary";
+                service.events().insert(calID, e).execute();
+
+//            cEvents.add(eventDetails)
+//                    .addOnSuccessListener(docRef -> {
+//                        if (toDoDetails != null) {
+//                            toDoDetails.put("eventID", docRef.getId());
+//                            cToDo.add(toDoDetails)
+//                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+//                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+//                        }
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                    })
+//                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+            }
+        }
     }
 }

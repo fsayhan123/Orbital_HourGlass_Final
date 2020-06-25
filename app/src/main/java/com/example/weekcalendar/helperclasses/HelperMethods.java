@@ -28,7 +28,7 @@ public class HelperMethods {
         return stringToNumMonth.get(month);
     }
 
-    public static String formatDateForFirebase(String date) {
+    public static String formatDateWithDash(String date) {
         String[] dateArr = date.split(" ");
         dateArr[1] = convertMonth(dateArr[1].substring(0,3));
         if (dateArr[0].length() == 1) {
@@ -44,7 +44,6 @@ public class HelperMethods {
 
     // ensure is 12h format, with AM/ PM notation, specifically of this format: " xx:yy AM "
     public static String formatTimeTo24H(String time) {
-        assert time.substring(time.length() - 2).equalsIgnoreCase("AM") || time.substring(time.length() - 2).equalsIgnoreCase("PM");
         String[] getAMOrPM = time.split(" ");
         String amOrPM = getAMOrPM[1];
         String[] timeArr = getAMOrPM[0].split(":");
@@ -70,5 +69,9 @@ public class HelperMethods {
             amOrPM = "AM";
         }
         return timeArr[0] + ":" + timeArr[1] + " " + amOrPM;
+    }
+
+    public static String toGoogleDateTime(String date, String time) {
+        return date + "T" + time + ":00+08:00";
     }
 }
