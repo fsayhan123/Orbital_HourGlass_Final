@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.helperclasses.HelperMethods;
@@ -121,12 +122,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.todo1 = findViewById(R.id.todo_item);
 
         this.createEvent = findViewById(R.id.create_event_button);
-        if (acct != null) {
-            this.createEvent.setOnClickListener(v -> new RequestAuth().execute()); // to do: on success navigate back
+        if (acct != null) { // if logged in to a Google account
+            RequestAuth task = new RequestAuth();
+            this.createEvent.setOnClickListener(v -> task.execute("create"));
         } else {
             this.createEvent.setOnClickListener(v -> createFirebaseEvent());
         }
-
 
         // Setup toolbar with working back button
         Toolbar tb = findViewById(R.id.create_event_toolbar);
@@ -139,7 +140,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         Intent i = getIntent();
         this.event = i.getParcelableExtra("event to edit");
-        if (event != null) {
+        if (this.event != null) {
             this.title.setText(event.getTitle());
             this.selectStartDate.setText(HelperMethods.formatDateForView(event.getStartDate()));
             this.selectEndDate.setText(HelperMethods.formatDateForView(event.getEndDate()));
@@ -147,7 +148,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.selectEndTime.setText(HelperMethods.formatTimeTo12H(event.getEndTime()));
             this.createEvent.setText("Update Event");
             if (acct != null) {
-//                this.createEvent.setOnClickListener(v -> updateGoogleEvent());
+                RequestAuth task = new RequestAuth();
+                Log.d(TAG, "!!!!! " + this.event.getId());
+                this.createEvent.setOnClickListener(v -> task.execute("update", this.event.getId()));
             } else {
                 this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
             }
@@ -283,35 +286,30 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         b.setText(d.getTime());
     }
 
-    private class RequestAuth extends AsyncTask<CustomEvent, Void, Void> {
+    private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 
         @Override
-        protected Void doInBackground(CustomEvent... events) {
+        protected Boolean doInBackground(String... strings) {
             try {
-                pushData();
+                pushData(strings);
             } catch (IOException e) {
                 e.printStackTrace();
+                return false;
             }
-            return null;
+            return true;
         }
 
-        private void pushData() throws IOException {
+        private void pushData(String... strings) throws IOException {
             // Build a new authorized API client service.
             final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
             Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
-
-            createGoogleEvent(service);
-
-            // List the next 10 events from the primary calendar.
-//            DateTime now = new DateTime(System.currentTimeMillis());
-//            Events events = service.events().list("primary")
-//                    .setMaxResults(10)
-//                    .setTimeMin(now)
-//                    .setOrderBy("startTime")
-//                    .setSingleEvents(true)
-//                    .execute();
+            if (strings[0].equalsIgnoreCase("create")) {
+                createGoogleEvent(service);
+            } else {
+                updateGoogleEvent(service, strings[1]);
+            }
         }
 
         /**
@@ -347,6 +345,15 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             return ab.authorize("user");
         }
 
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean) {
+                Intent i = new Intent(ActivityCreateEventPage.this, ActivityUpcomingPage.class);
+                startActivity(i);
+            }
+        }
+
         private void createGoogleEvent(Calendar service) throws IOException {
             if (checkFields()) {
                 Map<String, Object> eventDetails = getEventDetails();
@@ -368,18 +375,33 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 e.setEnd(end);
                 String calID = "primary";
                 service.events().insert(calID, e).execute();
+            }
+        }
 
-//            cEvents.add(eventDetails)
-//                    .addOnSuccessListener(docRef -> {
-//                        if (toDoDetails != null) {
-//                            toDoDetails.put("eventID", docRef.getId());
-//                            cToDo.add(toDoDetails)
-//                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-//                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-//                        }
-//                        Log.d(TAG, "DocumentSnapshot successfully written!");
-//                    })
-//                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+        private void updateGoogleEvent(Calendar service, String eventID) throws IOException {
+            if (checkFields()) {
+                Map<String, Object> eventDetails = getEventDetails();
+//            Map<String, Object> toDoDetails = getToDoDetails();
+
+                Event e = service
+                        .events()
+                        .get("primary", eventID)
+                        .execute()
+                        .setSummary(eventDetails.get("eventTitle").toString());
+                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
+                        eventDetails.get("startTime").toString()));
+                EventDateTime start = new EventDateTime()
+                        .setDateTime(startDT)
+                        .setTimeZone("Asia/Singapore");
+                e.setStart(start);
+                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("endDate").toString(),
+                        eventDetails.get("endTime").toString()));
+                EventDateTime end = new EventDateTime()
+                        .setDateTime(endDT)
+                        .setTimeZone("Asia/Singapore");
+                e.setEnd(end);
+                String calID = "primary";
+                service.events().update(calID, eventID, e).execute();
             }
         }
     }

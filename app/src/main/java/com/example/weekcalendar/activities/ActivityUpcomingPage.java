@@ -223,7 +223,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String[] endDateAndTimeSplit = endDateTime.split("T");
         String endDate = endDateAndTimeSplit[0];
         String endTime = endDateAndTimeSplit[1].substring(0, 5);
-        String eventID = e.getICalUID();
+        String eventID = e.getId();
         if (startDate.equals(endDate)) { // just one day
             CustomEventFromGoogle event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
             addToMap(event);

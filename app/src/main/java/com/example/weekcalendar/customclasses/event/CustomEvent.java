@@ -10,13 +10,15 @@ public abstract class CustomEvent implements Parcelable {
     protected String startTime;
     protected String endTime;
     protected String description;
+    protected String ID;
 
-    public CustomEvent(String title, String startDate, String endDate, String startTime, String endTime) {
+    public CustomEvent(String title, String startDate, String endDate, String startTime, String endTime, String ID) {
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.ID = ID;
     }
 
     // Parcelable methods START
@@ -27,6 +29,7 @@ public abstract class CustomEvent implements Parcelable {
         this.endDate = in.readString();
         this.startTime = in.readString();
         this.endTime = in.readString();
+        this.ID = in.readString();
         this.description = in.readString();
     }
 
@@ -37,6 +40,7 @@ public abstract class CustomEvent implements Parcelable {
         dest.writeString(endDate);
         dest.writeString(startTime);
         dest.writeString(endTime);
+        dest.writeString(ID);
         if (this.description != null) {
             dest.writeString(this.description);
         }
@@ -79,7 +83,9 @@ public abstract class CustomEvent implements Parcelable {
         return this.description;
     }
 
-    public abstract String getId();
+    public String getId() {
+        return this.ID;
+    }
 
     // CustomEvent methods END
 }

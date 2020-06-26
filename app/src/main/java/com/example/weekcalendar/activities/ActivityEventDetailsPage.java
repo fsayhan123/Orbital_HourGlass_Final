@@ -5,20 +5,44 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.R;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Set;
 
 public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
@@ -35,6 +59,13 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private String userID;
     private CollectionReference c;
 
+    // Get data from Google
+    private static final String APPLICATION_NAME = "WeekCalendar";
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final Set<String> SCOPES = CalendarScopes.all();
+    private static final String CREDENTIALS_FILE_PATH = "credentials.json";
+    private GoogleSignInAccount acct;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +76,8 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.fStore = FirebaseFirestore.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();
         this.c = this.fStore.collection("events");
+
+        this.acct = GoogleSignIn.getLastSignedInAccount(this);
 
         // Get Intent of the event item selected
         Intent intent = getIntent();
@@ -79,7 +112,12 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         if (item.getItemId() == R.id.edit_event_topR) {
             editEvent();
         } else if (item.getItemId() == R.id.delete_event_topR) {
-            deleteEvent();
+            if (acct != null) { // if logged in to a Google account
+                ActivityEventDetailsPage.RequestAuth task = new ActivityEventDetailsPage.RequestAuth();
+                task.execute(this.event.getId());
+            } else {
+                deleteEvent();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -109,5 +147,74 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
         Intent intent = new Intent(this, ActivityUpcomingPage.class);
         startActivity(intent);
+    }
+
+    private class RequestAuth extends AsyncTask<String, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            try {
+                pushData(strings);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        private void pushData(String... strings) throws IOException {
+            // Build a new authorized API client service.
+            final NetHttpTransport HTTP_TRANSPORT = new com.google.api.client.http.javanet.NetHttpTransport();
+            Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(APPLICATION_NAME)
+                    .build();
+            deleteGoogleEvent(service, strings[0]);
+        }
+
+        /**
+         * Creates an authorized Credential object.
+         * @param HTTP_TRANSPORT The network HTTP Transport.
+         * @return An authorized Credential object.
+         * @throws IOException If the credentials.json file cannot be found.
+         */
+        private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+            // Load client secrets.
+            InputStream in = ActivityEventDetailsPage.this.getAssets().open(CREDENTIALS_FILE_PATH);
+            if (in == null) {
+                throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+            }
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+            File tokenFolder = new File(ActivityEventDetailsPage.this.getFilesDir(), "tokens");
+
+            // Build flow and trigger user authorization request.
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                    .setDataStoreFactory(new FileDataStoreFactory(tokenFolder))
+                    .setAccessType("offline")
+                    .build();
+            LocalServerReceiver receiver = new LocalServerReceiver();
+            AuthorizationCodeInstalledApp ab = new AuthorizationCodeInstalledApp(flow, receiver){
+                @Override
+                protected void onAuthorization(AuthorizationCodeRequestUrl authorizationUrl) {
+                    String url = authorizationUrl.build();
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
+                }
+            };
+            return ab.authorize("user");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean) {
+                Intent i = new Intent(ActivityEventDetailsPage.this, ActivityUpcomingPage.class);
+                startActivity(i);
+            }
+        }
+
+        private void deleteGoogleEvent(Calendar service, String eventID) throws IOException {
+            service.events().delete("primary", eventID).execute();
+        }
     }
 }
