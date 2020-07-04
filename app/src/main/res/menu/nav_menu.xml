@@ -13,6 +13,8 @@
             android:title="Expenses"/>
         <item android:id="@+id/activity_todo_view"
             android:title="To Do List"/>
+        <item android:id="@+id/activity_notifications_view"
+            android:title="Notifications"/>
     </group>
 
     <group android:id="@+id/logout">

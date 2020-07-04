@@ -54,7 +54,8 @@ dependencies {
     implementation ('com.google.apis:google-api-services-calendar:v3-rev305-1.23.0') {
         exclude group:'com.google.guava'
     }
-
+    implementation 'com.google.firebase:firebase-dynamic-links:19.1.0'
+    implementation 'com.google.firebase:firebase-analytics:17.4.3'
     implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.2'
     implementation 'com.github.sundeepk:compact-calendar-view:3.0.0'
 }

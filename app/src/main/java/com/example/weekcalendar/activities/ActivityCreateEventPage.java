@@ -258,6 +258,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+                        //Create deep link
+                        System.out.println(docRef.getId());
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
 

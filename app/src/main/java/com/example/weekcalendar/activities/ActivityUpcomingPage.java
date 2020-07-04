@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -42,7 +43,10 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -153,6 +157,29 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         } else {
             Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
         }
+        //testing firebase dynamic links
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+            @Override
+            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                System.out.println("Hello World");
+
+                Uri deepLink = null;
+                if (pendingDynamicLinkData != null) {
+                    deepLink = pendingDynamicLinkData.getLink();
+                }
+
+                if (deepLink != null) {
+                    String documentID = deepLink.getQueryParameter("id");
+                    fStore.collection("events").document(documentID)
+                            .update("sharedUserID", FieldValue.arrayUnion(ActivityUpcomingPage.this.userID));
+                }
+            }
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("Error unable to retrieve link");
+            }
+        });
     }
 
     private void moveToCreateEventPage() {

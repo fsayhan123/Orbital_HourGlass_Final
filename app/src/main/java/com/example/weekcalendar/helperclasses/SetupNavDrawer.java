@@ -15,6 +15,7 @@ import com.example.weekcalendar.FetchGoogleCalendarEvents;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityExpensePage;
 import com.example.weekcalendar.activities.ActivityLoginPage;
+import com.example.weekcalendar.activities.ActivityNotificationsPage;
 import com.example.weekcalendar.activities.ActivityMainCalendar;
 import com.example.weekcalendar.activities.ActivityToDoListPage;
 import com.example.weekcalendar.activities.ActivityUpcomingPage;
@@ -83,6 +84,11 @@ public class SetupNavDrawer {
                     Intent i3 = new Intent(a, ActivityToDoListPage.class);
                     a.startActivity(i3);
                     break;
+                case R.id.activity_notifications_view:
+                    Toast.makeText(a, "Notifications", Toast.LENGTH_SHORT).show();
+                    Intent i6 = new Intent(a, ActivityNotificationsPage.class);
+                    a.startActivity(i6);
+                    break;
                 case R.id.logout_button:
                     Toast.makeText(a, "Logout",Toast.LENGTH_SHORT).show();
                     mGoogleSignInClient.signOut();
@@ -96,8 +102,8 @@ public class SetupNavDrawer {
                     break;
                 case R.id.main_calendar_button:
                     Toast.makeText(a, "Main calendar",Toast.LENGTH_SHORT).show();
-                    Intent i6 = new Intent(a, ActivityMainCalendar.class);
-                    a.startActivity(i6);
+                    Intent i7 = new Intent(a, ActivityMainCalendar.class);
+                    a.startActivity(i7);
                     break;
                 default:
                     break;
