@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:text="Already regisitered? Login here!"
+        android:text="Already registered? Login here!"
         android:textColor="#4A4A4A"
         app:layout_constraintBaseline_toBaselineOf="@+id/register_button"
         app:layout_constraintEnd_toStartOf="@+id/register_button"

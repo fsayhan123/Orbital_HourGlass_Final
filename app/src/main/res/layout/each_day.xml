@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/each_day_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="20dp"
+    android:background="#FFFFFF"
+    android:backgroundTint="#00FFFFFF"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -14,48 +14,30 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="5dp"
+        android:background="@drawable/click_layout"
         android:clickable="true"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/date_button"
+        <TextView
+            android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/date_button"
             android:gravity="center"
+            android:paddingHorizontal="5dp"
             android:text="21"
             android:textColor="#4A4A4A"
             android:textSize="56dp"
             android:typeface="sans" />
 
-        <Button
-            android:id="@+id/month_button"
+        <TextView
+            android:id="@+id/month"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/date_button"
+            android:gravity="center"
+            android:paddingHorizontal="5dp"
             android:text="May"
             android:textColor="#4A4A4A"
             android:textSize="24dp" />
-
-<!--        <TextView-->
-<!--            android:id="@+id/date_only"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:clickable="true"-->
-<!--            android:gravity="center"-->
-<!--            android:text="21"-->
-<!--            android:textSize="56dp"-->
-<!--            android:background="@drawable/date_button"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/month_only"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="0"-->
-<!--            android:clickable="true"-->
-<!--            android:gravity="center"-->
-<!--            android:text="May"-->
-<!--            android:textSize="24dp" />-->
 
     </LinearLayout>
 
@@ -66,7 +48,7 @@
         android:background="@color/black" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/all_events_layout"
+        android:id="@+id/all_events_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"

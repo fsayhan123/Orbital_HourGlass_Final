@@ -7,7 +7,7 @@
     tools:context=".activities.ActivityEventDetailsPage">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/event_details_toolbar"
+        android:id="@+id/event_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_below="@+id/event_details_toolbar">
+        android:layout_below="@+id/event_details">
 
         <TextView
             android:id="@+id/event_title"

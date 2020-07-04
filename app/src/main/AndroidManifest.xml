@@ -5,26 +5,29 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
     <application
-        android:requestLegacyExternalStorage="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FetchGoogleCalendarEvents"></activity>
-        <activity android:name=".activities.ActivityRegisterPage" />
-        <activity android:name=".activities.ActivityLoginPage">
+        <activity android:name=".activities.ActivityMainCalendar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            </activity>
+        <activity android:name=".FetchGoogleCalendarEvents" />
+        <activity android:name=".activities.ActivityRegisterPage" />
+        <activity android:name=".activities.ActivityLoginPage">
+
         </activity>
         <activity android:name=".activities.ActivityEachDayExpenses" />
         <activity android:name=".activities.ActivityCreateToDoPage" />
@@ -36,7 +39,6 @@
         <activity android:name=".activities.ActivityEventDetailsPage" />
         <activity android:name=".activities.ActivityCreateEventPage" />
         <activity android:name=".activities.ActivityUpcomingPage">
-
         </activity>
 
         <meta-data

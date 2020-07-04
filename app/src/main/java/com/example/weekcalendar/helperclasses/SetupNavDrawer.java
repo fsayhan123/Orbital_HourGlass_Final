@@ -15,6 +15,7 @@ import com.example.weekcalendar.FetchGoogleCalendarEvents;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityExpensePage;
 import com.example.weekcalendar.activities.ActivityLoginPage;
+import com.example.weekcalendar.activities.ActivityMainCalendar;
 import com.example.weekcalendar.activities.ActivityToDoListPage;
 import com.example.weekcalendar.activities.ActivityUpcomingPage;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -34,10 +35,6 @@ import javax.annotation.Nullable;
 public class SetupNavDrawer {
     private Activity a;
     private Toolbar toolbar;
-    // navigation drawer pane
-    private DrawerLayout dl;
-    private ActionBarDrawerToggle t;
-    private NavigationView nv;
 
     public SetupNavDrawer(Activity a, Toolbar toolbar) {
         this.a = a;
@@ -56,8 +53,9 @@ public class SetupNavDrawer {
 
         ((AppCompatActivity) a).setSupportActionBar(toolbar);
 
-        dl = a.findViewById(R.id.drawer_layout);
-        t = new ActionBarDrawerToggle(a, dl, toolbar, R.string.Open, R.string.Close);
+        // navigation drawer pane
+        DrawerLayout dl = a.findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle t = new ActionBarDrawerToggle(a, dl, toolbar, R.string.Open, R.string.Close);
 
         dl.addDrawerListener(t);
         t.syncState();
@@ -65,7 +63,7 @@ public class SetupNavDrawer {
         ((AppCompatActivity) a).getSupportActionBar().setDisplayShowHomeEnabled(true);
         ((AppCompatActivity) a).getSupportActionBar().setHomeButtonEnabled(true);
 
-        nv = a.findViewById(R.id.nv);
+        NavigationView nv = a.findViewById(R.id.nv);
         nv.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             switch(id)
@@ -96,6 +94,11 @@ public class SetupNavDrawer {
                     Intent i5 = new Intent(a, FetchGoogleCalendarEvents.class);
                     a.startActivity(i5);
                     break;
+                case R.id.main_calendar_button:
+                    Toast.makeText(a, "Main calendar",Toast.LENGTH_SHORT).show();
+                    Intent i6 = new Intent(a, ActivityMainCalendar.class);
+                    a.startActivity(i6);
+                    break;
                 default:
                     break;
             }
@@ -110,7 +113,6 @@ public class SetupNavDrawer {
             String personName = acct.getDisplayName();
             nav_user.setText(personName);
         } else {
-            Toast.makeText(a, "Firebase", Toast.LENGTH_SHORT).show();
             String userID = fAuth.getCurrentUser().getUid();
             DocumentReference docRef = fStore.collection("users").document(userID);
             docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {

@@ -23,7 +23,6 @@ import com.example.weekcalendar.adapters.UpcomingRecyclerViewAdapter;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -130,15 +129,12 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             List<Event> fetchedEvents;
             try {
                 fetchedEvents = new ActivityUpcomingPage.RequestAuth().execute().get();
+                Log.d(TAG, "from google: " + fetchedEvents.isEmpty());
                 this.listOfDays = new ArrayList<>();
                 this.mapOfEvents = new HashMap<>();
                 this.setOfDays = new HashSet<>();
                 this.cache = new HashMap<>();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                fetchedEvents = new ArrayList<>();
-                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 fetchedEvents = new ArrayList<>();
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
@@ -146,13 +142,14 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             for (Event e : fetchedEvents) {
                 processGoogleEvent(e);
             }
+            Log.d(TAG, "TESTTTTTTT " + listOfDays.isEmpty());
             this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);
             this.mRecyclerView.setAdapter(mAdapter);
         } else if (this.fAuth.getCurrentUser() != null){
             this.userID = this.fAuth.getCurrentUser().getUid();
             this.c = this.fStore.collection("events");
-            fetchEventsFromFirebase();
+            fetchEventsFromTodayFromFirebase();
         } else {
             Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
         }
@@ -241,16 +238,19 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 }
                 CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
                 addToMap(event);
+                Log.d(TAG, "TESTTTTTTT inside" + listOfDays.isEmpty());
             }
         }
     }
 
     // Fetches events from Firebase
-    private void fetchEventsFromFirebase() {
+    private void fetchEventsFromTodayFromFirebase() {
         this.listOfDays = new ArrayList<>();
         this.mapOfEvents = new HashMap<>();
         this.setOfDays = new HashSet<>();
-        c.whereEqualTo("userID", userID)
+        String today = dateFormatter.format(java.util.Calendar.getInstance().getTime());
+        this.c.whereEqualTo("userID", userID)
+                .whereGreaterThanOrEqualTo("startDate", today)
                 .orderBy("startDate")
                 .orderBy("startTime")
                 .get()
@@ -318,7 +318,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             // List the next 10 events from the primary calendar.
             DateTime now = new DateTime(System.currentTimeMillis());
             Events events = service.events().list("primary")
-                    .setMaxResults(10)
                     .setTimeMin(now)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)

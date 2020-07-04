@@ -13,10 +13,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
-import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -91,7 +89,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.setView(this.event);
 
         // Setup toolbar with working back button
-        Toolbar tb = findViewById(R.id.event_details_toolbar);
+        Toolbar tb = findViewById(R.id.event_details);
         setSupportActionBar(tb);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

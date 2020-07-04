@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
-import com.example.weekcalendar.customclasses.event.CustomEventFromFirebase;
 import com.example.weekcalendar.helperclasses.MyOnEventClickListener;
 import com.example.weekcalendar.R;
 
@@ -29,7 +28,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
         public MyEventViewHolder(@NonNull View itemView) {
             super(itemView);
             time = itemView.findViewById(R.id.time);
-            eventTitle = itemView.findViewById(R.id.event_details_toolbar);
+            eventTitle = itemView.findViewById(R.id.event_details);
             eachEventlayout = itemView.findViewById(R.id.each_event_layout);
         }
     }
@@ -45,13 +44,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_event, parent, false);
         EventRecyclerViewAdapter.MyEventViewHolder holder = new EventRecyclerViewAdapter.MyEventViewHolder(view);
 
-        holder.eachEventlayout.setOnClickListener(v -> {
-
-        });
-
-        holder.time.setOnClickListener(v -> mEventClickListener.onEventClickListener(holder.id));
-
-        holder.eventTitle.setOnClickListener(v -> mEventClickListener.onEventClickListener(holder.id));
+        holder.eachEventlayout.setOnClickListener(v -> mEventClickListener.onEventClickListener(holder.id));
 
         return holder;
     }

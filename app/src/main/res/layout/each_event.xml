@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:background="@drawable/click_layout">
 
     <TextView
         android:id="@+id/time"
@@ -12,7 +13,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_weight="0"
-        android:background="@drawable/date_button"
         android:gravity="center"
         android:nestedScrollingEnabled="false"
         android:paddingHorizontal="3dp"
@@ -20,15 +20,16 @@
         android:text="07.30pm"
         android:textAlignment="center"
         android:textColor="#4A4A4A"
-        android:textSize="12dp" />
+        android:textSize="12dp"
+        android:background="@drawable/click_layout"/>
 
     <TextView
-        android:id="@+id/event_details_toolbar"
-        android:layout_width="wrap_content"
+        android:id="@+id/event_details"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="0"
-        android:background="@drawable/event_button"
+        android:background="@drawable/click_layout"
         android:gravity="center"
         android:paddingHorizontal="5dp"
         android:singleLine="true"

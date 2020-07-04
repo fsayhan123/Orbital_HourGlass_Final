@@ -117,7 +117,7 @@ public class ActivityLoginPage extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(ActivityLoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), ActivityUpcomingPage.class);
+                            Intent i = new Intent(getApplicationContext(), ActivityMainCalendar.class);
                             startActivity(i);
                         } else {
                             Toast.makeText(ActivityLoginPage.this, "Error! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -175,7 +175,7 @@ public class ActivityLoginPage extends AppCompatActivity {
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fAuth.getCurrentUser();
                             Toast.makeText(ActivityLoginPage.this, "Logging in as " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), ActivityUpcomingPage.class);
+                            Intent i = new Intent(getApplicationContext(), ActivityMainCalendar.class);
                             startActivity(i);
                         } else {
                             // If sign in fails, display a message to the user.
