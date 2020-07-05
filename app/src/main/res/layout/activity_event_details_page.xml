@@ -63,6 +63,14 @@
             android:singleLine="false"
             android:text="Event Description" />
 
+        <Button
+            android:id="@+id/invite_event"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:onClick="eventInvite"
+            android:text="Invite Others" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/todo_placeholder"
             android:layout_width="match_parent"

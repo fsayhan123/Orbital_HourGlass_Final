@@ -12,13 +12,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
+import com.example.weekcalendar.helperclasses.Dialog;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -32,6 +36,9 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -145,6 +152,34 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
         Intent intent = new Intent(this, ActivityUpcomingPage.class);
         startActivity(intent);
+    }
+
+    public void eventInvite(View view) {
+        String link = "https://www.example.com/?id=" + this.event.getId();
+        System.out.println(link);
+        //Generate the dynamic link
+        Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse("https://www.example.com/"))
+                .setDomainUriPrefix("https://orbitalweekcalendar.page.link")
+                .setAndroidParameters(
+                        new DynamicLink.AndroidParameters.Builder("com.example.weekcalendar")
+                                .build())
+                .buildShortDynamicLink()
+                .addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
+                    @Override
+                    public void onComplete(@NonNull Task<ShortDynamicLink> task) {
+                        if (task.isSuccessful()) {
+
+                            Uri shortLink = task.getResult().getShortLink();
+                            Uri flowchartLink = task.getResult().getPreviewLink();
+
+                            Dialog dialog = new Dialog(shortLink.toString());
+                            dialog.show(getSupportFragmentManager(), "Example");
+                        } else {
+                            System.out.println("error");
+                        }
+                    }
+                });
     }
 
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {

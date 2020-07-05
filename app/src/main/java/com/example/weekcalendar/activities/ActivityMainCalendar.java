@@ -41,7 +41,10 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Events;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -217,6 +220,31 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             first = false;
         }
         // Firebase end
+
+        //testing firebase dynamic links
+
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+            @Override
+            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                System.out.println("Hello World dyanmic links");
+
+                Uri deepLink = null;
+                if (pendingDynamicLinkData != null) {
+                    deepLink = pendingDynamicLinkData.getLink();
+                }
+
+                if (deepLink != null) {
+                    String documentID = deepLink.getQueryParameter("id");
+                    fStore.collection("events").document(documentID)
+                            .update("participants", FieldValue.arrayUnion(ActivityMainCalendar.this.userID));
+                }
+            }
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                System.out.println("Error unable to retrieve link");
+            }
+        });
     }
 
     private void fetch3MonthEventsFromFirebase(Date curr) {

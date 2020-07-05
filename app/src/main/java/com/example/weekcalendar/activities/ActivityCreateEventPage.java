@@ -194,7 +194,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         eventDetails.put("endDate", endDate);
         eventDetails.put("startTime", startTime);
         eventDetails.put("endTime", endTime);
-
+        eventDetails.put("participants", Arrays.asList(this.userID));
         return eventDetails;
     }
 

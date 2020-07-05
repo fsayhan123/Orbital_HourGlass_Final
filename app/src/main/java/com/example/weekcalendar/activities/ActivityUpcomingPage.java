@@ -157,29 +157,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         } else {
             Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
         }
-        //testing firebase dynamic links
-        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
-            @Override
-            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                System.out.println("Hello World");
-
-                Uri deepLink = null;
-                if (pendingDynamicLinkData != null) {
-                    deepLink = pendingDynamicLinkData.getLink();
-                }
-
-                if (deepLink != null) {
-                    String documentID = deepLink.getQueryParameter("id");
-                    fStore.collection("events").document(documentID)
-                            .update("sharedUserID", FieldValue.arrayUnion(ActivityUpcomingPage.this.userID));
-                }
-            }
-        }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                System.out.println("Error unable to retrieve link");
-            }
-        });
     }
 
     private void moveToCreateEventPage() {
@@ -276,7 +253,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         this.mapOfEvents = new HashMap<>();
         this.setOfDays = new HashSet<>();
         String today = dateFormatter.format(java.util.Calendar.getInstance().getTime());
-        this.c.whereEqualTo("userID", userID)
+        this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", today)
                 .orderBy("startDate")
                 .orderBy("startTime")
