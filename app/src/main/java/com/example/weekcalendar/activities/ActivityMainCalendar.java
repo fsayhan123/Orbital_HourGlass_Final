@@ -293,7 +293,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     }
 
     private void firebaseQuery(String min, String max) {
-        this.c.whereEqualTo("userID", userID)
+        this.c.whereArrayContains("userID", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
                 .whereLessThan("startDate", max)
                 .orderBy("startDate")
