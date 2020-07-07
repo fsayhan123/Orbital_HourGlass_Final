@@ -371,17 +371,33 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
     private void processGoogleEvent(com.google.api.services.calendar.model.Event e) throws ParseException {
         String title = e.getSummary();
-        String startDateTime = e.getStart().get("dateTime").toString();
-        String[] startDateAndTimeSplit = startDateTime.split("T");
-        String startDate = startDateAndTimeSplit[0];
-        String startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
-        String endDateTime = e.getEnd().get("dateTime").toString();
-        String[] endDateAndTimeSplit = endDateTime.split("T");
-        String endDate = endDateAndTimeSplit[0];
-        String endTime = endDateAndTimeSplit[1].substring(0, 5);
+        String startDate;
+        String startTime;
+        String endDate;
+        String endTime;
         String eventID = e.getId();
         CustomEvent event;
-        if (startDate.equals(endDate)) { // just one day
+        if (e.getStart().get("dateTime") == null) { // full day event of any number of days
+            try {
+                Log.d(TAG, "HIIIIIIIIIIIIII" + e.toPrettyString());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            startDate = e.getStart().get("date").toString();
+            startTime = "All day";
+            String fullEndDate = e.getEnd().get("date").toString();
+            int endDateNum = Integer.parseInt(fullEndDate.substring(fullEndDate.length() - 2)) - 1;
+            endDate = fullEndDate.substring(0, fullEndDate.length() - 2) + String.format("%02d", endDateNum); // on Google it is instantiated as the next day;
+            endTime = "23:59";
+        } else { // < 1 day events, as well as non-full day events spanning multiple days
+            String[] startDateAndTimeSplit = e.getStart().get("dateTime").toString().split("T");
+            startDate = startDateAndTimeSplit[0];
+            startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
+            String[] endDateAndTimeSplit = e.getEnd().get("dateTime").toString().split("T");
+            endDate = endDateAndTimeSplit[0];
+            endTime = endDateAndTimeSplit[1].substring(0, 5);
+        }
+        if (startDate.equals(endDate)) { // <= 1 day
             event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
             addToMap(event);
             addToCalendarWidget(event);

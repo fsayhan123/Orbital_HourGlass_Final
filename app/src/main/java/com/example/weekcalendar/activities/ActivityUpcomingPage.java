@@ -144,7 +144,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
             for (Event e : fetchedEvents) {
-                processGoogleEvent(e);
+                try {
+                    processGoogleEvent(e);
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
             }
             Log.d(TAG, "TESTTTTTTT " + listOfDays.isEmpty());
             this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
@@ -214,19 +218,34 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
-    private void processGoogleEvent(Event e) {
+    private void processGoogleEvent(com.google.api.services.calendar.model.Event e) throws ParseException {
         String title = e.getSummary();
-        String startDateTime = e.getStart().get("dateTime").toString();
-        String[] startDateAndTimeSplit = startDateTime.split("T");
-        String startDate = startDateAndTimeSplit[0];
-        String startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
-        String endDateTime = e.getEnd().get("dateTime").toString();
-        String[] endDateAndTimeSplit = endDateTime.split("T");
-        String endDate = endDateAndTimeSplit[0];
-        String endTime = endDateAndTimeSplit[1].substring(0, 5);
+        String startDate;
+        String startTime;
+        String endDate;
+        String endTime;
         String eventID = e.getId();
-        if (startDate.equals(endDate)) { // just one day
-            CustomEventFromGoogle event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
+        CustomEvent event;
+        if (e.getStart().get("dateTime") == null) { // full day event
+            try {
+                Log.d(TAG, "HIIIIIIIIIIIIII" + e.toPrettyString());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            startDate = e.getStart().get("date").toString();
+            startTime = "All day";
+            endDate = startDate; // on Google it is instantiated as the next day
+            endTime = "23:59";
+        } else {
+            String[] startDateAndTimeSplit = e.getStart().get("dateTime").toString().split("T");
+            startDate = startDateAndTimeSplit[0];
+            startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
+            String[] endDateAndTimeSplit = e.getEnd().get("dateTime").toString().split("T");
+            endDate = endDateAndTimeSplit[0];
+            endTime = endDateAndTimeSplit[1].substring(0, 5);
+        }
+        if (startDate.equals(endDate)) { // <= 1 day
+            event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
             addToMap(event);
         } else { // > 1 day
             LocalDate first = LocalDate.parse(startDate);
@@ -240,9 +259,8 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     newDate = first.plusDays(i).toString();
                     startTime = "All Day"; // change later to support end time
                 }
-                CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
+                event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
                 addToMap(event);
-                Log.d(TAG, "TESTTTTTTT inside" + listOfDays.isEmpty());
             }
         }
     }
