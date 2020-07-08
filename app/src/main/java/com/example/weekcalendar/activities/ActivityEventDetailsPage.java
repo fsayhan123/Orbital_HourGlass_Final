@@ -41,12 +41,16 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class ActivityEventDetailsPage extends AppCompatActivity {
@@ -175,12 +179,41 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
 
                             Dialog dialog = new Dialog(shortLink.toString());
                             dialog.show(getSupportFragmentManager(), "Example");
+                            System.out.println(dialog.getStatus());
+                            if (dialog.getStatus()) {
+                                String userEmail = dialog.getEmail();
+                                ActivityEventDetailsPage.this.sendNotification(userEmail, shortLink.toString());
+                            }
                         } else {
                             System.out.println("error");
                         }
                     }
                 });
     }
+
+    private void sendNotification(String userEmail, String url) {
+        this.fStore.collection("users")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            String userID = "";
+                            for (QueryDocumentSnapshot document: task.getResult()) {
+                                userID = document.getId();
+                            }
+                            //need to for loop this to accept multiple, leave it as is for now
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("Date", "2020-06-05");
+                            data.put("Message", url);
+                            data.put("userID", userID);
+                            ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);
+                        }
+                    }
+                });
+    }
+
 
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 
