@@ -257,13 +257,16 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             return;
         }
         if (!this.mapOfMonths.containsKey(prevMonth) && !this.mapOfMonths.containsKey(nextMonth)) {
+            Log.d(TAG, "both missing");
             firebaseQuery(prev, next);
         } else if (!this.mapOfMonths.containsKey(prevMonth)) {
+            Log.d(TAG, "prev missing " + prevMonth + " " + mapOfMonths);
             Date[] missingMonth = getRequiredMonth(neighbouringMonths, -1);
             prev = FULL_DATE.format(missingMonth[0].getTime());
             next = FULL_DATE.format(missingMonth[1].getTime());
             firebaseQuery(prev, next);
         } else if (!this.mapOfMonths.containsKey(nextMonth)) {
+            Log.d(TAG, "next missing " + nextMonth);
             Date[] missingMonth = getRequiredMonth(neighbouringMonths, 1);
             prev = FULL_DATE.format(missingMonth[0].getTime());
             next = FULL_DATE.format(missingMonth[1].getTime());
@@ -293,7 +296,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     }
 
     private void firebaseQuery(String min, String max) {
-        this.c.whereArrayContains("userID", userID)
+        this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
                 .whereLessThan("startDate", max)
                 .orderBy("startDate")
@@ -439,6 +442,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             Map<String, List<CustomEvent>> currMonth = new HashMap<>();
             currMonth.put(day, temp);
             this.mapOfMonths.put(month, currMonth);
+            Log.d(TAG, "added " + month);
         }
         if (this.cache.get(event.getId()) == null) {
             this.cache.put(event.getId(), event);
@@ -513,6 +517,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         private void googleQuery(com.google.api.services.calendar.Calendar service, Date first, Date second) throws IOException {
             DateTime min = new DateTime(first);
             DateTime max = new DateTime(second);
+            Log.d(TAG, "querying from " + min + " to " + max);
             Events events = service.events().list("primary")
                     .setTimeMin(min)
                     .setTimeMax(max)
