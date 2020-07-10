@@ -40,7 +40,7 @@ public class Dialog extends AppCompatDialogFragment {
                         Dialog.this.status = true;
                     }
                 })
-                .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
