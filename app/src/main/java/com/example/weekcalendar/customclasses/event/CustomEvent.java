@@ -3,6 +3,10 @@ package com.example.weekcalendar.customclasses.event;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
+import java.util.Objects;
+
 public abstract class CustomEvent implements Parcelable {
     protected String title;
     protected String startDate;
@@ -86,6 +90,49 @@ public abstract class CustomEvent implements Parcelable {
     public String getId() {
         return this.ID;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomEvent that = (CustomEvent) o;
+        return getTitle().equals(that.getTitle()) &&
+                getStartDate().equals(that.getStartDate()) &&
+                getEndDate().equals(that.getEndDate()) &&
+                getStartTime().equals(that.getStartTime()) &&
+                getEndTime().equals(that.getEndTime()) &&
+                ID.equals(that.ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitle(), getStartDate(), getEndDate(), getStartTime(), getEndTime(), ID);
+    }
+
+    //    @Override
+//    public boolean equals(@Nullable Object obj) {
+//        if (obj == null || !(obj instanceof CustomEvent)) {
+//            return false;
+//        } else if (obj instanceof CustomEvent) {
+//            CustomEvent e = (CustomEvent) obj;
+//            return this.getTitle().equals(e.getTitle())
+//                    && this.getStartDate().equals(e.getStartDate())
+//                    && this.getStartTime().equals(e.getStartTime())
+//                    && this.getEndDate().equals(e.getEndDate())
+//                    && this.getEndTime().equals(e.getEndTime());
+//        } else {
+//            return false;
+//        }
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return (this.getTitle().hashCode()
+//                + this.getStartDate()
+//                + this.getStartTime()
+//                + this.getEndDate()
+//                + this.getEndTime()).hashCode();
+//    }
 
     // CustomEvent methods END
 }
