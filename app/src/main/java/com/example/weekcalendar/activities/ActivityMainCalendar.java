@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,8 +95,10 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private RecyclerView mRecyclerView;
     private MainCalendarAdapter mAdapter;
     private Map<String, MainCalendarAdapter> existingAdapters = new HashMap<>();
-    private List<CustomEvent> LIST_WITH_EMPTY_CUSTOMEVENT = Arrays.asList(new CustomEventFromFirebase("No Events Today!", "", "", "", "", ""));
-    private final MainCalendarAdapter EMPTY_ADAPTER = new MainCalendarAdapter(LIST_WITH_EMPTY_CUSTOMEVENT, this);
+    private Set<CustomEvent> checkExist = new HashSet<>();
+    private List<CustomEvent> LIST_WITH_EMPTY_CUSTOMEVENT = new ArrayList<>();
+    private final CustomEventFromFirebase EMPTY_CUSTOMEVENT = new CustomEventFromFirebase("No Events Today!", "", "", "", "", "");
+    private final MainCalendarAdapter EMPTY_ADAPTER = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -142,13 +145,16 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         LinearLayoutManager manager = new LinearLayoutManager(ActivityMainCalendar.this);
         this.mRecyclerView.setHasFixedSize(true);
         this.mRecyclerView.setLayoutManager(manager);
+        this.LIST_WITH_EMPTY_CUSTOMEVENT.add(this.EMPTY_CUSTOMEVENT);
+        this.mAdapter = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
+//        this.mRecyclerView.setAdapter(this.mAdapter);
 
-        calPrev.add(Calendar.MONTH, -2);
-        calPrev.set(Calendar.DATE, calPrev.getActualMaximum(Calendar.DAY_OF_MONTH));
-        datePrev = calPrev.getTime();
-        calNext.add(Calendar.MONTH, 2);
-        calNext.set(Calendar.DATE, 1);
-        dateNext = calNext.getTime();
+        this.calPrev.add(Calendar.MONTH, -2);
+        this.calPrev.set(Calendar.DATE, calPrev.getActualMaximum(Calendar.DAY_OF_MONTH));
+        this.datePrev = calPrev.getTime();
+        this.calNext.add(Calendar.MONTH, 2);
+        this.calNext.set(Calendar.DATE, 1);
+        this.dateNext = this.calNext.getTime();
 
         this.compactCalendarView = findViewById(R.id.compact_calendar_view);
         this.compactCalendarView.setFirstDayOfWeek(Calendar.SUNDAY);
@@ -158,10 +164,12 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             @Override
             public void onDayClick(Date dateClicked) {
                 String clicked = FULL_DATE.format(dateClicked);
+                String[] split = clicked.split("-");
                 if (existingAdapters.get(clicked) == null) {
                     mRecyclerView.setAdapter(EMPTY_ADAPTER);
                 } else {
                     mRecyclerView.setAdapter(existingAdapters.get(clicked));
+                    Log.d(TAG, "" + mapOfMonths.get(split[1]).get(split[2]).toString());
                 }
             }
 
@@ -267,7 +275,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             firebaseQuery(prev, next);
         } else if (!this.mapOfMonths.containsKey(nextMonth)) {
             Log.d(TAG, "next missing " + nextMonth);
-            Date[] missingMonth = getRequiredMonth(neighbouringMonths, 1);
+            Date[] missingMonth = getRequiredMonth(neighbouringMonths, 0);
             prev = FULL_DATE.format(missingMonth[0].getTime());
             next = FULL_DATE.format(missingMonth[1].getTime());
             firebaseQuery(prev, next);
@@ -291,11 +299,12 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private Date[] getRequiredMonth(Calendar[] neighbouringMonths, int addMonth) { // start inclusive and end exclusive as per google calendar api
         neighbouringMonths[0].set(Calendar.DATE, 1);
         neighbouringMonths[1].add(Calendar.MONTH, addMonth);
-        neighbouringMonths[1].set(Calendar.DATE, neighbouringMonths[1].getActualMaximum(Calendar.DAY_OF_MONTH));
+        neighbouringMonths[1].set(Calendar.DATE, 1);
         return new Date[] { neighbouringMonths[0].getTime(), neighbouringMonths[1].getTime() };
     }
 
     private void firebaseQuery(String min, String max) {
+        Toast.makeText(this, "querying from " + min + " to " + max, Toast.LENGTH_LONG).show();
         this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
                 .whereLessThan("startDate", max)
@@ -351,8 +360,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         CustomEvent event;
         if (startDate.equals(endDate)) { // just one day
             event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
-            addToMap(event);
-            addToCalendarWidget(event);
+            if (!this.checkExist.contains(event)) {
+                this.checkExist.add(event);
+                addToMap(event);
+                addToCalendarWidget(event);
+            }
         } else { // > 1 day
             LocalDate first = LocalDate.parse(startDate);
             LocalDate last = LocalDate.parse(endDate);
@@ -366,8 +378,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                     startTime = "All Day"; // change later to support end time
                 }
                 event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
-                addToMap(event);
-                addToCalendarWidget(event);
+                if (!this.checkExist.contains(event)) {
+                    this.checkExist.add(event);
+                    addToMap(event);
+                    addToCalendarWidget(event);
+                }
             }
         }
     }
@@ -442,12 +457,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             Map<String, List<CustomEvent>> currMonth = new HashMap<>();
             currMonth.put(day, temp);
             this.mapOfMonths.put(month, currMonth);
-            Log.d(TAG, "added " + month);
         }
         if (this.cache.get(event.getId()) == null) {
             this.cache.put(event.getId(), event);
         }
-//        Log.d(TAG, "added " + event.getTitle() + " to map");
+        Log.d(TAG, "added " + event.getTitle() + " to map");
     }
 
     @Override

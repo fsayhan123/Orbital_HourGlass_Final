@@ -58,4 +58,10 @@ public class MainCalendarAdapter extends RecyclerView.Adapter<MainCalendarAdapte
             this.eventDetails = itemView.findViewById(R.id.event_details);
         }
     }
+
+    public void changeList(List<CustomEvent> newList) {
+        this.listOfEvents.clear();
+        this.listOfEvents.addAll(newList);
+        notifyDataSetChanged();
+    }
 }
