@@ -13,22 +13,22 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.weekcalendar.R;
+import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
 public class Dialog extends AppCompatDialogFragment {
     private String url;
-    private Activity a;
+    private ActivityEventDetailsPage a;
     public EditText email;
-    public boolean status = false;
 
 
-    public Dialog(String url) {
+    public Dialog(String url, ActivityEventDetailsPage activity) {
         this.url = url;
+        this.a = activity;
     }
     @NonNull
     @Override
     public android.app.Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        this.a = getActivity();
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
         email = view.findViewById(R.id.edit_invite);
@@ -37,7 +37,8 @@ public class Dialog extends AppCompatDialogFragment {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Dialog.this.status = true;
+                        String userEmail = email.toString();
+                        Dialog.this.a.sendNotification(userEmail, Dialog.this.url);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -47,10 +48,6 @@ public class Dialog extends AppCompatDialogFragment {
                 });
 
         return builder.create();
-    }
-
-    public boolean getStatus() {
-        return this.status;
     }
 
     public String getEmail() {

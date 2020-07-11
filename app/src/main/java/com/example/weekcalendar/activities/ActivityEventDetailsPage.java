@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.helperclasses.Dialog;
@@ -177,13 +178,9 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             Uri shortLink = task.getResult().getShortLink();
                             Uri flowchartLink = task.getResult().getPreviewLink();
 
-                            Dialog dialog = new Dialog(shortLink.toString());
+                            Dialog dialog = new Dialog(shortLink.toString(), ActivityEventDetailsPage.this);
                             dialog.show(getSupportFragmentManager(), "Example");
-                            System.out.println(dialog.getStatus());
-                            if (dialog.getStatus()) {
-                                String userEmail = dialog.getEmail();
-                                ActivityEventDetailsPage.this.sendNotification(userEmail, shortLink.toString());
-                            }
+
                         } else {
                             System.out.println("error");
                         }
@@ -191,7 +188,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 });
     }
 
-    private void sendNotification(String userEmail, String url) {
+    public void sendNotification(String userEmail, String url) {
         this.fStore.collection("users")
                 .whereEqualTo("email", userEmail)
                 .get()
@@ -209,9 +206,11 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             data.put("Message", url);
                             data.put("userID", userID);
                             ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);
+
                         }
                     }
                 });
+        Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show();
     }
 
 
