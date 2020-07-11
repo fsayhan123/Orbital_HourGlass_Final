@@ -164,7 +164,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         System.out.println(link);
         //Generate the dynamic link
         Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
-                .setLink(Uri.parse("https://www.example.com/"))
+                .setLink(Uri.parse(link))
                 .setDomainUriPrefix("https://orbitalweekcalendar.page.link")
                 .setAndroidParameters(
                         new DynamicLink.AndroidParameters.Builder("com.example.weekcalendar")

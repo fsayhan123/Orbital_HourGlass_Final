@@ -37,7 +37,7 @@ public class Dialog extends AppCompatDialogFragment {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String userEmail = email.toString();
+                        String userEmail = email.getText().toString();
                         Dialog.this.a.sendNotification(userEmail, Dialog.this.url);
                     }
                 })
