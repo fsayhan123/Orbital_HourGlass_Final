@@ -20,7 +20,7 @@ public class HelperMethods {
         put("Dec", "12");
     }};
 
-    private static String[] numToStringMonth = new String[] { "",
+    public static String[] numToStringMonth = new String[] { "",
             "January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December" };
 

@@ -3,13 +3,20 @@ package com.example.weekcalendar.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.event.CustomEvent;
@@ -47,6 +54,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,12 +72,17 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectStartDate;
     private TextInputLayout selectEndDateLayout;
     private Button selectEndDate;
-    private TextInputLayout selectStartTimeLayout;
     private Button selectStartTime;
-    private TextInputLayout selectEndTimeLayout;
     private Button selectEndTime;
     private Button createEvent;
+    private Button addToDoButton;
+    private LinearLayout todoList;
+    private Map<Integer, EditText> todos;
+    private int prevToDo = 1;
+
     private EditText todo1;
+    private DatePickerDialog datePickerDialog;
+    private TimePickerDialog timePickerDialog;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -119,7 +133,15 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.selectEndTime = findViewById(R.id.select_end_time);
         this.selectEndTime.setOnClickListener(v -> openSelectTimeDialog(this.selectEndTime));
 
+        this.todoList = findViewById(R.id.fill_in_todos);
+
         this.todo1 = findViewById(R.id.todo_item);
+
+        this.addToDoButton = findViewById(R.id.add_todo);
+        this.addToDoButton.setOnClickListener(v -> addToDoEditText());
+
+        this.todos = new HashMap<>();
+        this.todos.put(1, this.todo1);
 
         this.createEvent = findViewById(R.id.create_event_button);
         if (acct != null) { // if logged in to a Google account
@@ -154,6 +176,18 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             } else {
                 this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
             }
+        }
+    }
+
+    private void addToDoEditText() {
+        if (this.todos.get(prevToDo).getText().toString().equals("")) {
+
+        } else {
+            LayoutInflater inflater = this.getLayoutInflater();
+            View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
+            this.todoList.addView(eachToDo);
+            prevToDo++;
+            this.todos.put(prevToDo, eachToDo.findViewById(R.id.todo_item));
         }
     }
 
@@ -269,13 +303,37 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     private void openSelectDateDialog(Button b) {
-        MyDateDialog myDateDialog = new MyDateDialog(b);
-        myDateDialog.show(getSupportFragmentManager(), "date dialog");
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        int day = c.get(java.util.Calendar.DAY_OF_MONTH);
+        int month = c.get(java.util.Calendar.MONTH);
+        int year = c.get(java.util.Calendar.YEAR);
+        this.datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                b.setText(dayOfMonth + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
+            }
+        }, year, month, day);
+        this.datePickerDialog.show();
     }
 
     private void openSelectTimeDialog(Button b) {
-        MyTimeDialog myTimeDialog = new MyTimeDialog(b);
-        myTimeDialog.show(getSupportFragmentManager(), "time dialog");
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        int minute = c.get(java.util.Calendar.MINUTE);
+        int hour = c.get(java.util.Calendar.HOUR);
+        Log.d(TAG, hour + ":" + minute);
+        this.timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                Log.d(TAG, Integer.toString(hourOfDay));
+                String end = "AM";
+                if (hourOfDay > 12) {
+                    hourOfDay -= 12;
+                    end = "PM";
+                }
+                b.setText(hourOfDay + ":" + minute + " " + end);
+            }
+        }, hour, minute, false);
+        this.timePickerDialog.show();
     }
 
     @Override

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".activities.ActivityCreateToDoPage">
 
     <androidx.appcompat.widget.Toolbar
@@ -24,12 +25,15 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
         android:paddingHorizontal="20dp"
-        android:text="Create To Do Item" />
+        android:text="Create To Do"
+        android:textColor="#4A4A4A" />
 
     <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
+        android:layout_below="@+id/create_todo_toolbar"
+        android:layout_marginTop="0dp"
         android:orientation="vertical">
 
         <EditText
@@ -49,7 +53,8 @@
             android:layout_gravity="center|center_horizontal"
             android:layout_marginHorizontal="100dp"
             android:layout_marginTop="10dp"
-            android:text="Select Date" />
+            android:text="Select Date"
+            android:textColor="#4A4A4A" />
 
 
     </LinearLayout>

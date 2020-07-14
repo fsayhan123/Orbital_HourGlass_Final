@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -43,9 +45,8 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
     private EditText expenditure;
     private EditText cost;
     private Button dateDialog;
+    private DatePickerDialog datePickerDialog;
     private Button addExpenditure;
-    private SingleDateAndTimePicker time_scroller;
-    private DatabaseHelper myDB;
     private SimpleDateFormat stringToDate = new SimpleDateFormat("yyyy-MM-dd");
     private SimpleDateFormat dateToString = new SimpleDateFormat("dd MMMMM yyyy");
     private FirebaseFirestore db;
@@ -62,8 +63,6 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         fAuth = FirebaseAuth.getInstance();
         userID = fAuth.getCurrentUser().getUid();
 
-        myDB = new DatabaseHelper(this);
-
         // sets up toolbar with working back button
         Toolbar tb = findViewById(R.id.create_todo_toolbar);
         setSupportActionBar(tb);
@@ -78,15 +77,15 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         date = findViewById(R.id.select_date);
-        date.setOnClickListener(v -> openSelectDateDialog(v, date));
+        date.setOnClickListener(v -> openSelectDateDialog(date));
 
         addExpenditure = findViewById(R.id.submit_expenditure);
 
         cost = findViewById(R.id.cost);
         cost.setFilters(new InputFilter[] {new DigitsInputFilter(Integer.MAX_VALUE, 2, Double.MAX_VALUE)});
 
-        View inflatedView = getLayoutInflater().inflate(R.layout.select_time_dialog, null);
-        time_scroller = inflatedView.findViewById(R.id.date_selector_time);
+//        View inflatedView = getLayoutInflater().inflate(R.layout.select_time_dialog, null);
+//        time_scroller = inflatedView.findViewById(R.id.date_selector_time);
 
         Intent i = getIntent();
         String num = i.getStringExtra("expense ID");
@@ -121,7 +120,6 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
 
                             String amount = document.get("Amount").toString();
                             cost.setText(amount);
-
 
                             Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                         } else {
@@ -217,10 +215,18 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
     @Override
     public void onNothingSelected(AdapterView<?> parent) { }
 
-    private void openSelectDateDialog(View v, Button b) {
-        Toast.makeText(this, "opened date dialog", Toast.LENGTH_SHORT).show();
-        MyDateDialog myDateDialog = new MyDateDialog(b);
-        myDateDialog.show(getSupportFragmentManager(), "date dialog");
+    private void openSelectDateDialog(Button b) {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        int day = c.get(java.util.Calendar.DAY_OF_MONTH);
+        int month = c.get(java.util.Calendar.MONTH);
+        int year = c.get(java.util.Calendar.YEAR);
+        this.datePickerDialog = new DatePickerDialog(ActivityCreateExpensePage.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                b.setText(dayOfMonth + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
+            }
+        }, year, month, day);
+        this.datePickerDialog.show();
     }
 
     @Override
