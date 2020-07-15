@@ -52,7 +52,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
         CustomToDo toDo = getChild(listPosition, expandedListPosition);
-        final String expandedListText = toDo.getDetails();
+        final String expandedListText = toDo.getTitle();
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

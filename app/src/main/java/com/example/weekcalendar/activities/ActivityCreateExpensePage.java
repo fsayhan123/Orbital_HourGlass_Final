@@ -223,7 +223,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
         this.datePickerDialog = new DatePickerDialog(ActivityCreateExpensePage.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                b.setText(dayOfMonth + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
+                b.setText(String.format("%02d", dayOfMonth) + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
             }
         }, year, month, day);
         this.datePickerDialog.show();

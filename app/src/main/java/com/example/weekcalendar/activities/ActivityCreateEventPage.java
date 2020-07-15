@@ -1,5 +1,6 @@
 package com.example.weekcalendar.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -19,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.weekcalendar.customclasses.CustomToDo;
 import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.MyDateDialog;
@@ -27,6 +29,8 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -43,21 +47,20 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.Events;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,9 +79,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectEndTime;
     private Button createEvent;
     private Button addToDoButton;
-    private LinearLayout todoList;
-    private Map<Integer, EditText> todos;
-    private int prevToDo = 1;
+    private LinearLayout todoListLayout;
+    private List<EditText> todos;
 
     private EditText todo1;
     private DatePickerDialog datePickerDialog;
@@ -92,6 +94,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private CollectionReference cToDo;
 
     private CustomEvent event;
+    private List<CustomToDo> originalToDos;
 
     // Get data from Google
     private static final String APPLICATION_NAME = "WeekCalendar";
@@ -118,8 +121,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         this.selectStartDateLayout = findViewById(R.id.selectStartDateLayout);
         this.selectEndDateLayout = findViewById(R.id.selectEndDateLayout);
-//        this.selectStartTimeLayout = findViewById(R.id.selectStartDateLayout);
-//        this.selectEndTimeLayout = findViewById(R.id.selectStartDateLayout);
 
         this.selectStartDate = findViewById(R.id.select_start_date);
         this.selectStartDate.setOnClickListener(v -> openSelectDateDialog(this.selectStartDate));
@@ -133,15 +134,17 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.selectEndTime = findViewById(R.id.select_end_time);
         this.selectEndTime.setOnClickListener(v -> openSelectTimeDialog(this.selectEndTime));
 
-        this.todoList = findViewById(R.id.fill_in_todos);
+        this.todoListLayout = findViewById(R.id.fill_in_todos);
 
         this.todo1 = findViewById(R.id.todo_item);
 
         this.addToDoButton = findViewById(R.id.add_todo);
         this.addToDoButton.setOnClickListener(v -> addToDoEditText());
 
-        this.todos = new HashMap<>();
-        this.todos.put(1, this.todo1);
+        this.todos = new ArrayList<>();
+        this.todos.add(this.todo1);
+
+        this.originalToDos = new ArrayList<>();
 
         this.createEvent = findViewById(R.id.create_event_button);
         if (acct != null) { // if logged in to a Google account
@@ -169,6 +172,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.selectStartTime.setText(HelperMethods.formatTimeTo12H(event.getStartTime()));
             this.selectEndTime.setText(HelperMethods.formatTimeTo12H(event.getEndTime()));
             this.createEvent.setText("Update Event");
+            fetchToDos(this.event.getId());
             if (acct != null) {
                 RequestAuth task = new RequestAuth();
                 Log.d(TAG, "!!!!! " + this.event.getId());
@@ -179,15 +183,48 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
-    private void addToDoEditText() {
-        if (this.todos.get(prevToDo).getText().toString().equals("")) {
+    private void fetchToDos(String eventID) {
+        this.cToDo.whereEqualTo("eventID", eventID)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d(TAG, "onSuccess: NO TODO");
+                        } else {
+                            Log.d(TAG, "onSuccess: TODO EXISTS");
+                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                processToDoDocument(document);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                    }
+                });
+    }
 
-        } else {
+    private void processToDoDocument(QueryDocumentSnapshot doc) { // for previously created todos
+        String date = (String) doc.get("date");
+        String title = (String) doc.get("title");
+        String id = doc.getId();
+        CustomToDo todo = new CustomToDo(id, title, date);
+        this.originalToDos.add(todo);
+
+        EditText e = this.todos.get(this.todos.size() - 1);
+        e.setText(title);
+        addToDoEditText();
+    }
+
+    private void addToDoEditText() {
+        if (!this.todos.get(this.todos.size() - 1).getText().toString().equals("")) {
             LayoutInflater inflater = this.getLayoutInflater();
             View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
-            this.todoList.addView(eachToDo);
-            prevToDo++;
-            this.todos.put(prevToDo, eachToDo.findViewById(R.id.todo_item));
+            this.todoListLayout.addView(eachToDo);
+            this.todos.add(eachToDo.findViewById(R.id.todo_item));
         }
     }
 
@@ -232,42 +269,56 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         return eventDetails;
     }
 
-    private Map<String, Object> getToDoDetails() {
-        String toDo = this.todo1.getText().toString();
+    private List<Map<String, Object>> getToDoDetails() {
+        List<Map<String, Object>> allToDoDetails = new ArrayList<>();
+        for (EditText e : this.todos) {
+            String toDo = e.getText().toString();
 
-        if (!toDo.equals("")) {
-            Map<String, Object> toDoDetails = new HashMap<>();
-            String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
-            toDoDetails.put("userID", this.userID);
-            toDoDetails.put("date", startDate);
-            toDoDetails.put("title", toDo);
-            return toDoDetails;
-        } else {
-            return null;
+            if (!toDo.equals("")) {
+                Map<String, Object> toDoDetails = new HashMap<>();
+                String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
+                toDoDetails.put("userID", this.userID);
+                toDoDetails.put("date", startDate);
+                toDoDetails.put("title", toDo);
+                allToDoDetails.add(toDoDetails);
+            }
         }
+        return allToDoDetails;
     }
 
     private void updateFirebaseEvent() {
         if (checkFields()) {
             DocumentReference thisEventDoc = this.cEvents.document(this.event.getId());
-//            DocumentReference thisToDoDoc = this.cToDo.document(this.event.getId());
 
             Map<String, Object> eventDetails = getEventDetails();
-//            Map<String, Object> toDoDetails = getToDoDetails();
+            List<Map<String, Object>> todoDetails = getToDoDetails();
 
             thisEventDoc.update(eventDetails)
                     .addOnSuccessListener(docRef -> {
                         // need to check if event originally had to do items
                         // if true, then we need to update this based on the existing to do's document ID
                         // if false, we need to create new document
-//                        if (toDoDetails != null) {
-//                            DocumentReference toDoDocRef = cToDo.document();
-//                            toDoDetails.put("eventID", this.event.getId());
-//                            toDoDetails.put("todoID", toDoDocRef.getId());
-//                            toDoDocRef.set(toDoDetails)
-//                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-//                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-//                        }
+                        for (int i = 0; i < originalToDos.size(); i++) { // for original todos
+                            CustomToDo todo = originalToDos.get(i);
+                            DocumentReference toDoDocRef = cToDo.document(todo.getID());
+                            Map<String, Object> thisToDoDetails = new HashMap<>();
+                            thisToDoDetails.put("eventID", this.event.getId());
+                            thisToDoDetails.put("todoID", toDoDocRef.getId());
+                            thisToDoDetails.put("date", eventDetails.get("startDate"));
+                            String newTitle = (String) todoDetails.get(i).get("title");
+                            thisToDoDetails.put("title", newTitle);
+                            toDoDocRef.update(thisToDoDetails)
+                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
+                                    .addOnFailureListener(e -> Log.w(TAG, "*****Error writing document", e));
+                        }
+
+                        for (int i = originalToDos.size(); i < todoDetails.size(); i++) {
+                            Map<String, Object> nextToDo = getToDoDetails().get(i);
+                            nextToDo.put("eventID", this.event.getId());
+                            cToDo.add(nextToDo)
+                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
+                                    .addOnFailureListener(e -> Log.w(TAG, "*****Error writing document", e));
+                        }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
@@ -281,13 +332,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private void createFirebaseEvent() {
         if (checkFields()) {
             Map<String, Object> eventDetails = getEventDetails();
-            Map<String, Object> toDoDetails = getToDoDetails();
+            List<Map<String, Object>> allToDoDetails = getToDoDetails();
 
             cEvents.add(eventDetails)
                     .addOnSuccessListener(docRef -> {
-                        if (toDoDetails != null) {
-                            toDoDetails.put("eventID", docRef.getId());
-                            cToDo.add(toDoDetails)
+                        for (Map<String, Object> todo : allToDoDetails) {
+                            todo.put("eventID", docRef.getId());
+                            cToDo.add(todo)
                                     .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
@@ -310,7 +361,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                b.setText(dayOfMonth + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
+                b.setText(String.format("%02d", dayOfMonth) + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
             }
         }, year, month, day);
         this.datePickerDialog.show();
@@ -330,7 +381,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                     hourOfDay -= 12;
                     end = "PM";
                 }
-                b.setText(hourOfDay + ":" + minute + " " + end);
+                b.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute) + " " + end);
             }
         }, hour, minute, false);
         this.timePickerDialog.show();
@@ -417,8 +468,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         private void createGoogleEvent(Calendar service) throws IOException {
             if (checkFields()) {
                 Map<String, Object> eventDetails = getEventDetails();
-//            Map<String, Object> toDoDetails = getToDoDetails();
-
                 Event e = new Event()
                         .setSummary(eventDetails.get("eventTitle").toString());
                 DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
@@ -434,15 +483,22 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                         .setTimeZone("Asia/Singapore");
                 e.setEnd(end);
                 String calID = "primary";
-                service.events().insert(calID, e).execute();
+                Event response = service.events().insert(calID, e).execute();
+
+                List<Map<String, Object>> allToDoDetails = getToDoDetails();
+                for (Map<String, Object> todo : allToDoDetails) {
+                    Log.d(TAG, "ID IS " + response.getId());
+                    todo.put("eventID", response.getId());
+                    cToDo.add(todo)
+                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                            .addOnFailureListener(td -> Log.w(TAG, "Error writing todo document", td));
+                }
             }
         }
 
         private void updateGoogleEvent(Calendar service, String eventID) throws IOException {
             if (checkFields()) {
                 Map<String, Object> eventDetails = getEventDetails();
-//            Map<String, Object> toDoDetails = getToDoDetails();
-
                 Event e = service
                         .events()
                         .get("primary", eventID)
@@ -462,6 +518,30 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 e.setEnd(end);
                 String calID = "primary";
                 service.events().update(calID, eventID, e).execute();
+
+                List<Map<String, Object>> todoDetails = getToDoDetails();
+
+                for (int i = 0; i < originalToDos.size(); i++) { // for original todos
+                    CustomToDo todo = originalToDos.get(i);
+                    DocumentReference toDoDocRef = cToDo.document(todo.getID());
+                    Map<String, Object> thisToDoDetails = new HashMap<>();
+                    thisToDoDetails.put("eventID", event.getId());
+                    thisToDoDetails.put("todoID", toDoDocRef.getId());
+                    thisToDoDetails.put("date", eventDetails.get("startDate"));
+                    String newTitle = (String) todoDetails.get(i).get("title");
+                    thisToDoDetails.put("title", newTitle);
+                    toDoDocRef.update(thisToDoDetails)
+                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
+                            .addOnFailureListener(doc -> Log.w(TAG, "*****Error writing document", doc));
+                }
+
+                for (int i = originalToDos.size(); i < todoDetails.size(); i++) {
+                    Map<String, Object> nextToDo = getToDoDetails().get(i);
+                    nextToDo.put("eventID", event.getId());
+                    cToDo.add(nextToDo)
+                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
+                            .addOnFailureListener(doc -> Log.w(TAG, "*****Error writing document", doc));
+                }
             }
         }
     }

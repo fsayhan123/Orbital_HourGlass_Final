@@ -5,18 +5,18 @@ import android.os.Parcelable;
 
 public class CustomToDo implements Parcelable {
     private String ID;
-    private String details;
+    private String title;
     private String date;
 
-    public CustomToDo(String ID, String details, String date) {
+    public CustomToDo(String ID, String title, String date) {
         this.ID = ID;
-        this.details = details;
+        this.title = title;
         this.date = date;
     }
 
     protected CustomToDo(Parcel in) {
         this.ID = in.readString();
-        this.details = in.readString();
+        this.title = in.readString();
         this.date = in.readString();
     }
 
@@ -36,8 +36,8 @@ public class CustomToDo implements Parcelable {
         return this.ID;
     }
 
-    public String getDetails() {
-        return this.details;
+    public String getTitle() {
+        return this.title;
     }
 
     public String getDate() {
@@ -52,7 +52,7 @@ public class CustomToDo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.ID);
-        dest.writeString(this.details);
+        dest.writeString(this.title);
         dest.writeString(this.date);
     }
 }

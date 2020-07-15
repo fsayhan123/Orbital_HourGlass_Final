@@ -73,7 +73,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         Intent i = getIntent();
         this.toDo = i.getParcelableExtra("todo");
         if (toDo != null) {
-            this.toDoTitle.setText(this.toDo.getDetails());
+            this.toDoTitle.setText(this.toDo.getTitle());
             this.selectDate.setText(HelperMethods.formatDateForView(this.toDo.getDate()));
             this.createToDo.setOnClickListener(v -> updateToDo());
             this.createToDo.setText("Update To Do");
@@ -117,7 +117,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         this.datePickerDialog = new DatePickerDialog(ActivityCreateToDoPage.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                b.setText(dayOfMonth + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
+                b.setText(String.format("%02d", dayOfMonth) + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
             }
         }, year, month, day);
         this.datePickerDialog.show();
