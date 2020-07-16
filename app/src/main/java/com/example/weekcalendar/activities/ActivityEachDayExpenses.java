@@ -19,6 +19,7 @@ import com.example.weekcalendar.adapters.EachDayExpensesExListAdapter;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomExpense;
 import com.example.weekcalendar.customclasses.CustomExpenseCategory;
+import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ActivityEachDayExpenses extends AppCompatActivity {
-    private DatabaseHelper myDB;
     private List<CustomExpenseCategory> listOfCat = new ArrayList<>();
     private boolean canDelete = false;
 
@@ -47,7 +47,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_each_day_categories);
+        setContentView(R.layout.activity_each_day_expense_categories);
 
         Intent intent = getIntent();
         String expenseDate = intent.getStringExtra("date clicked");
@@ -56,25 +56,22 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         Toolbar tb = findViewById(R.id.select_date);
         setSupportActionBar(tb);
         getSupportActionBar().setTitle("Expenses on " + expenseDate);
+
         // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         //Setup firebase fields
-        db = FirebaseFirestore.getInstance();
-        fAuth = FirebaseAuth.getInstance();
-        userID = fAuth.getCurrentUser().getUid();
+        this.db = FirebaseFirestore.getInstance();
+        this.fAuth = FirebaseAuth.getInstance();
+        this.userID = this.fAuth.getCurrentUser().getUid();
 
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(ActivityEachDayExpenses.this, ActivityExpensePage.class));
         });
 
-        myDB = new DatabaseHelper(this);
-
         //Get a particular date as given from the top
-        String parsedDate = parseDate(expenseDate);
-        populateCategories(parsedDate);
-
+        populateCategories(HelperMethods.formatDateWithDash(expenseDate));
     }
 
     @Override
@@ -117,17 +114,8 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public String parseDate(String date) {
-        String[] expenseDateArr = date.split(" ");
-        expenseDateArr[1] = myDB.convertDate(expenseDateArr[1].substring(0,3));
-        if (expenseDateArr[0].length() == 1) {
-            expenseDateArr[0] = "0" + expenseDateArr[0];
-        }
-        return String.join("-", expenseDateArr[2], expenseDateArr[1], expenseDateArr[0]);
-    }
-
     public void populateCategories(String date) {
-        db.collection("expense")
+        this.db.collection("expense")
                 .whereEqualTo("userID", this.userID)
                 .whereEqualTo("Date", date)
                 .get()
@@ -143,6 +131,7 @@ public class ActivityEachDayExpenses extends AppCompatActivity {
                             allExpenseCategories = findViewById(R.id.all_expense_categories);
                             adapter = new EachDayExpensesExListAdapter(ActivityEachDayExpenses.this, ActivityEachDayExpenses.this.listOfCat);
                             allExpenseCategories.setAdapter(adapter);
+//                            allExpenseCategories.setDivider(R.color.transparent);
                             for (int i = 0; i < adapter.getGroupCount(); i++) {
                                 allExpenseCategories.expandGroup(i);
                             }

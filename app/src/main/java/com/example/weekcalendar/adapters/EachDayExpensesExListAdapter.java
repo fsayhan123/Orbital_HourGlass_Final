@@ -1,7 +1,6 @@
 package com.example.weekcalendar.adapters;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,15 +64,12 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         CustomExpenseCategory e = (CustomExpenseCategory) getGroup(groupPosition);
         if (convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) this.context.
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.expense_category_and_category_cost_2, null);
+            LayoutInflater layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = layoutInflater.inflate(R.layout.expense_category_and_category_cost, null);
         }
         TextView categoryName = convertView.findViewById(R.id.category);
-        categoryName.setTypeface(null, Typeface.BOLD);
         categoryName.setText(e.getName());
         TextView cost = convertView.findViewById(R.id.expense);
-        cost.setTypeface(null, Typeface.BOLD);
         cost.setText(String.format("%.2f", (e.getTotalCost())));
         return convertView;
     }
@@ -85,16 +81,12 @@ public class EachDayExpensesExListAdapter extends BaseExpandableListAdapter {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.expense_item_name_cost, null);
+            convertView.setBackgroundResource(R.drawable.selector);
         }
-//        convertView.setBackgroundColor(e.isSelected() ? Color.RED : Color.WHITE);
         TextView expense = convertView.findViewById(R.id.expense_name);
         TextView cost = convertView.findViewById(R.id.expense_cost);
         expense.setText(e.getExpenseName());
         cost.setText(String.format("%.2f", e.getCost()));
-
-//        long packedPos = ExpandableListView.getPackedPositionForChild(groupPosition, childPosition);
-//        int pos = ((ExpandableListView) parent).getFlatListPosition(packedPos);
-//        ((ExpandableListView) parent).setItemChecked(pos, true);
         return convertView;
     }
 

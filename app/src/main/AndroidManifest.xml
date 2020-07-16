@@ -18,11 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activities.ActivityMainCalendar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -37,7 +33,6 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".FetchGoogleCalendarEvents" />
         <activity android:name=".activities.ActivityRegisterPage" />
         <activity android:name=".activities.ActivityLoginPage">
 
@@ -47,12 +42,19 @@
         <activity
             android:name=".activities.ActivityToDoListPage"
             android:parentActivityName=".activities.ActivityUpcomingPage" />
-        <activity android:name=".activities.ActivityExpensePage" />
+        <activity android:name=".activities.ActivityExpensePage">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".activities.ActivityCreateExpensePage" />
         <activity android:name=".activities.ActivityEventDetailsPage" />
         <activity android:name=".activities.ActivityCreateEventPage" />
         <activity android:name=".activities.ActivityNotificationsPage"/>
         <activity android:name=".activities.ActivityUpcomingPage">
+
         </activity>
 
         <meta-data

@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.example.weekcalendar.FetchGoogleCalendarEvents;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityExpensePage;
 import com.example.weekcalendar.activities.ActivityLoginPage;
@@ -94,11 +93,6 @@ public class SetupNavDrawer {
                     mGoogleSignInClient.signOut();
                     Intent i4 = new Intent(a, ActivityLoginPage.class);
                     a.startActivity(i4);
-                    break;
-                case R.id.fetch_button:
-                    Toast.makeText(a, "Fetch Events",Toast.LENGTH_SHORT).show();
-                    Intent i5 = new Intent(a, FetchGoogleCalendarEvents.class);
-                    a.startActivity(i5);
                     break;
                 case R.id.main_calendar_button:
                     Toast.makeText(a, "Main calendar",Toast.LENGTH_SHORT).show();

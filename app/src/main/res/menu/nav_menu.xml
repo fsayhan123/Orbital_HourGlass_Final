@@ -22,9 +22,4 @@
             android:title="Logout"/>
     </group>
 
-    <group android:id="@+id/fetch">
-        <item android:id="@+id/fetch_button"
-            android:title="Fetch Events"/>
-    </group>
-
 </menu>

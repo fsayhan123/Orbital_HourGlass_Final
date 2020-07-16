@@ -27,7 +27,7 @@ public class EachCatExpenseAdapter extends RecyclerView.Adapter<EachCatExpenseAd
     @NonNull
     @Override
     public EachCatExpenseAdapter.MyCatExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.individual_expense_and_cost, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_expense_page_individual_expense_and_cost, parent, false);
         EachCatExpenseAdapter.MyCatExpenseViewHolder holder = new EachCatExpenseAdapter.MyCatExpenseViewHolder(view);
         return holder;
     }

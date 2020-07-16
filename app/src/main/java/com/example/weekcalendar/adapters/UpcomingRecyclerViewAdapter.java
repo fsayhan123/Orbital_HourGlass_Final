@@ -1,6 +1,7 @@
 package com.example.weekcalendar.adapters;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import com.example.weekcalendar.customclasses.CustomDay;
 import java.util.List;
 import java.util.Map;
 
+import static android.content.ContentValues.TAG;
+
 public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRecyclerViewAdapter.MyViewHolder> {
 
     private List<CustomDay> listOfDates;
@@ -33,6 +36,7 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
 
         private TextView date;
         private TextView month;
+        private TextView year;
         private RecyclerView dayEvents;
         private LinearLayout eachDayLayout;
 
@@ -40,6 +44,7 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
             super(itemView);
             this.date = itemView.findViewById(R.id.date);
             this.month = itemView.findViewById(R.id.month);
+            this.year = itemView.findViewById(R.id.year);
             this.dayEvents = itemView.findViewById(R.id.all_events_list);
             this.eachDayLayout = itemView.findViewById(R.id.date_month_layout);
         }
@@ -62,7 +67,9 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
         holder.eachDayLayout.setOnClickListener(v -> {
             String day = holder.date.getText().toString();
             String month = holder.month.getText().toString();
-            mDateClickListener.onDateClickListener(day + " " + month);
+            String year = holder.year.getText().toString();
+            mDateClickListener.onDateClickListener(day + " " + month + " " + year);
+            Log.d(TAG, day + " " + month + " " + year);
         });
 
         return holder;
@@ -73,6 +80,7 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
         final CustomDay d = listOfDates.get(position);
         holder.date.setText(d.getdd().length() == 1 ? "0" + d.getdd() : d.getdd());
         holder.month.setText(d.getMMM());
+        holder.year.setText(d.getyyyy());
 
         EventRecyclerViewAdapter e = new EventRecyclerViewAdapter(this.mapOfEvents.get(d), (MyOnEventClickListener) a); // can store in holder?
         LinearLayoutManager LLM = new LinearLayoutManager(a); // can store in holder?

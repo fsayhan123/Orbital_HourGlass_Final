@@ -25,7 +25,8 @@
         android:id="@+id/all_expense_categories"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:choiceMode="multipleChoice" />
-
+        android:childDivider="#00000000"
+        android:choiceMode="multipleChoice"
+        android:divider="#00000000" />
 
 </LinearLayout>

@@ -41,6 +41,8 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     and a Map with key-value pair of CustomDay and a List<CustomExpenseCategory>, representing
     the spending in each category each day.
      */
+    private static final String TAG = ActivityExpensePage.class.getSimpleName();
+
     private List<CustomDay> daysWithExpenditure;
     private RecyclerView expensesByDay;
     private ExpenseRecyclerViewAdapter dayExpenseAdapter;
@@ -51,9 +53,6 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     // FloatingActionButton to link to ActivityCreateExpense
     private FloatingActionButton floatingAddExpense;
 
-    // Database handler
-    private DatabaseHelper myDB;
-
     private SetupNavDrawer navDrawer;
 
     //Firebase fields
@@ -61,41 +60,40 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
     private FirebaseAuth fAuth;
     private String userID;
 
+    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_page);
-        myDB = new DatabaseHelper(this);
 
         //Setup firebase fields
-        db = FirebaseFirestore.getInstance();
-        fAuth = FirebaseAuth.getInstance();
-        userID = fAuth.getCurrentUser().getUid();
+        this.db = FirebaseFirestore.getInstance();
+        this.fAuth = FirebaseAuth.getInstance();
+        this.userID = this.fAuth.getCurrentUser().getUid();
 
-        try {
-            getSpendingDays();
-            //daysWithExpenditure.sort((d1, d2) -> d1.compareTo(d2));
-        } catch (ParseException e) {
-            daysWithExpenditure = new ArrayList<>();
-        }
+        getSpendingDays();
 
-        //spendingEachDay = getSpendingEachDay();
+        this.expensesByDay = findViewById(R.id.day_by_day_expense_view);
+        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
+                ActivityExpensePage.this, this);
 
-        expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        //dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
-        //        ActivityExpensePage.this, this);
+        this.manager = new LinearLayoutManager(ActivityExpensePage.this);
+        this.expensesByDay.setHasFixedSize(true);
+        this.expensesByDay.setLayoutManager(this.manager);
+        expensesByDay.setAdapter(dayExpenseAdapter);
 
-        manager = new LinearLayoutManager(ActivityExpensePage.this);
-        expensesByDay.setHasFixedSize(true);
-        expensesByDay.setLayoutManager(manager);
-        //expensesByDay.setAdapter(dayExpenseAdapter);
-
-        floatingAddExpense = findViewById(R.id.to_add_expense);
-        floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
+        this.floatingAddExpense = findViewById(R.id.to_add_expense);
+        this.floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
 
         // Navigation pane drawer setup
-        navDrawer = new SetupNavDrawer(this, findViewById(R.id.expenses_toolbar));
-        navDrawer.setupNavDrawerPane();
+        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.expenses_toolbar));
+        this.navDrawer.setupNavDrawerPane();
+
+        for (CustomDay day : spendingEachDay.keySet()) {
+            List<CustomExpenseCategory> list = spendingEachDay.get(day);
+            Log.d(TAG, list.toString());
+        }
     }
 
     private void moveToAddExpensePage() {
@@ -103,12 +101,10 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
         startActivity(i);
     }
 
-
     // Returns a List<CustomDay> that user has a spending;
-    private void getSpendingDays() throws ParseException {
-        daysWithExpenditure = new ArrayList<>();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        db.collection("expense")
+    private void getSpendingDays() {
+        this.daysWithExpenditure = new ArrayList<>();
+        this.db.collection("expense")
                 .whereEqualTo("userID", this.userID)
                 .orderBy("Date")
                 .get()
@@ -120,12 +116,11 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
                         } else {
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processDocument(document);
-                            } for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
-                                System.out.println(daysWithExpenditure);
+                            }
+                            for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
                                 prepHashMap(daysWithExpenditure);
                                 prepSpending(document);
                             }
-                            System.out.println(spendingEachDay);
                             dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
                                     ActivityExpensePage.this, ActivityExpensePage.this);
                             expensesByDay.setAdapter(dayExpenseAdapter);
@@ -142,7 +137,6 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
 
     //Get the days with expenditure and add them into the list
     private void processDocument(QueryDocumentSnapshot document) {
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String date = document.get("Date").toString();
         Date d = null;
         try {
@@ -151,24 +145,23 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
             e.printStackTrace();
         }
         CustomDay day = new CustomDay(d);
-        if (!(daysWithExpenditure.contains(day))) {
-            daysWithExpenditure.add(day);
+        if (!(this.daysWithExpenditure.contains(day))) {
+            this.daysWithExpenditure.add(day);
         }
     }
 
     //Fill Hashmap with days
     private void prepHashMap(List<CustomDay> dayList) {
-        for (CustomDay day:dayList) {
-            if (!(spendingEachDay.containsKey(day))) {
+        for (CustomDay day : dayList) {
+            if (!(this.spendingEachDay.containsKey(day))) {
                 List<CustomExpenseCategory> customCategoryList = new ArrayList<>();
-                spendingEachDay.put(day, customCategoryList);
+                this.spendingEachDay.put(day, customCategoryList);
             }
         }
     }
 
     //Prepare hashmap
     private void prepSpending(QueryDocumentSnapshot document) {
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String date = document.get("Date").toString();
         String category = document.get("Category").toString();
         String name = document.get("Name").toString();
@@ -180,7 +173,7 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
             e.printStackTrace();
         }
         CustomDay day = new CustomDay(d);
-        List<CustomExpenseCategory> customExpenseCategoriesList = spendingEachDay.get(day);
+        List<CustomExpenseCategory> customExpenseCategoriesList = this.spendingEachDay.get(day);
         boolean flag = false;
         for (CustomExpenseCategory cat : customExpenseCategoriesList) {
             if (cat.getName().equals(category)) {

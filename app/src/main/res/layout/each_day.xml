@@ -12,8 +12,8 @@
         android:id="@+id/date_month_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="7dp"
         android:background="@drawable/click_layout"
         android:clickable="true"
         android:orientation="vertical">
@@ -22,11 +22,12 @@
             android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="top|center_horizontal"
+            android:includeFontPadding="false"
             android:paddingHorizontal="5dp"
             android:text="21"
             android:textColor="#4A4A4A"
-            android:textSize="56dp"
+            android:textSize="48dp"
             android:typeface="sans" />
 
         <TextView
@@ -38,6 +39,14 @@
             android:text="May"
             android:textColor="#4A4A4A"
             android:textSize="24dp" />
+
+        <TextView
+            android:id="@+id/year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="TextView"
+            android:textColor="#4A4A4A" />
 
     </LinearLayout>
 

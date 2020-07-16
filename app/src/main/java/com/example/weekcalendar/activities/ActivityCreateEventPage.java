@@ -180,6 +180,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             } else {
                 this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
             }
+        } else if (i.getStringExtra("date clicked") != null) {
+            String date = i.getStringExtra("date clicked");
+            this.selectStartDate.setText(date);
         }
     }
 
@@ -354,10 +357,20 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     private void openSelectDateDialog(Button b) {
-        java.util.Calendar c = java.util.Calendar.getInstance();
-        int day = c.get(java.util.Calendar.DAY_OF_MONTH);
-        int month = c.get(java.util.Calendar.MONTH);
-        int year = c.get(java.util.Calendar.YEAR);
+        int day, month, year;
+        if (b.getText().toString().contains("SELECT")) {
+            String givenDate = b.getText().toString();
+            String[] split = givenDate.split(" ");
+            day = Integer.parseInt(split[0]);
+            month = Integer.parseInt(HelperMethods.convertMonth(split[1]));
+            year = Integer.parseInt(split[2]);
+        } else {
+            java.util.Calendar c = java.util.Calendar.getInstance();
+            day = c.get(java.util.Calendar.DAY_OF_MONTH);
+            month = c.get(java.util.Calendar.MONTH);
+            year = c.get(java.util.Calendar.YEAR);
+        }
+
         this.datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {

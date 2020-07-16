@@ -3,31 +3,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
+    android:layout_margin="5dp"
+    android:background="#00FFFFFF"
+    android:backgroundTint="#00FFFFFF"
     android:orientation="vertical">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/one_day_expense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
-        app:cardElevation="4dp">
+        android:background="#00FFFFFF"
+        android:backgroundTint="#00FFFFFF"
+        android:elevation="0dp"
+        app:cardBackgroundColor="#00FFFFFF"
+        app:cardElevation="2dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:background="#00FFFFFF"
+            android:backgroundTint="#00FFFFFF"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="#00FFFFFF"
+                android:backgroundTint="#00FFFFFF"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/select_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="1"
+                    android:backgroundTint="#00FFFFFF"
                     android:text="today"
                     android:textAlignment="textStart"
                     android:textColor="#4A4A4A"
@@ -38,12 +50,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginRight="5dp"
                     android:layout_weight="3"
+                    android:background="#00FFFFFF"
                     android:gravity="center"
                     android:text="TextView"
                     android:textAlignment="textEnd"
                     android:textColor="#4A4A4A"
-                    android:textSize="24sp" />
+                    android:textSize="22sp" />
 
             </LinearLayout>
 
@@ -51,6 +65,8 @@
                 android:id="@+id/category_and_expenses"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#00FFFFFF"
+                android:backgroundTint="#00FFFFFF"
                 android:nestedScrollingEnabled="false"
                 android:saveEnabled="true" />
 
