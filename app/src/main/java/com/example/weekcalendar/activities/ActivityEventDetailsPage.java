@@ -60,6 +60,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventTitle;
     private TextView eventDate;
     private TextView eventTime;
+    private TextView eventDescription;
 
     private CustomEvent event;
 
@@ -97,6 +98,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.eventTitle = findViewById(R.id.event_title);
         this.eventDate = findViewById(R.id.event_date);
         this.eventTime = findViewById(R.id.event_time);
+        this.eventDescription = findViewById(R.id.event_description);
 
         this.setView(this.event);
 
@@ -133,15 +135,20 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     }
 
     private void setView(CustomEvent event) {
-        eventTitle.setText(event.getTitle());
+        this.eventTitle.setText(event.getTitle());
         String startDate = HelperMethods.formatDateForView(event.getStartDate());
         String endDate = HelperMethods.formatDateForView(event.getEndDate());
         if (startDate.equalsIgnoreCase(endDate)) {
-            eventDate.setText("Date: " + startDate);
+            this.eventDate.setText("Date: " + startDate);
         } else {
-            eventDate.setText("Date: " + startDate + " to " + endDate);
+            this.eventDate.setText("Date: " + startDate + " to " + endDate);
         }
-        eventTime.setText("Time: " + event.getStartTime() + " to " + event.getEndTime());
+        this.eventTime.setText("Time: " + event.getStartTime() + " to " + event.getEndTime());
+        if (!event.getDescription().equals("")) {
+            this.eventDescription.setText(event.getDescription());
+        } else {
+            this.eventDescription.setText("No event description.");
+        }
     }
 
     private void editEvent() {

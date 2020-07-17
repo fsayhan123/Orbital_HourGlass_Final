@@ -78,6 +78,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectStartTime;
     private Button selectEndTime;
     private Button createEvent;
+    private EditText description;
     private Button addToDoButton;
     private LinearLayout todoListLayout;
     private List<EditText> todos;
@@ -134,8 +135,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.selectEndTime = findViewById(R.id.select_end_time);
         this.selectEndTime.setOnClickListener(v -> openSelectTimeDialog(this.selectEndTime));
 
+        this.description = findViewById(R.id.insert_event_description);
+
         this.todoListLayout = findViewById(R.id.fill_in_todos);
 
+        // inflate?
+//        LayoutInflater inflater = this.getLayoutInflater();
+//        View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
+//        this.todoListLayout.addView(eachToDo);
         this.todo1 = findViewById(R.id.todo_item);
 
         this.addToDoButton = findViewById(R.id.add_todo);
@@ -166,11 +173,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         Intent i = getIntent();
         this.event = i.getParcelableExtra("event to edit");
         if (this.event != null) {
-            this.title.setText(event.getTitle());
-            this.selectStartDate.setText(HelperMethods.formatDateForView(event.getStartDate()));
-            this.selectEndDate.setText(HelperMethods.formatDateForView(event.getEndDate()));
-            this.selectStartTime.setText(HelperMethods.formatTimeTo12H(event.getStartTime()));
-            this.selectEndTime.setText(HelperMethods.formatTimeTo12H(event.getEndTime()));
+            this.title.setText(this.event.getTitle());
+            this.selectStartDate.setText(HelperMethods.formatDateForView(this.event.getStartDate()));
+            this.selectEndDate.setText(HelperMethods.formatDateForView(this.event.getEndDate()));
+            this.selectStartTime.setText(HelperMethods.formatTimeTo12H(this.event.getStartTime()));
+            this.selectEndTime.setText(HelperMethods.formatTimeTo12H(this.event.getEndTime()));
+            if (!this.event.getDescription().equals("")) {
+                this.description.setText(this.event.getDescription());
+            }
             this.createEvent.setText("Update Event");
             fetchToDos(this.event.getId());
             if (acct != null) {
@@ -214,7 +224,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         String date = (String) doc.get("date");
         String title = (String) doc.get("title");
         String id = doc.getId();
-        CustomToDo todo = new CustomToDo(id, title, date);
+        boolean completed = (boolean) doc.get("completed");
+        CustomToDo todo = new CustomToDo(id, title, date, completed);
         this.originalToDos.add(todo);
 
         EditText e = this.todos.get(this.todos.size() - 1);
@@ -255,11 +266,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     private Map<String, Object> getEventDetails() {
-        String eventTitle = ((EditText) findViewById(R.id.insert_event_name)).getText().toString();
+        String eventTitle = this.title.getText().toString();
         String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
         String endDate = HelperMethods.formatDateWithDash(this.selectEndDate.getText().toString());
         String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
         String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());
+        String eventDescription = this.description.getText().toString();
+        Log.d(TAG, "!!!" + Boolean.toString(eventDescription == null) + "!!!!!!!!!!");
 
         Map<String, Object> eventDetails = new HashMap<>();
         eventDetails.put("userID", this.userID);
@@ -268,6 +281,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         eventDetails.put("endDate", endDate);
         eventDetails.put("startTime", startTime);
         eventDetails.put("endTime", endTime);
+        eventDetails.put("description", eventDescription);
         eventDetails.put("participants", Arrays.asList(this.userID));
         return eventDetails;
     }
@@ -382,9 +396,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
     private void openSelectTimeDialog(Button b) {
         java.util.Calendar c = java.util.Calendar.getInstance();
+        int amPM = c.get(java.util.Calendar.AM_PM);
         int minute = c.get(java.util.Calendar.MINUTE);
-        int hour = c.get(java.util.Calendar.HOUR);
-        Log.d(TAG, hour + ":" + minute);
+        int hour = amPM == 1 ? c.get(java.util.Calendar.HOUR) + 12 : c.get(java.util.Calendar.HOUR);
+        Log.d(TAG, "TIME NOW IS: " + hour + ":" + minute + " " + amPM);
         this.timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -482,7 +497,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             if (checkFields()) {
                 Map<String, Object> eventDetails = getEventDetails();
                 Event e = new Event()
-                        .setSummary(eventDetails.get("eventTitle").toString());
+                        .setSummary(eventDetails.get("eventTitle").toString())
+                        .setDescription(eventDetails.get("description").toString());
                 DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
                         eventDetails.get("startTime").toString()));
                 EventDateTime start = new EventDateTime()
@@ -516,7 +532,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                         .events()
                         .get("primary", eventID)
                         .execute()
-                        .setSummary(eventDetails.get("eventTitle").toString());
+                        .setSummary(eventDetails.get("eventTitle").toString())
+                        .setDescription(eventDetails.get("description").toString());
                 DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
                         eventDetails.get("startTime").toString()));
                 EventDateTime start = new EventDateTime()

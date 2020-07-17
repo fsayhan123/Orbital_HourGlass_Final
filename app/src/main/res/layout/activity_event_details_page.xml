@@ -29,6 +29,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="20dp"
             android:text="Event Title"
+            android:textColor="#4A4A4A"
             android:textSize="24dp" />
 
         <TextView
@@ -38,6 +39,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:text="Event Date"
+            android:textColor="#4A4A4A"
             android:textSize="18dp" />
 
         <TextView
@@ -47,39 +49,40 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
             android:text="Event Time"
+            android:textColor="#4A4A4A"
             android:textSize="18dp" />
 
-        <EditText
+        <TextView
             android:id="@+id/event_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
-            android:editable="true"
             android:ems="10"
             android:gravity="start|top"
-            android:lines="5"
             android:scrollbars="vertical"
             android:singleLine="false"
-            android:text="Event Description" />
+            android:text="Event Description"
+            android:textColor="#4A4A4A" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/todo_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp">
+
+
+        </androidx.recyclerview.widget.RecyclerView>
 
         <Button
             android:id="@+id/invite_event"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="10dp"
             android:onClick="eventInvite"
             android:text="Invite Others" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/todo_placeholder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="30dp" >
-
-
-        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 

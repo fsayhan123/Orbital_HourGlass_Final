@@ -196,9 +196,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String endDate = (String) document.get("endDate");
         String startTime = (String) document.get("startTime");
         String endTime = (String) document.get("endTime");
+        String description = (String) document.get("description");
         String docID = document.getId();
         if (startDate.equals(endDate)) { // just one day
             CustomEventFromFirebase event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
+            event.setDescription(description);
             addToMap(event);
         } else { // > 1 day
             LocalDate first = LocalDate.parse(startDate);
@@ -213,6 +215,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     startTime = "All Day"; // change later to support end time
                 }
                 CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
+                event.setDescription(description);
                 addToMap(event);
             }
         }
@@ -225,6 +228,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String endDate;
         String endTime;
         String eventID = e.getId();
+        String eventDescription = e.getDescription() == null ? "" : e.getDescription();
         CustomEvent event;
         if (e.getStart().get("dateTime") == null) { // full day event
             try {
@@ -246,6 +250,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
         if (startDate.equals(endDate)) { // <= 1 day
             event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
+            event.setDescription(eventDescription);
             addToMap(event);
         } else { // > 1 day
             LocalDate first = LocalDate.parse(startDate);
@@ -260,6 +265,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     startTime = "All Day"; // change later to support end time
                 }
                 event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
+                event.setDescription(eventDescription);
                 addToMap(event);
             }
         }

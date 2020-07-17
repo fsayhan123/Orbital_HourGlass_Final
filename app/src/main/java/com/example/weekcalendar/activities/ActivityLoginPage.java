@@ -23,12 +23,19 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActivityLoginPage extends AppCompatActivity {
     private static final String TAG = ActivityLoginPage.class.getSimpleName();
@@ -44,52 +51,39 @@ public class ActivityLoginPage extends AppCompatActivity {
     // Google sign in
     private SignInButton signInButton;
     private GoogleSignInClient mGoogleSignInClient;
-    private FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseFirestore fStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
-        fAuth = FirebaseAuth.getInstance();
-//        not necessary: https://stackoverflow.com/questions/48794132/is-it-necessary-to-add-an-authstatelistener-in-every-activity-of-android-firebas
-//        authStateListener = new FirebaseAuth.AuthStateListener() {
-//            @Override
-//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-//                FirebaseUser user = fAuth.getCurrentUser();
-//                if (user != null) {
-//                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-//                } else {
-//                    // means user is signed out
-//                    Log.d(TAG, "onAuthStateChanged:signed_out");
-//                }
-//            }
-//        };
-
+        this.fAuth = FirebaseAuth.getInstance();
+        this.fStore = FirebaseFirestore.getInstance();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"), new Scope("https://www.googleapis.com/auth/calendar.events"))
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        this.mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setOnClickListener(v -> {
+        this.signInButton = findViewById(R.id.sign_in_button);
+        this.signInButton.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
         });
 
-        mEmail = findViewById(R.id.email);
-        mPassword = findViewById(R.id.password);
-        mLoginButton = findViewById(R.id.login_button);
-        mRegister = findViewById(R.id.no_account);
-        progressBar = findViewById(R.id.loading_login);
+        this.mEmail = findViewById(R.id.email);
+        this.mPassword = findViewById(R.id.password);
+        this.mLoginButton = findViewById(R.id.login_button);
+        this.mRegister = findViewById(R.id.no_account);
+        this.progressBar = findViewById(R.id.loading_login);
 
+        this.mRegister.setOnClickListener(v -> toRegister());
 
-        mRegister.setOnClickListener(v -> toRegister());
-
-        mLoginButton.setOnClickListener(v -> {
+        // to log in with firebase
+        this.mLoginButton.setOnClickListener(v -> {
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
 
@@ -165,7 +159,7 @@ public class ActivityLoginPage extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        fAuth.signInWithCredential(credential)
+        this.fAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -174,6 +168,24 @@ public class ActivityLoginPage extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fAuth.getCurrentUser();
+                            String id = user.getUid();
+
+                            DocumentReference docRef = fStore.collection("users").document(id);
+                            Map<String, Object> userDetails = new HashMap<>();
+                            userDetails.put("fName", user.getDisplayName());
+                            userDetails.put("email", user.getEmail());
+                            docRef.set(userDetails).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "OnSuccess: user Profile is created for " + id);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "onFailure: " + e.toString());
+                                }
+                            });
+
                             Toast.makeText(ActivityLoginPage.this, "Logging in as " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
                             Intent i = new Intent(getApplicationContext(), ActivityMainCalendar.class);
                             startActivity(i);
@@ -186,12 +198,11 @@ public class ActivityLoginPage extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (authStateListener != null){
-            fAuth.removeAuthStateListener(authStateListener);
-        }
-    }
-
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        if (authStateListener != null){
+//            fAuth.removeAuthStateListener(authStateListener);
+//        }
+//    }
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +16,14 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityCreateToDoPage;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.customclasses.CustomToDo;
+
+import static android.content.ContentValues.TAG;
 
 public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
@@ -27,6 +31,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     private List<CustomDay> expandableListTitle;
     private Map<CustomDay, List<CustomToDo>> expandableListDetail;
     private final Set<Pair<Long, Long>> checkedItems = new HashSet<>();
+    private final Set<Pair<Long, Long>> toggledItems = new HashSet<>();
 
     private Set<CheckBox> myCheckBoxes = new HashSet<>();
 
@@ -58,8 +63,9 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.list_item, null);
         }
-        TextView expandedListTextView = (CheckBox) convertView.findViewById(R.id.list_child);
+        CheckBox expandedListTextView = convertView.findViewById(R.id.list_child);
         expandedListTextView.setText(expandedListText);
+        expandedListTextView.setChecked(toDo.getCompleted());
 
         expandedListTextView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -79,6 +85,13 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 CheckBox cb = (CheckBox) v;
                 final Pair<Long, Long> tag = (Pair<Long, Long>) v.getTag();
+
+                if (toggledItems.contains(tag)) {
+                    toggledItems.remove(tag);
+                } else {
+                    toggledItems.add(tag);
+                }
+
                 if (cb.isChecked()) {
                     checkedItems.add(tag);
                     myCheckBoxes.add(cb);
@@ -86,6 +99,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
                     checkedItems.remove(tag);
                     myCheckBoxes.remove(cb);
                 }
+                toDo.toggleComplete();
             }
         });
         return convertView;
@@ -139,7 +153,11 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     }
 
     public Set<Pair<Long, Long>> getCheckedItems() {
-        return checkedItems;
+        return this.checkedItems;
+    }
+
+    public Set<Pair<Long, Long>> getToggledItems() {
+        return this.toggledItems;
     }
 
     public void remove(int groupPos, int childPos) {

@@ -43,18 +43,18 @@
             android:name=".activities.ActivityToDoListPage"
             android:parentActivityName=".activities.ActivityUpcomingPage" />
         <activity android:name=".activities.ActivityExpensePage">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".activities.ActivityCreateExpensePage" />
         <activity android:name=".activities.ActivityEventDetailsPage" />
         <activity android:name=".activities.ActivityCreateEventPage" />
         <activity android:name=".activities.ActivityNotificationsPage"/>
         <activity android:name=".activities.ActivityUpcomingPage">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <meta-data

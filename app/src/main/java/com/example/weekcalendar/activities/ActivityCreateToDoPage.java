@@ -72,7 +72,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
         Intent i = getIntent();
         this.toDo = i.getParcelableExtra("todo");
-        if (toDo != null) {
+        if (this.toDo != null) {
             this.toDoTitle.setText(this.toDo.getTitle());
             this.selectDate.setText(HelperMethods.formatDateForView(this.toDo.getDate()));
             this.createToDo.setOnClickListener(v -> updateToDo());
@@ -93,20 +93,38 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
     private void createToDo() {
          if (checkFields()) {
-            String date = selectDate.getText().toString();
-            String title = toDoTitle.getText().toString();
-
-             Map<String, Object> details = new HashMap<>();
-             details.put("userID", userID);
-             details.put("date", HelperMethods.formatDateWithDash(date));
-             details.put("title", title);
-
-             c.add(details)
+             Map<String, Object> details = detailsToMap(false);
+             this.c.add(details)
                      .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                      .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
              Intent i = new Intent(this, ActivityToDoListPage.class);
              startActivity(i);
         }
+    }
+
+    public void updateToDo() {
+        if (checkFields()) {
+            Map<String, Object> details = detailsToMap(this.toDo.getCompleted());
+            this.fStore.collection("todo").document(this.toDo.getID()).set(details);
+            Intent intent = new Intent(this, ActivityToDoListPage.class);
+            startActivity(intent);
+        }
+    }
+
+    public Map<String, Object> detailsToMap(boolean completed) {
+        String date = this.selectDate.getText().toString();
+        String title = this.toDoTitle.getText().toString();
+        Map<String, Object> details = new HashMap<>();
+        details.put("userID", this.userID);
+        details.put("date", HelperMethods.formatDateWithDash(date));
+        details.put("title", title);
+        details.put("completed", completed);
+        return details;
+    }
+
+    @Override
+    public void applyDateText(CustomDay d, Button b) {
+        b.setText(d.getDate());
     }
 
     private void openSelectDateDialog(Button b) {
@@ -121,26 +139,5 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
             }
         }, year, month, day);
         this.datePickerDialog.show();
-    }
-
-    public void updateToDo() {
-        if (checkFields()) {
-            String date = this.selectDate.getText().toString();
-            String title = this.toDoTitle.getText().toString();
-
-            Map<String, Object> details = new HashMap<>();
-            details.put("userID", userID);
-            details.put("date", HelperMethods.formatDateWithDash(date));
-            details.put("title", title);
-
-            fStore.collection("todo").document(this.toDo.getID()).set(details);
-            Intent intent = new Intent(this, ActivityToDoListPage.class);
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void applyDateText(CustomDay d, Button b) {
-        b.setText(d.getDate());
     }
 }

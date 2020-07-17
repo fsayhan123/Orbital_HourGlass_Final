@@ -43,25 +43,25 @@ public class ActivityRegisterPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_page);
 
-        mFullname = findViewById(R.id.create_name);
-        mEmail = findViewById(R.id.create_email);
-        mPassword = findViewById(R.id.create_password);
-        mRegisterButton = findViewById(R.id.register_button);
-        mLoginButton = findViewById(R.id.already_registered);
-        progressBar = findViewById(R.id.loading_register);
+        this.mFullname = findViewById(R.id.create_name);
+        this.mEmail = findViewById(R.id.create_email);
+        this.mPassword = findViewById(R.id.create_password);
+        this.mRegisterButton = findViewById(R.id.register_button);
+        this.mLoginButton = findViewById(R.id.already_registered);
+        this.progressBar = findViewById(R.id.loading_register);
 
-        mLoginButton.setOnClickListener(v -> toLogin());
+        this.mLoginButton.setOnClickListener(v -> toLogin());
 
-        fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
+        this.fAuth = FirebaseAuth.getInstance();
+        this.fStore = FirebaseFirestore.getInstance();
 
         // check if user is already logged in
-        if (fAuth.getCurrentUser() != null) {
+        if (this.fAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), ActivityUpcomingPage.class));
             finish();
         }
 
-        mRegisterButton.setOnClickListener(v -> {
+        this.mRegisterButton.setOnClickListener(v -> {
             String name = mFullname.getText().toString();
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();

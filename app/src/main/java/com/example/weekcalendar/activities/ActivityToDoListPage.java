@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.weekcalendar.R;
+import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.example.weekcalendar.adapters.ToDoListViewAdapter;
 import com.example.weekcalendar.customclasses.CustomDay;
@@ -98,6 +99,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         String ID = document.getId();
         String date = (String) document.get("date");
         String title = (String) document.get("title");
+        boolean completed = (boolean) document.get("completed");
         Date d = null;
         try {
             d = dateFormatter.parse(date);
@@ -105,7 +107,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
             e.printStackTrace();
         }
         CustomDay day = new CustomDay(d);
-        CustomToDo toDo = new CustomToDo(ID, title, date);
+        CustomToDo toDo = new CustomToDo(ID, title, date, completed);
         addToMap(day, toDo);
     }
 
@@ -114,7 +116,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         this.mapOfToDo = new HashMap<>();
         this.setOfDays = new HashSet<>();
 
-        c.whereEqualTo("userID", userID)
+        this.c.whereEqualTo("userID", userID)
                 .orderBy("date")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -170,6 +172,26 @@ public class ActivityToDoListPage extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void pushToDo() {
+        Set<Pair<Long, Long>> toggledItems = this.mAdapter.getToggledItems();
+        for (Pair<Long, Long> pair : toggledItems) {
+            int groupPos = (int) (long) pair.first;
+            int childPos = (int) (long) pair.second;
+            CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
+            this.fStore.collection("todo").document(todo.getID()).set(customToDoToMap(todo));
+            Log.d(TAG, todo.getTitle() + " updated");
+        }
+    }
+
+    public Map<String, Object> customToDoToMap(CustomToDo todo) {
+        Map<String, Object> todoDetails = new HashMap<>();
+        todoDetails.put("userID", userID);
+        todoDetails.put("date", todo.getDate());
+        todoDetails.put("title", todo.getTitle());
+        todoDetails.put("completed", todo.getCompleted());
+        return todoDetails;
+    }
+
     public void deleteToDo() {
         Set<Pair<Long, Long>> setItems = this.mAdapter.getCheckedItems();
         for (Pair<Long, Long> pair : setItems) {
@@ -184,5 +206,11 @@ public class ActivityToDoListPage extends AppCompatActivity {
         }
         setItems.clear();
         this.mAdapter.resetCheckBoxes();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        pushToDo();
     }
 }

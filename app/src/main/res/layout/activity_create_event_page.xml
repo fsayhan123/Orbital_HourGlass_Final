@@ -184,7 +184,7 @@
 
                 <ImageView
                     android:id="@+id/bullet_placeholder"
-                    android:layout_width="10dp"
+                    android:layout_width="5dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginHorizontal="10dp"
