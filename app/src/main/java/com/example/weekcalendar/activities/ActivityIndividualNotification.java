@@ -2,6 +2,7 @@ package com.example.weekcalendar.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -9,7 +10,9 @@ import android.widget.TextView;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ActivityIndividualNotification extends AppCompatActivity {
@@ -17,9 +20,6 @@ public class ActivityIndividualNotification extends AppCompatActivity {
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
-
-    //Nav Drawer
-    private SetupNavDrawer navDrawer;
 
     //Notification Content
     private TextView title;
@@ -32,10 +32,6 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_notification);
 
-        //Setup Nav Drawer
-        //this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.notifications_toolbar));
-        //this.navDrawer.setupNavDrawerPane();
-
         //Setup Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
@@ -46,8 +42,21 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         this.content = findViewById(R.id.notification_body);
         this.links = findViewById(R.id.notification_url);
 
-        setText("Hello", "You are gay", "http://www.google.com");
-
+        //get the document then set the text
+        Intent intent = getIntent();
+        String notificationID = intent.getStringExtra("notificationID");
+        this.fStore.collection("Notifications")
+                .document(notificationID)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String message = (String) documentSnapshot.get("Message");
+                        String date = (String) documentSnapshot.get("Date");
+                        String url = (String) documentSnapshot.get("url");
+                        setText(date, message, url);
+                    }
+                });
     }
 
     private void setText(String title, String content, String links) {

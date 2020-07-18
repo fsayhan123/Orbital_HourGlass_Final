@@ -12,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.weekcalendar.R;
+import com.example.weekcalendar.activities.ActivityCreateSharedEvent;
 import com.example.weekcalendar.activities.ActivityExpensePage;
 import com.example.weekcalendar.activities.ActivityLoginPage;
 import com.example.weekcalendar.activities.ActivityNotificationsPage;
@@ -98,6 +99,11 @@ public class SetupNavDrawer {
                     Toast.makeText(a, "Main calendar",Toast.LENGTH_SHORT).show();
                     Intent i7 = new Intent(a, ActivityMainCalendar.class);
                     a.startActivity(i7);
+                    break;
+                case R.id.activity_create_shared_event_view:
+                    Toast.makeText(a, "Create Shared Event", Toast.LENGTH_SHORT).show();
+                    Intent i8 = new Intent(a, ActivityCreateSharedEvent.class);
+                    a.startActivity(i8);
                     break;
                 default:
                     break;

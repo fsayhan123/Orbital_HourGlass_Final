@@ -15,6 +15,8 @@
             android:title="To Do List"/>
         <item android:id="@+id/activity_notifications_view"
             android:title="Notifications"/>
+        <item android:id="@+id/activity_create_shared_event_view"
+            android:title="Create Shared Event"/>
     </group>
 
     <group android:id="@+id/logout">
