@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -25,7 +26,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ActivityNotificationsPage extends AppCompatActivity {
+public class ActivityNotificationsPage extends AppCompatActivity implements NotificationsRecyclerViewAdapter.OnNotificationListener {
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -90,7 +91,7 @@ public class ActivityNotificationsPage extends AppCompatActivity {
                                 customNotificationArrayList.add(notif);
                             }
                             System.out.print(customNotificationArrayList);
-                            mAdapter = new NotificationsRecyclerViewAdapter(customNotificationArrayList);
+                            mAdapter = new NotificationsRecyclerViewAdapter(customNotificationArrayList, ActivityNotificationsPage.this);
                             mRecyclerView.setAdapter(mAdapter);
                         }
                     }
@@ -103,6 +104,11 @@ public class ActivityNotificationsPage extends AppCompatActivity {
                 });
     }
 
-
-
+    @Override
+    public void onNotificationClick(int position) {
+        CustomNotification customNotification = customNotificationArrayList.get(position);
+        Intent intent = new Intent(this, ActivityIndividualNotification.class);
+        intent.putExtra("notificationID", customNotification.getID());
+        startActivity(intent);
+    }
 }

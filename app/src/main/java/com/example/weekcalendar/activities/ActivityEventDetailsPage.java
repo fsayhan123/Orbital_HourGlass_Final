@@ -209,7 +209,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             }
                             //need to for loop this to accept multiple, leave it as is for now
                             Map<String, Object> data = new HashMap<>();
-                            data.put("Date", "2020-06-05");
+                            data.put("Date", HelperMethods.getCurrDate());
                             data.put("Message", url);
                             data.put("userID", userID);
                             ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);

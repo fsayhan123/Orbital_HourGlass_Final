@@ -18,24 +18,39 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
     private ArrayList<CustomNotification> mDataset;
     private Activity a;
     private View eachDayView;
+    private OnNotificationListener mOnNotificationListener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
-        public Button date;
+    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView date;
         public TextView message;
+        OnNotificationListener onNotificationListener;
 
-        public MyViewHolder(View v) {
+        public MyViewHolder(View v, OnNotificationListener onNotificationListener) {
             super(v);
             this.message = itemView.findViewById(R.id.Notification_text);
             this.date = itemView.findViewById(R.id.Notification_date);
+            this.onNotificationListener = onNotificationListener;
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onNotificationListener.onNotificationClick(getAdapterPosition());
         }
     }
 
+    public interface OnNotificationListener {
+        void onNotificationClick(int position);
+    }
+
     // Provide a suitable constructor (depends on the kind of dataset)
-    public NotificationsRecyclerViewAdapter(ArrayList<CustomNotification> myDataset) {
-        mDataset = myDataset;
+    public NotificationsRecyclerViewAdapter(ArrayList<CustomNotification> myDataset, OnNotificationListener mOnNotificationListener) {
+        this.mDataset = myDataset;
+        this.mOnNotificationListener = mOnNotificationListener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -45,7 +60,7 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
         // create a new view
         eachDayView  = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.notification_view, parent, false);
-        MyViewHolder vh = new MyViewHolder(eachDayView);
+        MyViewHolder vh = new MyViewHolder(eachDayView, this.mOnNotificationListener);
         return vh;
     }
 

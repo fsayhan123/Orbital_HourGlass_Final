@@ -17,8 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".activities.ActivityIndividualNotification"></activity>
         <activity android:name=".activities.ActivityMainCalendar">
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -34,21 +34,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.ActivityRegisterPage" />
-        <activity android:name=".activities.ActivityLoginPage">
-
-        </activity>
+        <activity android:name=".activities.ActivityLoginPage"></activity>
         <activity android:name=".activities.ActivityEachDayExpenses" />
         <activity android:name=".activities.ActivityCreateToDoPage" />
         <activity
             android:name=".activities.ActivityToDoListPage"
             android:parentActivityName=".activities.ActivityUpcomingPage" />
-        <activity android:name=".activities.ActivityExpensePage">
-
-        </activity>
+        <activity android:name=".activities.ActivityExpensePage"></activity>
         <activity android:name=".activities.ActivityCreateExpensePage" />
         <activity android:name=".activities.ActivityEventDetailsPage" />
         <activity android:name=".activities.ActivityCreateEventPage" />
-        <activity android:name=".activities.ActivityNotificationsPage"/>
+        <activity android:name=".activities.ActivityNotificationsPage" />
         <activity android:name=".activities.ActivityUpcomingPage">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

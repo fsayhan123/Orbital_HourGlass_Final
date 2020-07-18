@@ -2,6 +2,8 @@ package com.example.weekcalendar.helperclasses;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 public class HelperMethods {
     private static Map<String, String> stringToNumMonth = new HashMap<String, String>()
@@ -73,5 +75,11 @@ public class HelperMethods {
 
     public static String toGoogleDateTime(String date, String time) {
         return date + "T" + time + ":00+08:00";
+    }
+
+    public static String getCurrDate() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime date = LocalDateTime.now();
+        return dtf.format(date);
     }
 }

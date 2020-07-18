@@ -9,7 +9,7 @@
     android:layout_marginHorizontal="20dp"
     android:orientation="vertical">
 
-    <Button
+    <TextView
         android:id="@+id/Notification_date"
         android:layout_width="match_parent"
         android:layout_height="40dp"
