@@ -17,17 +17,6 @@
         app:title="Add Expenditure"
         app:titleTextColor="#FFFFFF" />
 
-    <Button
-        android:id="@+id/submit_expenditure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:paddingHorizontal="20dp"
-        android:text="Add Expenditure"
-        android:textColor="#4A4A4A" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -102,6 +91,17 @@
             android:lines="3"
             android:scrollbars="vertical"
             android:singleLine="false" />
+
+        <Button
+            android:id="@+id/submit_expenditure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop = "200dp"
+            android:layout_marginBottom="20dp"
+            android:paddingHorizontal="20dp"
+            android:layout_gravity="center"
+            android:text="Add Expenditure"
+            android:textColor="#4A4A4A" />
 
         <!--            <Button-->
         <!--                android:id="@+id/attach_file"-->
