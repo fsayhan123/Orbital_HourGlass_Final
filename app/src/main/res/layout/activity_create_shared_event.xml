@@ -8,9 +8,13 @@
     android:fitsSystemWindows="true"
     android:theme="@style/AppTheme">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/layout"
+        android:layout_below="@+id/create_todo_toolbar"
+        android:layout_marginTop="0dp"
+        android:orientation="vertical">>
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/create_shared_event"
@@ -26,35 +30,44 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
             android:text="Choose your dates"
-            android:textSize="20dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop = "80dp"
-        />
+            android:textSize="20dp" />
 
 
-        <CalendarView
-            android:id="@+id/date_select_calendar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="false"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="101dp" />
+        <com.github.sundeepk.compactcalendarview.CompactCalendarView
+            android:id="@+id/compact_calendar_view_creation"
+            android:layout_width="fill_parent"
+            android:layout_height="215dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            app:compactCalendarBackgroundColor="#EC5653"
+            app:compactCalendarCurrentDayBackgroundColor="#B71C1C"
+            app:compactCalendarCurrentDayIndicatorStyle="no_fill_large_indicator"
+            app:compactCalendarCurrentSelectedDayBackgroundColor="#E57373"
+            app:compactCalendarCurrentSelectedDayIndicatorStyle="fill_large_indicator"
+            app:compactCalendarDisplayOtherMonthDays="true"
+            app:compactCalendarEventIndicatorStyle="no_fill_large_indicator"
+            app:compactCalendarMultiEventIndicatorColor="#004D40"
+            app:compactCalendarOtherMonthDaysTextColor="#4A4A4A"
+            app:compactCalendarTargetHeight="250dp"
+            app:compactCalendarTextColor="#fff"
+            app:compactCalendarTextSize="12sp" />
 
         <Button
             android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-
-            android:layout_marginTop="600dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="350dp"
+            android:layout_gravity="center"
             android:onClick="sendInvite"
             android:text="Send Invite" />
 
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nv"
