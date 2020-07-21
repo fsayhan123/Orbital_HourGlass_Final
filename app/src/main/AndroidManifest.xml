@@ -17,9 +17,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.ActivityAcceptSharedEvent"></activity>
+        <activity android:name=".activities.ActivitySelectSharedEvent"></activity>
+        <activity android:name=".activities.ActivityPendingSharedEvent" />
+        <activity android:name=".activities.ActivityAcceptSharedEvent" />
         <activity android:name=".activities.ActivityCreateSharedEvent">
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -35,9 +36,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.ActivityIndividualNotification" />
-        <activity android:name=".activities.ActivityMainCalendar">
-
-        </activity>
+        <activity android:name=".activities.ActivityMainCalendar" />
         <activity android:name=".activities.ActivityRegisterPage" />
         <activity android:name=".activities.ActivityLoginPage" />
         <activity android:name=".activities.ActivityEachDayExpenses" />
@@ -56,9 +55,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ActivityUpcomingPage">
-
-        </activity>
+        <activity android:name=".activities.ActivityUpcomingPage" />
 
         <meta-data
             android:name="com.google.android.gms.version"

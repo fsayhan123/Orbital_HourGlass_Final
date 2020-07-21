@@ -17,6 +17,7 @@ import com.example.weekcalendar.activities.ActivityExpensePage;
 import com.example.weekcalendar.activities.ActivityLoginPage;
 import com.example.weekcalendar.activities.ActivityNotificationsPage;
 import com.example.weekcalendar.activities.ActivityMainCalendar;
+import com.example.weekcalendar.activities.ActivityPendingSharedEvent;
 import com.example.weekcalendar.activities.ActivityToDoListPage;
 import com.example.weekcalendar.activities.ActivityUpcomingPage;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -104,6 +105,10 @@ public class SetupNavDrawer {
                     Toast.makeText(a, "Create Shared Event", Toast.LENGTH_SHORT).show();
                     Intent i8 = new Intent(a, ActivityCreateSharedEvent.class);
                     a.startActivity(i8);
+                    break;
+                case R.id.activity_pending_shared_event_view:
+                    Intent i9 = new Intent(a, ActivityPendingSharedEvent.class);
+                    a.startActivity(i9);
                     break;
                 default:
                     break;
