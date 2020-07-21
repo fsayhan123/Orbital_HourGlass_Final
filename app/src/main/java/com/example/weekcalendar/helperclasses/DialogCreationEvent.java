@@ -17,13 +17,12 @@ import com.example.weekcalendar.activities.ActivityCreateSharedEvent;
 import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
 public class DialogCreationEvent extends AppCompatDialogFragment {
-    private String url;
     private ActivityCreateSharedEvent a;
-    public EditText email;
+    private String docRefID;
+    public EditText allEmails;
 
-
-    public DialogCreationEvent(String url, ActivityCreateSharedEvent activity) {
-        this.url = url;
+    public DialogCreationEvent(String docRefID, ActivityCreateSharedEvent activity) {
+        this.docRefID = docRefID;
         this.a = activity;
     }
     @NonNull
@@ -32,14 +31,15 @@ public class DialogCreationEvent extends AppCompatDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
-        email = view.findViewById(R.id.edit_invite);
+        this.allEmails = view.findViewById(R.id.edit_invite);
         builder.setView(view)
                 .setTitle("Invite Others")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String userEmail = email.getText().toString();
-                        //DialogCreationEvent.this.a.sendNotification(userEmail, DialogCreationEvent.this.url);
+                        String[] usersToInvite = getEmails();
+                        String userEmail = "alicia@gmail.com";
+                        a.reportUID(docRefID, userEmail);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -51,7 +51,7 @@ public class DialogCreationEvent extends AppCompatDialogFragment {
         return builder.create();
     }
 
-    public String getEmail() {
-        return this.email.toString();
+    public String[] getEmails() {
+        return this.allEmails.getText().toString().split(",");
     }
 }

@@ -31,7 +31,7 @@ public class Dialog extends AppCompatDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
-        email = view.findViewById(R.id.edit_invite);
+        this.email = view.findViewById(R.id.edit_invite);
         builder.setView(view)
                 .setTitle("Invite Others")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {

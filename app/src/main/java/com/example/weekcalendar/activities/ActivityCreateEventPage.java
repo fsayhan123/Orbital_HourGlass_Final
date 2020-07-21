@@ -18,7 +18,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.example.weekcalendar.customclasses.CustomToDo;
 import com.example.weekcalendar.customclasses.event.CustomEvent;
@@ -351,7 +350,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             Map<String, Object> eventDetails = getEventDetails();
             List<Map<String, Object>> allToDoDetails = getToDoDetails();
 
-            cEvents.add(eventDetails)
+            this.cEvents.add(eventDetails)
                     .addOnSuccessListener(docRef -> {
                         for (Map<String, Object> todo : allToDoDetails) {
                             todo.put("eventID", docRef.getId());
@@ -417,7 +416,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
     @Override
     public void applyDateText(CustomDay d, Button b) {
-        b.setText(d.getDate());
+        b.setText(d.getFullDateForView());
     }
 
     @Override

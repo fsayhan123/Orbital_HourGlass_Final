@@ -16,20 +16,21 @@
         android:layout_marginTop="0dp"
         android:orientation="vertical">
 
+
         <com.squareup.timessquare.CalendarPickerView
-            android:id = "@+id/picker_calendar"
+            android:id="@+id/picker_calendar"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
-
+            android:layout_height="366dp" />
 
         <Button
-            android:onClick="testing"
+            android:id="@+id/submit_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Testing"></Button>
+            android:layout_marginTop="30dp"
+            android:onClick="testing"
+            android:paddingHorizontal="20dp"
+            android:text="Submit Choices"></Button>
 
     </LinearLayout>
 

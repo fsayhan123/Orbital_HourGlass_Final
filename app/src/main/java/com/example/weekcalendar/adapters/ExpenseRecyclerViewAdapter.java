@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +65,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder, int position) {
         CustomDay d = this.spendingCustomDays.get(position);
-        holder.date.setText(d.getDate());
+        holder.date.setText(d.getFullDateForView());
 
         List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
         if (expenditureOnDayD.size() == 0) {

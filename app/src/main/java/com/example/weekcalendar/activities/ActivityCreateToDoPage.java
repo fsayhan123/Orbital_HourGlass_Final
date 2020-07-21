@@ -124,7 +124,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
     @Override
     public void applyDateText(CustomDay d, Button b) {
-        b.setText(d.getDate());
+        b.setText(d.getFullDateForView());
     }
 
     private void openSelectDateDialog(Button b) {

@@ -50,7 +50,7 @@ public class MyDateDialog extends AppCompatDialogFragment {
                 .setTitle("Select Date")
                 .setPositiveButton("Submit", (dialog, which) -> {
                     CustomDay selectedCustomDay = new CustomDay(s.getDate());
-                    Toast.makeText(getContext(),"Selected " + selectedCustomDay.getDate(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Selected " + selectedCustomDay.getFullDateForView(), Toast.LENGTH_SHORT).show();
                     listener.applyDateText(selectedCustomDay, b);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> { });

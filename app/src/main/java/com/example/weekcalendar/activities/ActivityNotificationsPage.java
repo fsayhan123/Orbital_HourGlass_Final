@@ -43,8 +43,6 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
     private RecyclerView.LayoutManager layoutManager;
     private NotificationsRecyclerViewAdapter mAdapter;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,9 +57,6 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
         this.mRecyclerView.setHasFixedSize(true);
         this.layoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(layoutManager);
-
-
-
 
         //Setup firebase Variables
         this.fAuth = FirebaseAuth.getInstance();

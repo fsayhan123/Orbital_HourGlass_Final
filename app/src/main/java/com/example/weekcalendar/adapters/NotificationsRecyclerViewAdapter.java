@@ -71,7 +71,7 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
         // - replace the contents of the view with that element
         final CustomNotification notif = this.mDataset.get(position);
         holder.message.setText(notif.getMessage());
-        holder.date.setText(notif.getDate());
+        holder.date.setText(notif.getDateForView());
 
     }
 

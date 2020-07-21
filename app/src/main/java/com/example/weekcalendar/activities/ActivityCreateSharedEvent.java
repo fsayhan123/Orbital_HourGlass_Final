@@ -7,8 +7,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.Toast;
 
@@ -16,11 +19,21 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.helperclasses.Dialog;
 import com.example.weekcalendar.helperclasses.DialogCreationEvent;
+import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.github.sundeepk.compactcalendarview.domain.Event;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,25 +41,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.graphics.Color.*;
 
 
 public class ActivityCreateSharedEvent extends AppCompatActivity {
+    private static final String TAG = ActivityCreateSharedEvent.class.getSimpleName();
 
     private SetupNavDrawer navDrawer;
     private CompactCalendarView calendarView;
     private ArrayList<CustomDay> selectedDates = new ArrayList<>();
+    private ArrayList<String> emails = new ArrayList<>();
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    private Button sendInvites;
 
     //Firebase Variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
+    private CollectionReference c;
     private String userID;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +74,16 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
 
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        this.c = this.fStore.collection("responses");
 
+        this.userID = this.fAuth.getCurrentUser().getUid();
 
         this.calendarView = findViewById(R.id.compact_calendar_view_creation);
         this.calendarView.setFirstDayOfWeek(Calendar.SUNDAY);
         this.calendarView.shouldDrawIndicatorsBelowSelectedDays(true);
+
+        this.sendInvites = findViewById(R.id.button);
+        this.sendInvites.setOnClickListener(v -> sendInvite());
 
         this.calendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
@@ -72,12 +92,12 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                 if (ActivityCreateSharedEvent.this.selectedDates.contains(date)) {
                     ActivityCreateSharedEvent.this.selectedDates.remove(date);
                     ActivityCreateSharedEvent.this.calendarView.removeEvents(dateClicked);
-                    Toast.makeText(ActivityCreateSharedEvent.this, "removed " + date.toString(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(ActivityCreateSharedEvent.this, "removed " + date.toString(), Toast.LENGTH_SHORT).show();
                 } else {
                     ActivityCreateSharedEvent.this.selectedDates.add(date);
                     Event e1 = new Event(GREEN, dateClicked.getTime());
                     ActivityCreateSharedEvent.this.calendarView.addEvent(e1);
-                    Toast.makeText(ActivityCreateSharedEvent.this, "Added " + date.toString(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(ActivityCreateSharedEvent.this, "Added " + date.toString(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -116,12 +136,95 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
         });*/
     }
 
-
-    public void sendInvite(View v) {
-        System.out.println(selectedDates);
-        //DialogCreationEvent dialog = new DialogCreationEvent("Testing", ActivityCreateSharedEvent.this);
-        //dialog.show(getSupportFragmentManager(), "Example");
-        Intent intent = new Intent(this, ActivityAcceptSharedEvent.class);
-        startActivity(intent);
+    // change to String[]
+    public void reportUID(String docRefID, String userEmail) {
+        this.fStore.collection("users")
+                .whereEqualTo("email", userEmail)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            String userID = "";
+                            for (QueryDocumentSnapshot document: task.getResult()) {
+                                userID = document.getId();
+                            }
+                            emails.add(userID);
+                            //need to for loop this to accept multiple, leave it as is for now
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("Date", HelperMethods.getCurrDate());
+                            data.put("Message", "Hello, this is an invitation to jeremy's event");
+                            data.put("userID", userID);
+                            data.put("response form ID", docRefID);
+                            ActivityCreateSharedEvent.this.fStore.collection("Notifications").add(data);
+                        }
+                    }
+                });
+//        this.emails.add(userEmail);
     }
+
+    public void sendInvite() {
+        Log.d(TAG, "creating!!!!!!!!");
+        createResponseForm();
+//        generateURL(responseDocID);
+    }
+
+    public void createResponseForm() {
+        Map<String, Object> sharedEventDetails = getSharedEventDetails();
+
+        this.c.add(sharedEventDetails)
+                .addOnSuccessListener(docRef -> {
+                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                    DialogCreationEvent dialog = new DialogCreationEvent(docRef.getId(), ActivityCreateSharedEvent.this);
+                    dialog.show(getSupportFragmentManager(), "Example");
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+    }
+
+    private Map<String, Object> getSharedEventDetails() {
+        Map<String, Object> details = new HashMap<>();
+
+//        String[] arr = this.emails.toArray(new String[this.emails.size()]);
+//        details.put("emails", arr);
+
+        Map<String, List<String>> dates = new HashMap<>();
+        for (CustomDay d : this.selectedDates) {
+            String date = d.getyyyy() + "-" + HelperMethods.convertMonth(d.getMMM()) + "-" + d.getdd();
+            dates.put(date, new ArrayList<>()); // change limit to number of users
+            Log.d(TAG, date + " HIIIIIIIII");
+        }
+        details.put("responses", dates);
+
+        return details;
+    }
+
+//    public void generateURL(String responseFormID) {
+//        String link = "https://www.example.com/?id=" + responseFormID;
+//        System.out.println(link);
+//        //Generate the dynamic link
+//        Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
+//                .setLink(Uri.parse(link))
+//                .setDomainUriPrefix("https://orbitalweekcalendar.page.link")
+//                .setAndroidParameters(
+//                        new DynamicLink.AndroidParameters.Builder("com.example.weekcalendar")
+//                                .build())
+//                .buildShortDynamicLink()
+//                .addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<ShortDynamicLink> task) {
+//                        if (task.isSuccessful()) {
+//
+//                            Uri shortLink = task.getResult().getShortLink();
+//                            Uri flowchartLink = task.getResult().getPreviewLink();
+//
+//                            DialogCreationEvent dialog = new DialogCreationEvent(ActivityCreateSharedEvent.this);
+//                            dialog.show(getSupportFragmentManager(), "Example");
+//                            Log.d(TAG, shortLink.toString());
+//
+//                        } else {
+//                            System.out.println("error");
+//                        }
+//                    }
+//                });
+//    }
 }

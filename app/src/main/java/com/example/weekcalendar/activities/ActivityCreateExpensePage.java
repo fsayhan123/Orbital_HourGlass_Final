@@ -18,14 +18,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.weekcalendar.helperclasses.DatabaseHelper;
 import com.example.weekcalendar.helperclasses.DigitsInputFilter;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.MyDateDialog;
 import com.example.weekcalendar.adapters.NothingSelectedSpinnerAdapter;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
-import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -109,7 +107,7 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
                                 Date d = stringToDate.parse(date);
                                 CustomDay myDay = new CustomDay(d);
                                 String output = dateToString.format(d);
-                                dateDialog.setText(myDay.getDate());
+                                dateDialog.setText(myDay.getFullDateForView());
                             } catch (ParseException e) {
                                 System.out.println(e);
                             }
@@ -231,6 +229,6 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
 
     @Override
     public void applyDateText(CustomDay d, Button b) {
-        b.setText(d.getDate());
+        b.setText(d.getFullDateForView());
     }
 }

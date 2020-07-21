@@ -214,13 +214,11 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             data.put("url", url);
                             data.put("userID", userID);
                             ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);
-
                         }
                     }
                 });
         Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show();
     }
-
 
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 
