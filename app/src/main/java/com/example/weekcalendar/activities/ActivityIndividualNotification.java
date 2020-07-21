@@ -4,33 +4,44 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.weekcalendar.R;
-import com.example.weekcalendar.customclasses.CustomNotification;
-import com.example.weekcalendar.helperclasses.SetupNavDrawer;
+import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.w3c.dom.Document;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class ActivityIndividualNotification extends AppCompatActivity {
+    private static final String TAG = ActivityIndividualNotification.class.getSimpleName();
+
     //Firebase Classes
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
-    private String userID;
 
     //Notification Content
-    private TextView title;
-    private TextView content;
-    private TextView links;
+    private LinearLayout notificationContents;
+    private TextView date;
+    private TextView message;
+    private TextView response;
     private Button respondButton;
+    private LinearLayout buttonLayout;
+    private Button rejectButton;
 
-    private CustomNotification notif;
+    private String notifID;
     private String responseFormID = null;
+    private String eventID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,46 +52,94 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         //Setup Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
 
         //Setup local activity variables
-        this.title = findViewById(R.id.notification_title);
-        this.content = findViewById(R.id.notification_body);
-        this.links = findViewById(R.id.notification_url);
+        this.notificationContents = findViewById(R.id.notification_contents);
+        this.date = findViewById(R.id.notification_date);
+        this.message = findViewById(R.id.notification_message);
+
         this.respondButton = findViewById(R.id.respond_button);
-        this.respondButton.setOnClickListener(v -> responsePage());
+        this.respondButton.setOnClickListener(v -> respond());
+
+        this.buttonLayout = findViewById(R.id.button_layouts);
 
         //get the document then set the text
         Intent intent = getIntent();
-        String notificationID = intent.getStringExtra("notificationID");
+        this.notifID = intent.getStringExtra("notificationID");
         this.fStore.collection("Notifications")
-                .document(notificationID)
+                .document(this.notifID)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        String message = (String) documentSnapshot.get("Message");
-                        String date = (String) documentSnapshot.get("Date");
-                        String url = (String) documentSnapshot.get("url");
-                        setText(date, message, url);
-                        if (documentSnapshot.get("response form ID") != null) {
-                            responseFormID = (String) documentSnapshot.get("response form ID");
+                        setText(documentSnapshot);
+                        if (documentSnapshot.get("responseFormID") != null) {
+                            assert documentSnapshot.get("eventID") == null;
+                            responseFormID = (String) documentSnapshot.get("responseFormID");
+                        }
+                        if (documentSnapshot.get("eventID") != null) {
+                            assert documentSnapshot.get("responseFormID") == null;
+                            eventID = (String) documentSnapshot.get("eventID");
+                            respondButton.setText("Accept");
+                            rejectButton = new Button(ActivityIndividualNotification.this);
+                            rejectButton.setText("Reject");
+                            buttonLayout.addView(rejectButton);
+                            rejectButton.setOnClickListener(v -> reject());
                         }
                     }
                 });
     }
 
-    private void responsePage() {
-        Intent i = new Intent(this, ActivityAcceptSharedEvent.class);
-        i.putExtra("response form ID", this.responseFormID);
+    private void respond() {
+        Intent i;
+        if (this.responseFormID != null) {
+            i = new Intent(this, ActivityAcceptSharedEvent.class);
+            i.putExtra("response form ID", this.responseFormID);
+            i.putExtra("notification ID", this.notifID);
+        } else {
+            i = new Intent(this, ActivityNotificationsPage.class);
+            this.fStore.collection("events")
+                    .document(this.eventID)
+                    .update("participants", FieldValue.arrayUnion(fAuth.getCurrentUser().getUid()))
+                    .addOnSuccessListener(v -> Log.d(TAG, "Added user to event!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error adding user to event.", e));
+            Map<String, Object> data = new HashMap<>();
+            data.put("hasResponded", true);
+            data.put("response", "accepted");
+            this.fStore.collection("Notifications")
+                    .document(this.notifID)
+                    .update(data)
+                    .addOnSuccessListener(v -> Log.d(TAG, "Normal event invite accepted!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error accepting normal event invite.", e));
+            i.putExtra("eventID", this.eventID);
+        }
         startActivity(i);
     }
 
-    private void setText(String title, String content, String links) {
-        this.title.setText(title);
-        this.content.setText(content);
-        String updatedLink = "<a href='" + links + "'> HERE";
-        this.links.setMovementMethod(LinkMovementMethod.getInstance());
-        this.links.setText(Html.fromHtml(updatedLink));
+    private void reject() {
+        Toast.makeText(this, "Event invite rejected.", Toast.LENGTH_SHORT).show();
+        Map<String, Object> data = new HashMap<>();
+        data.put("hasResponded", true);
+        data.put("response", "rejected");
+        Intent i = new Intent(this, ActivityNotificationsPage.class);
+        this.fStore.collection("Notifications")
+                .document(this.notifID)
+                .update(data)
+                .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+        startActivity(i);
+    }
+
+    private void setText(DocumentSnapshot doc) {
+        String date = HelperMethods.formatDateForView((String) doc.get("dateOfNotification"));
+        String message = (String) doc.get("message");
+        boolean hasResponded = (boolean) doc.get("hasResponded");
+        this.date.setText(date);
+        this.message.setText(message);
+        if (hasResponded) {
+            TextView response = new TextView(this);
+            response.setText(doc.get("response").toString());
+            this.notificationContents.addView(response);
+        }
     }
 }

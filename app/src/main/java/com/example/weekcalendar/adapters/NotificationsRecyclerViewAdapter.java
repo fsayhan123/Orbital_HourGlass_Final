@@ -1,11 +1,9 @@
 package com.example.weekcalendar.adapters;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomNotification;
@@ -26,12 +24,14 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
     public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView date;
         public TextView message;
+        public TextView responseStatus;
         OnNotificationListener onNotificationListener;
 
         public MyViewHolder(View v, OnNotificationListener onNotificationListener) {
             super(v);
-            this.message = itemView.findViewById(R.id.Notification_text);
-            this.date = itemView.findViewById(R.id.Notification_date);
+            this.message = itemView.findViewById(R.id.notification_message);
+            this.date = itemView.findViewById(R.id.notification_date);
+            this.responseStatus = itemView.findViewById(R.id.response_status);
             this.onNotificationListener = onNotificationListener;
 
             itemView.setOnClickListener(this);
@@ -58,8 +58,7 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
     public NotificationsRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType) {
         // create a new view
-        eachDayView  = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.notification_view, parent, false);
+        eachDayView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.notification_view, parent, false);
         MyViewHolder vh = new MyViewHolder(eachDayView, this.mOnNotificationListener);
         return vh;
     }
@@ -72,7 +71,7 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
         final CustomNotification notif = this.mDataset.get(position);
         holder.message.setText(notif.getMessage());
         holder.date.setText(notif.getDateForView());
-
+        holder.responseStatus.setText(notif.getResponseStatus() ? "Responded!" : "Requires response.");
     }
 
     // Return the size of your dataset (invoked by the layout manager)

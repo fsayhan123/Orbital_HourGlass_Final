@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
+import com.example.weekcalendar.helperclasses.HelperMethods;
+
 import java.util.Objects;
 
 public abstract class CustomEvent implements Parcelable {
@@ -91,6 +93,12 @@ public abstract class CustomEvent implements Parcelable {
         return this.ID;
     }
 
+    public String getAllDetails() {
+        return this.title + "\n" + "date: " + HelperMethods.formatDateForView(this.startDate) +
+                " to " + HelperMethods.formatDateForView(this.endDate) + "\n" + "time: " +
+                HelperMethods.formatTimeTo12H(this.startTime) + " to " + HelperMethods.formatTimeTo12H(this.endTime);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,31 +116,6 @@ public abstract class CustomEvent implements Parcelable {
     public int hashCode() {
         return Objects.hash(getTitle(), getStartDate(), getEndDate(), getStartTime(), getEndTime(), ID);
     }
-
-    //    @Override
-//    public boolean equals(@Nullable Object obj) {
-//        if (obj == null || !(obj instanceof CustomEvent)) {
-//            return false;
-//        } else if (obj instanceof CustomEvent) {
-//            CustomEvent e = (CustomEvent) obj;
-//            return this.getTitle().equals(e.getTitle())
-//                    && this.getStartDate().equals(e.getStartDate())
-//                    && this.getStartTime().equals(e.getStartTime())
-//                    && this.getEndDate().equals(e.getEndDate())
-//                    && this.getEndTime().equals(e.getEndTime());
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return (this.getTitle().hashCode()
-//                + this.getStartDate()
-//                + this.getStartTime()
-//                + this.getEndDate()
-//                + this.getEndTime()).hashCode();
-//    }
 
     // CustomEvent methods END
 }

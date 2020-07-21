@@ -21,6 +21,7 @@ import com.squareup.timessquare.CalendarPickerView;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
     private String userID;
     private CollectionReference c;
     private String docID;
+    private String notifID;
 
     private Date firstDate = null;
     private Date lastDate = null;
@@ -72,6 +74,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
         Intent i = getIntent();
         this.docID = i.getStringExtra("response form ID");
+        this.notifID = i.getStringExtra("notification ID");
 
         fetchDataFromFirebase(this.docID);
 
@@ -125,12 +128,21 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
     public void submitChoices() {
         Map<String, Object> responses = getUserResponse();
-        Map<String, Object> data = new HashMap<>();
-        data.put("responses", responses);
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("responses", responses);
         this.c.document(this.docID)
-                .update(data)
+                .update(responseData)
                 .addOnSuccessListener(docRef -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("hasResponded", true);
+        data.put("response", new ArrayList<>(responses.keySet()));
+        this.fStore.collection("Notifications")
+                .document(this.notifID)
+                .update(data)
+                .addOnSuccessListener(v -> Log.d(TAG, "Normal event invite accepted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error accepting normal event invite.", e));
     }
 
     public Map<String, Object> getUserResponse() {

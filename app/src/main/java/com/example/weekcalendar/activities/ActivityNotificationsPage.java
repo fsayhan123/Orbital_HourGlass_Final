@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.adapters.NotificationsRecyclerViewAdapter;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ActivityNotificationsPage extends AppCompatActivity implements NotificationsRecyclerViewAdapter.OnNotificationListener {
+    private static final String TAG = ActivityNotificationsPage.class.getSimpleName();
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -69,23 +71,24 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
 
     protected void getNotificationFromFirebase() {
         this.customNotificationArrayList = new ArrayList<>();
+//        Toast.makeText(this, this.userID, Toast.LENGTH_SHORT).show();
         this.notification.whereEqualTo("userID", this.userID)
-                .orderBy("Date")
+                .orderBy("dateOfNotification")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (queryDocumentSnapshots.isEmpty()) {
-                            Log.d("TAG", "onSuccess: LIST EMPTY");
+                            Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                String ID = document.getId();
-                                String date = (String) document.get("Date");
-                                String message = (String) document.get("Message");
-                                CustomNotification notif = new CustomNotification(date, message, ID);
+                                String notifID = document.getId();
+                                String date = (String) document.get("dateOfNotification");
+                                String message = (String) document.get("message");
+                                boolean responseStatus = (boolean) document.get("hasResponded");
+                                CustomNotification notif = new CustomNotification(date, message, notifID, responseStatus);
                                 customNotificationArrayList.add(notif);
                             }
-                            System.out.print(customNotificationArrayList);
                             mAdapter = new NotificationsRecyclerViewAdapter(customNotificationArrayList, ActivityNotificationsPage.this);
                             mRecyclerView.setAdapter(mAdapter);
                         }

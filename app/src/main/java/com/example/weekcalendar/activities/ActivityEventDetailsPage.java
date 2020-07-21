@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventDate;
     private TextView eventTime;
     private TextView eventDescription;
+    private Button inviteEvent;
 
     private CustomEvent event;
 
@@ -99,6 +101,8 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.eventDate = findViewById(R.id.event_date);
         this.eventTime = findViewById(R.id.event_time);
         this.eventDescription = findViewById(R.id.event_description);
+        this.inviteEvent = findViewById(R.id.invite_event);
+        this.inviteEvent.setOnClickListener(v -> eventInvite());
 
         this.setView(this.event);
 
@@ -166,36 +170,12 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void eventInvite(View view) {
-        String link = "https://www.example.com/?id=" + this.event.getId();
-        System.out.println(link);
-        //Generate the dynamic link
-        Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
-                .setLink(Uri.parse(link))
-                .setDomainUriPrefix("https://orbitalweekcalendar.page.link")
-                .setAndroidParameters(
-                        new DynamicLink.AndroidParameters.Builder("com.example.weekcalendar")
-                                .build())
-                .buildShortDynamicLink()
-                .addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
-                    @Override
-                    public void onComplete(@NonNull Task<ShortDynamicLink> task) {
-                        if (task.isSuccessful()) {
-
-                            Uri shortLink = task.getResult().getShortLink();
-                            Uri flowchartLink = task.getResult().getPreviewLink();
-
-                            Dialog dialog = new Dialog(shortLink.toString(), ActivityEventDetailsPage.this);
-                            dialog.show(getSupportFragmentManager(), "Example");
-
-                        } else {
-                            System.out.println("error");
-                        }
-                    }
-                });
+    public void eventInvite() {
+        Dialog dialog = new Dialog(this);
+        dialog.show(getSupportFragmentManager(), "Example");
     }
 
-    public void sendNotification(String userEmail, String url) {
+    public void sendNotification(String userEmail) {
         this.fStore.collection("users")
                 .whereEqualTo("email", userEmail)
                 .get()
@@ -209,10 +189,12 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             }
                             //need to for loop this to accept multiple, leave it as is for now
                             Map<String, Object> data = new HashMap<>();
-                            data.put("Date", HelperMethods.getCurrDate());
-                            data.put("Message", "Hello, this is an invitation to an event");
-                            data.put("url", url);
+                            data.put("dateOfNotification", HelperMethods.getCurrDate());
+                            data.put("message", event.getAllDetails());
+                            data.put("eventID", event.getId());
                             data.put("userID", userID);
+                            data.put("hasResponded", false);
+                            data.put("response", null);
                             ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);
                         }
                     }

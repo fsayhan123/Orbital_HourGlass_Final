@@ -16,13 +16,11 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
 public class Dialog extends AppCompatDialogFragment {
-    private String url;
     private ActivityEventDetailsPage a;
-    public EditText email;
+    public EditText allEmails;
 
 
-    public Dialog(String url, ActivityEventDetailsPage activity) {
-        this.url = url;
+    public Dialog(ActivityEventDetailsPage activity) {
         this.a = activity;
     }
     @NonNull
@@ -31,14 +29,16 @@ public class Dialog extends AppCompatDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
-        this.email = view.findViewById(R.id.edit_invite);
+        this.allEmails = view.findViewById(R.id.edit_invite);
         builder.setView(view)
                 .setTitle("Invite Others")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String userEmail = email.getText().toString();
-                        Dialog.this.a.sendNotification(userEmail, Dialog.this.url);
+                        String[] usersToInvite = getEmails();
+                        for (String email : usersToInvite) {
+                            a.sendNotification(email.replaceAll("\\s",""));
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -50,7 +50,7 @@ public class Dialog extends AppCompatDialogFragment {
         return builder.create();
     }
 
-    public String getEmail() {
-        return this.email.toString();
+    public String[] getEmails() {
+        return this.allEmails.getText().toString().split(",");
     }
 }

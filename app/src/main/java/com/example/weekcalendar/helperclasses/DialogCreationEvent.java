@@ -1,6 +1,5 @@
 package com.example.weekcalendar.helperclasses;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityCreateSharedEvent;
-import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
 public class DialogCreationEvent extends AppCompatDialogFragment {
     private ActivityCreateSharedEvent a;
@@ -38,8 +36,9 @@ public class DialogCreationEvent extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String[] usersToInvite = getEmails();
-                        String userEmail = "alicia@gmail.com";
-                        a.reportUID(docRefID, userEmail);
+                        for (String email : usersToInvite) {
+                            a.sendNotification(docRefID, email.replaceAll("\\s",""));
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

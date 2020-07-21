@@ -137,7 +137,7 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
     }
 
     // change to String[]
-    public void reportUID(String docRefID, String userEmail) {
+    public void sendNotification(String docRefID, String userEmail) {
         this.fStore.collection("users")
                 .whereEqualTo("email", userEmail)
                 .get()
@@ -150,23 +150,26 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                                 userID = document.getId();
                             }
                             emails.add(userID);
-                            //need to for loop this to accept multiple, leave it as is for now
                             Map<String, Object> data = new HashMap<>();
-                            data.put("Date", HelperMethods.getCurrDate());
-                            data.put("Message", "Hello, this is an invitation to jeremy's event");
+                            data.put("dateOfNotification", HelperMethods.getCurrDate());
+
+                            // TO CHANGE
+                            data.put("message", "Hello, this is an invitation to a shared event"); // change with the necessary details
+                            // TO CHANGE END
+
                             data.put("userID", userID);
-                            data.put("response form ID", docRefID);
+                            data.put("responseFormID", docRefID);
+                            data.put("hasResponded", false);
+                            data.put("response", null);
                             ActivityCreateSharedEvent.this.fStore.collection("Notifications").add(data);
                         }
                     }
                 });
-//        this.emails.add(userEmail);
     }
 
     public void sendInvite() {
         Log.d(TAG, "creating!!!!!!!!");
         createResponseForm();
-//        generateURL(responseDocID);
     }
 
     public void createResponseForm() {
