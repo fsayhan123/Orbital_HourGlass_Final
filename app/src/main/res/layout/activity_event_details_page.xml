@@ -66,7 +66,7 @@
             android:textColor="#4A4A4A" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/todo_placeholder"
+            android:id="@+id/all_todo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
@@ -81,7 +81,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
-            android:onClick="eventInvite"
             android:text="Invite Others" />
 
     </LinearLayout>

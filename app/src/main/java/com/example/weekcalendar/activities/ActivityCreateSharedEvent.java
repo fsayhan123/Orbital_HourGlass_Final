@@ -145,11 +145,11 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            String userID = "";
+                            String respondentID = "";
                             for (QueryDocumentSnapshot document: task.getResult()) {
-                                userID = document.getId();
+                                respondentID = document.getId();
                             }
-                            emails.add(userID);
+                            emails.add(respondentID);
                             Map<String, Object> data = new HashMap<>();
                             data.put("dateOfNotification", HelperMethods.getCurrDate());
 
@@ -157,7 +157,8 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                             data.put("message", "Hello, this is an invitation to a shared event"); // change with the necessary details
                             // TO CHANGE END
 
-                            data.put("userID", userID);
+                            data.put("hostID", userID);
+                            data.put("respondentID", respondentID);
                             data.put("responseFormID", docRefID);
                             data.put("hasResponded", false);
                             data.put("response", null);

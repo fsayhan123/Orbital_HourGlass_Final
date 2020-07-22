@@ -3,6 +3,8 @@ package com.example.weekcalendar.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -17,6 +19,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.weekcalendar.adapters.EventDetailsToDoAdapter;
+import com.example.weekcalendar.customclasses.CustomToDo;
 import com.example.weekcalendar.customclasses.event.CustomEvent;
 import com.example.weekcalendar.helperclasses.Dialog;
 import com.example.weekcalendar.helperclasses.HelperMethods;
@@ -24,6 +28,7 @@ import com.example.weekcalendar.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -51,7 +56,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,8 +70,10 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventTime;
     private TextView eventDescription;
     private Button inviteEvent;
+    private RecyclerView allToDos;
 
     private CustomEvent event;
+    private List<CustomToDo> listOfToDos;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -103,8 +112,15 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.eventDescription = findViewById(R.id.event_description);
         this.inviteEvent = findViewById(R.id.invite_event);
         this.inviteEvent.setOnClickListener(v -> eventInvite());
+        this.allToDos = findViewById(R.id.all_todo);
+        LinearLayoutManager manager = new LinearLayoutManager(ActivityEventDetailsPage.this);
+        this.allToDos.setHasFixedSize(true);
+        this.allToDos.setLayoutManager(manager);
+        this.listOfToDos = new ArrayList<>();
 
         this.setView(this.event);
+
+        fetchToDos();
 
         // Setup toolbar with working back button
         Toolbar tb = findViewById(R.id.event_details);
@@ -183,16 +199,17 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            String userID = "";
+                            String respondentID = "";
                             for (QueryDocumentSnapshot document: task.getResult()) {
-                                userID = document.getId();
+                                respondentID = document.getId();
                             }
                             //need to for loop this to accept multiple, leave it as is for now
                             Map<String, Object> data = new HashMap<>();
+                            data.put("hostID", userID);
+                            data.put("respondentID", respondentID);
                             data.put("dateOfNotification", HelperMethods.getCurrDate());
                             data.put("message", event.getAllDetails());
                             data.put("eventID", event.getId());
-                            data.put("userID", userID);
                             data.put("hasResponded", false);
                             data.put("response", null);
                             ActivityEventDetailsPage.this.fStore.collection("Notifications").add(data);
@@ -200,6 +217,27 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                     }
                 });
         Toast.makeText(this, "Done", Toast.LENGTH_SHORT).show();
+    }
+
+    public void fetchToDos() {
+        this.fStore.collection("todo")
+                .whereEqualTo("eventID", this.event.getId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            String todoID = doc.getId();
+                            String title = (String) doc.get("title");
+                            String date = (String) doc.get("date");
+                            boolean completed = (boolean) doc.get("completed");
+                            CustomToDo todo = new CustomToDo(todoID, title, date, completed);
+                            listOfToDos.add(todo);
+                        }
+                        EventDetailsToDoAdapter e = new EventDetailsToDoAdapter(listOfToDos);
+                        allToDos.setAdapter(e);
+                    }
+                });
     }
 
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {

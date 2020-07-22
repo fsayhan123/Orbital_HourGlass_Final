@@ -72,7 +72,7 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
     protected void getNotificationFromFirebase() {
         this.customNotificationArrayList = new ArrayList<>();
 //        Toast.makeText(this, this.userID, Toast.LENGTH_SHORT).show();
-        this.notification.whereEqualTo("userID", this.userID)
+        this.notification.whereEqualTo("respondentID", this.userID)
                 .orderBy("dateOfNotification")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {

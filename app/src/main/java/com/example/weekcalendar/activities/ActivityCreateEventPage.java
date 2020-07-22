@@ -296,6 +296,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 toDoDetails.put("userID", this.userID);
                 toDoDetails.put("date", startDate);
                 toDoDetails.put("title", toDo);
+                toDoDetails.put("completed", false);
                 allToDoDetails.add(toDoDetails);
             }
         }
@@ -404,7 +405,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 Log.d(TAG, Integer.toString(hourOfDay));
                 String end = "AM";
-                if (hourOfDay > 12) {
+                if (hourOfDay >= 12) {
                     hourOfDay -= 12;
                     end = "PM";
                 }

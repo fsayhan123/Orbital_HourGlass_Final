@@ -31,14 +31,31 @@
             android:id="@+id/notification_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textColor="#4A4A4A" />
+
+        <TextView
+            android:id="@+id/from"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="TextView"
+            android:textColor="#4A4A4A" />
 
         <TextView
             android:id="@+id/notification_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textColor="#4A4A4A" />
+
+        <TextView
+            android:id="@+id/response"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textColor="#4A4A4A" />
     </LinearLayout>
 
     <!--    <TextView-->

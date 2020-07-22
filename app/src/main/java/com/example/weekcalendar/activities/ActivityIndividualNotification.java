@@ -1,5 +1,6 @@
 package com.example.weekcalendar.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.helperclasses.HelperMethods;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -20,7 +23,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Document;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ActivityIndividualNotification extends AppCompatActivity {
@@ -34,6 +39,7 @@ public class ActivityIndividualNotification extends AppCompatActivity {
     private LinearLayout notificationContents;
     private TextView date;
     private TextView message;
+    private TextView from;
     private TextView response;
     private Button respondButton;
     private LinearLayout buttonLayout;
@@ -57,6 +63,8 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         this.notificationContents = findViewById(R.id.notification_contents);
         this.date = findViewById(R.id.notification_date);
         this.message = findViewById(R.id.notification_message);
+        this.from = findViewById(R.id.from);
+        this.response = findViewById(R.id.response);
 
         this.respondButton = findViewById(R.id.respond_button);
         this.respondButton.setOnClickListener(v -> respond());
@@ -73,6 +81,12 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         setText(documentSnapshot);
+                        if ((boolean) documentSnapshot.get("hasResponded")) {
+                            respondButton.setText("Delete Notification");
+                            respondButton.setOnClickListener(v -> delete());
+                            return;
+                        }
+
                         if (documentSnapshot.get("responseFormID") != null) {
                             assert documentSnapshot.get("eventID") == null;
                             responseFormID = (String) documentSnapshot.get("responseFormID");
@@ -86,6 +100,18 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                             buttonLayout.addView(rejectButton);
                             rejectButton.setOnClickListener(v -> reject());
                         }
+                    }
+                });
+    }
+
+    private void delete() {
+        this.fStore.collection("Notifications")
+                .document(this.notifID)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        startActivity(new Intent(ActivityIndividualNotification.this, ActivityNotificationsPage.class));
                     }
                 });
     }
@@ -131,15 +157,31 @@ public class ActivityIndividualNotification extends AppCompatActivity {
     }
 
     private void setText(DocumentSnapshot doc) {
+        Log.d(TAG, "!!!!!!!!!!!!!!!!" + doc.getId());
         String date = HelperMethods.formatDateForView((String) doc.get("dateOfNotification"));
         String message = (String) doc.get("message");
+        String hostID = (String) doc.get("hostID");
+        this.fStore.collection("users")
+                .document(hostID)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        from.setText("From: " + (String) documentSnapshot.get("fName"));
+                    }
+                });
         boolean hasResponded = (boolean) doc.get("hasResponded");
         this.date.setText(date);
         this.message.setText(message);
         if (hasResponded) {
-            TextView response = new TextView(this);
-            response.setText(doc.get("response").toString());
-            this.notificationContents.addView(response);
+            if (doc.get("responseFormID") != null) {
+                List<String> userResponses = (List<String>) doc.get("response");
+                Collections.sort(userResponses);
+                response.setText(userResponses.toString());
+            } else {
+                String userResponse = (String) doc.get("response");
+                response.setText(userResponse);
+            }
         }
     }
 }

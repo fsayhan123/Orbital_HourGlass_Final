@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.timessquare.CalendarPickerView;
 
@@ -128,12 +129,14 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
     public void submitChoices() {
         Map<String, Object> responses = getUserResponse();
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("responses", responses);
-        this.c.document(this.docID)
-                .update(responseData)
-                .addOnSuccessListener(docRef -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+
+        for (CustomDay d : this.selectedDates) {
+            Log.d(TAG, "!!!!!!!!!!!!!!!!!!!!!!! " + String.format("responses.%s", d.getDateForFirebase()));
+            this.c.document(this.docID)
+                    .update(String.format("responses.%s", d.getDateForFirebase()), FieldValue.arrayUnion(userID))
+                    .addOnSuccessListener(docRef -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+        }
 
         Map<String, Object> data = new HashMap<>();
         data.put("hasResponded", true);
@@ -143,6 +146,10 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                 .update(data)
                 .addOnSuccessListener(v -> Log.d(TAG, "Normal event invite accepted!"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error accepting normal event invite.", e));
+
+        Intent i = new Intent(this, ActivityIndividualNotification.class);
+        i.putExtra("notificationID", this.notifID);
+        startActivity(i);
     }
 
     public Map<String, Object> getUserResponse() {
