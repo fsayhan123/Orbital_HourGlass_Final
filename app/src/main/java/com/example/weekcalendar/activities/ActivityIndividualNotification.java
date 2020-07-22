@@ -2,6 +2,7 @@ package com.example.weekcalendar.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -58,6 +59,17 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         //Setup Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
+
+        //Setup toolbar
+        Toolbar tb = findViewById(R.id.notifications_toolbar);
+        setSupportActionBar(tb);
+
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityNotificationsPage.class));
+        });
 
         //Setup local activity variables
         this.notificationContents = findViewById(R.id.notification_contents);

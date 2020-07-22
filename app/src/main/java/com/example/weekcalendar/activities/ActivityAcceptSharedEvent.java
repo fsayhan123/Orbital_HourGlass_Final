@@ -1,6 +1,7 @@
 package com.example.weekcalendar.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -63,6 +64,18 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
 //        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.create_shared_event));
 //        this.navDrawer.setupNavDrawerPane();
+
+        //Setup toolbar
+        Toolbar tb = findViewById(R.id.accept_shared_event);
+        setSupportActionBar(tb);
+
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityNotificationsPage.class));
+        });
 
         this.fAuth = FirebaseAuth.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();

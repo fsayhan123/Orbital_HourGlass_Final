@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.weekcalendar.R;
@@ -44,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static android.graphics.Color.*;
 
@@ -57,12 +59,18 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
     private ArrayList<String> emails = new ArrayList<>();
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private Button sendInvites;
+    private TextView monthYear;
 
     //Firebase Variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private CollectionReference c;
     private String userID;
+
+    //Date variables
+    private static Date today = new Date();
+    private static final DateFormat MONTH_AND_YEAR = new SimpleDateFormat("MMMM yyyy");
+    private static final DateFormat FULL_DATE = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +93,9 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
         this.sendInvites = findViewById(R.id.button);
         this.sendInvites.setOnClickListener(v -> sendInvite());
 
+        this.monthYear = findViewById(R.id.month_year_shared);
+        this.monthYear.setText(MONTH_AND_YEAR.format(today));
+
         this.calendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
             public void onDayClick(Date dateClicked) {
@@ -101,39 +112,15 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                 }
             }
 
+
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
-            }});
-            /*calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                Date jDate = new Date();
-                String strMonth = String.valueOf(month + 1);
-                String strDay = String.valueOf(dayOfMonth);
-                if (strDay.length() < 2) {
-                    strDay = "0" + strDay;
-                }
-                if (strMonth.length() < 2) {
-                    strMonth = "0" + strMonth;
-                }
+                String date = MONTH_AND_YEAR.format(firstDayOfNewMonth);
+                String fullDate = FULL_DATE.format(firstDayOfNewMonth);
 
-                String strDate = year + "-" + strMonth + "-" + strDay;
-                System.out.println(strDate);
-                try {
-                    jDate = dateFormatter.parse(strDate);
-                } catch (ParseException e){
-                    System.out.println("dead");
-                }
-                CustomDay date = new CustomDay(jDate);
-                if (ActivityCreateSharedEvent.this.selectedDates.contains(date)) {
-                    ActivityCreateSharedEvent.this.selectedDates.remove(date);
-                    Toast.makeText(ActivityCreateSharedEvent.this, "removed " + date.toString(), Toast.LENGTH_LONG).show();
-                } else {
-                    ActivityCreateSharedEvent.this.selectedDates.add(date);
-                    Toast.makeText(ActivityCreateSharedEvent.this, "Added " + date.toString(), Toast.LENGTH_LONG).show();
-                }
-            }
-        });*/
+                monthYear.setText(date);
+            }});
+
     }
 
     // change to String[]
@@ -175,7 +162,8 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
 
     public void createResponseForm() {
         Map<String, Object> sharedEventDetails = getSharedEventDetails();
-
+        sharedEventDetails.put("hostID", this.userID);
+        sharedEventDetails.put("title", "testing title");
         this.c.add(sharedEventDetails)
                 .addOnSuccessListener(docRef -> {
                     Log.d(TAG, "DocumentSnapshot successfully written!");

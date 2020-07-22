@@ -24,25 +24,63 @@
 
         <TextView
             android:id="@+id/select_shared_event_title"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/create_shared_event_toolbar"
-            android:textSize="30dp"
             android:layout_centerHorizontal="true"
-            android:text="Title" />
+            android:layout_gravity="center"
+            android:text="Title"
+            android:textSize="30dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/selecting_shared_event_date"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="400dp"
             android:layout_below="@+id/select_shared_event_title"
             android:layout_marginLeft="0dp"
             android:layout_marginTop="0dp"
             android:layout_marginRight="0dp"
-            android:layout_marginBottom="0dp"
             android:orientation="vertical"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <LinearLayout
+            android:id="@+id/times"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/selecting_shared_event_date"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/select_start_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Select Start Time"
+                android:textColor="#4A4A4A" />
+
+            <Button
+                android:id="@+id/select_end_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Select End Time"
+                android:textColor="#4A4A4A" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/confirm_event_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/selecting_shared_event_date"
+            android:layout_marginTop="75dp"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:onClick = "confirmEvent"
+            android:text="Confirm Event" />
 
     </RelativeLayout>
 

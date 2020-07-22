@@ -18,6 +18,13 @@ public class ResponseRecyclerViewAdapter extends RecyclerView.Adapter<ResponseRe
     private ArrayList<CustomResponse> mDataset;
     private Activity a;
     private View eachDayView;
+    private OnDateCheckListener onDateCheckListener;
+
+    public interface OnDateCheckListener {
+        void onDateCheck(String date);
+        void onDateUncheck(String date);
+    }
+
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -29,14 +36,20 @@ public class ResponseRecyclerViewAdapter extends RecyclerView.Adapter<ResponseRe
         public MyViewHolder(View v) {
             super(v);
             this.eventDate = itemView.findViewById(R.id.shared_event_date_option);
+            this.eventDate.setClickable(false);
             this.count = itemView.findViewById(R.id.shared_event_date_count);
+        }
+
+        public void setOnClickListener(View.OnClickListener onClickListener) {
+            itemView.setOnClickListener(onClickListener);
         }
     }
 
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public ResponseRecyclerViewAdapter(ArrayList<CustomResponse> myDataset) {
+    public ResponseRecyclerViewAdapter(ArrayList<CustomResponse> myDataset, OnDateCheckListener onDateCheckListener) {
         this.mDataset = myDataset;
+        this.onDateCheckListener = onDateCheckListener;
     }
 
     // Create new views (invoked by the layout manager)
@@ -58,6 +71,21 @@ public class ResponseRecyclerViewAdapter extends RecyclerView.Adapter<ResponseRe
         holder.eventDate.setText(HelperMethods.formatDateForView(response.getDate()));
         String count = String.format("%s users can attend", response.getCount());
         holder.count.setText(count);
+        ((MyViewHolder) holder).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                ((MyViewHolder) holder).eventDate.setChecked(
+                        !((MyViewHolder) holder).eventDate.isChecked());
+                if (((MyViewHolder) holder).eventDate.isChecked()) {
+                    System.out.println(holder.eventDate.getText().toString());
+                    onDateCheckListener.onDateCheck(holder.eventDate.getText().toString());;
+                } else {
+                    System.out.println(holder.eventDate.getText().toString());
+                    onDateCheckListener.onDateUncheck(holder.eventDate.getText().toString());
+                }
+            }
+        });
     }
 
     // Return the size of your dataset (invoked by the layout manager)
