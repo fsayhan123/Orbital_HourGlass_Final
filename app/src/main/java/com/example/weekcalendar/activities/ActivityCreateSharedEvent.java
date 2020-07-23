@@ -62,10 +62,10 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
     private TextView monthYear;
 
     //Firebase Variables
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
-    private CollectionReference c;
-    private String userID;
+    public FirebaseAuth fAuth;
+    public FirebaseFirestore fStore;
+    public CollectionReference c;
+    public String userID;
 
     //Date variables
     private static Date today = new Date();
@@ -164,13 +164,9 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
         Map<String, Object> sharedEventDetails = getSharedEventDetails();
         sharedEventDetails.put("hostID", this.userID);
         sharedEventDetails.put("title", "testing title");
-        this.c.add(sharedEventDetails)
-                .addOnSuccessListener(docRef -> {
-                    Log.d(TAG, "DocumentSnapshot successfully written!");
-                    DialogCreationEvent dialog = new DialogCreationEvent(docRef.getId(), ActivityCreateSharedEvent.this);
-                    dialog.show(getSupportFragmentManager(), "Example");
-                })
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+        DialogCreationEvent dialog = new DialogCreationEvent(sharedEventDetails,ActivityCreateSharedEvent.this);
+        dialog.show(getSupportFragmentManager(), "Example");
+
     }
 
     private Map<String, Object> getSharedEventDetails() {
@@ -189,34 +185,4 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
 
         return details;
     }
-
-//    public void generateURL(String responseFormID) {
-//        String link = "https://www.example.com/?id=" + responseFormID;
-//        System.out.println(link);
-//        //Generate the dynamic link
-//        Task<ShortDynamicLink> shortLinkTask = FirebaseDynamicLinks.getInstance().createDynamicLink()
-//                .setLink(Uri.parse(link))
-//                .setDomainUriPrefix("https://orbitalweekcalendar.page.link")
-//                .setAndroidParameters(
-//                        new DynamicLink.AndroidParameters.Builder("com.example.weekcalendar")
-//                                .build())
-//                .buildShortDynamicLink()
-//                .addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<ShortDynamicLink> task) {
-//                        if (task.isSuccessful()) {
-//
-//                            Uri shortLink = task.getResult().getShortLink();
-//                            Uri flowchartLink = task.getResult().getPreviewLink();
-//
-//                            DialogCreationEvent dialog = new DialogCreationEvent(ActivityCreateSharedEvent.this);
-//                            dialog.show(getSupportFragmentManager(), "Example");
-//                            Log.d(TAG, shortLink.toString());
-//
-//                        } else {
-//                            System.out.println("error");
-//                        }
-//                    }
-//                });
-//    }
 }

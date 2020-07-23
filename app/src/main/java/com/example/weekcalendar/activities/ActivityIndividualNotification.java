@@ -179,7 +179,7 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        from.setText("From: " + (String) documentSnapshot.get("fName"));
+                        from.setText("From: " + documentSnapshot.get("fName"));
                     }
                 });
         boolean hasResponded = (boolean) doc.get("hasResponded");
@@ -189,7 +189,12 @@ public class ActivityIndividualNotification extends AppCompatActivity {
             if (doc.get("responseFormID") != null) {
                 List<String> userResponses = (List<String>) doc.get("response");
                 Collections.sort(userResponses);
-                response.setText(userResponses.toString());
+                StringBuilder s = new StringBuilder();
+                s.append("Responses: ");
+                for (String response : userResponses) {
+                    s.append(HelperMethods.formatDateForView(response) + ", ");
+                }
+                response.setText(s.substring(0, s.length() - 2));
             } else {
                 String userResponse = (String) doc.get("response");
                 response.setText(userResponse);

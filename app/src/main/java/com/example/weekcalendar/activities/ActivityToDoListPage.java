@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +28,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,14 +43,14 @@ import java.util.Set;
 
 public class ActivityToDoListPage extends AppCompatActivity {
     private static final String TAG = ActivityToDoListPage.class.getSimpleName();
-    private boolean canDelete = false;
+    public boolean canDelete = false;
 
     // ExpandableListView variables
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomToDo>> mapOfToDo;
     private ExpandableListView expandableListView;
-    private ToDoListViewAdapter mAdapter;
+    private ToDoListViewAdapter mAdapter = new ToDoListViewAdapter(this, new ArrayList<>(), new HashMap<>());
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -159,9 +162,12 @@ public class ActivityToDoListPage extends AppCompatActivity {
                 deleteToDo();
                 item.setIcon(R.drawable.ic_baseline_delete_24_transparent);
                 canDelete = false;
+                Toast.makeText(this, "false", Toast.LENGTH_SHORT).show();
+
             } else {
                 canDelete = true;
                 item.setIcon(R.drawable.ic_baseline_delete_24);
+                Toast.makeText(this, "true", Toast.LENGTH_SHORT).show();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -193,8 +199,12 @@ public class ActivityToDoListPage extends AppCompatActivity {
     }
 
     public void deleteToDo() {
-        Set<Pair<Long, Long>> setItems = this.mAdapter.getCheckedItems();
-        for (Pair<Long, Long> pair : setItems) {
+        Set<Pair<Long, Long>> setItems = this.mAdapter.getItemsToDelete();
+        List<Pair<Long, Long>> iterable = new ArrayList<>(setItems);
+        Collections.sort(iterable, (p1, p2) -> (int) -(p2.first - p1.first + p2.second - p1.second));
+        for (int i = iterable.size() - 1; i >= 0; i--) {
+            Pair<Long, Long> pair = iterable.get(i);
+            Log.d(TAG, pair.toString());
             int groupPos = (int) (long) pair.first;
             int childPos = (int) (long) pair.second;
             CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
@@ -204,8 +214,8 @@ public class ActivityToDoListPage extends AppCompatActivity {
                     .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
                     .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
         }
-        setItems.clear();
         this.mAdapter.resetCheckBoxes();
+        setItems.clear();
     }
 
     @Override

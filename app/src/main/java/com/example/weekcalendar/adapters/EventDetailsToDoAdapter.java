@@ -27,7 +27,7 @@ public class EventDetailsToDoAdapter extends RecyclerView.Adapter<EventDetailsTo
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        eachItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+        eachItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_todo_event_details, parent, false);
         EventDetailsToDoAdapter.MyViewHolder holder = new EventDetailsToDoAdapter.MyViewHolder(eachItemView);
         return holder;
     }

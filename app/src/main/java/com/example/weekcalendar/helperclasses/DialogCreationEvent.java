@@ -2,6 +2,7 @@ package com.example.weekcalendar.helperclasses;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -14,13 +15,15 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityCreateSharedEvent;
 
+import java.util.Map;
+
 public class DialogCreationEvent extends AppCompatDialogFragment {
     private ActivityCreateSharedEvent a;
-    private String docRefID;
-    public EditText allEmails;
+    private Map<String, Object> data;
+    private EditText allEmails;
 
-    public DialogCreationEvent(String docRefID, ActivityCreateSharedEvent activity) {
-        this.docRefID = docRefID;
+    public DialogCreationEvent(Map<String, Object> data, ActivityCreateSharedEvent activity) {
+        this.data = data;
         this.a = activity;
     }
     @NonNull
@@ -35,10 +38,15 @@ public class DialogCreationEvent extends AppCompatDialogFragment {
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String[] usersToInvite = getEmails();
-                        for (String email : usersToInvite) {
-                            a.sendNotification(docRefID, email.replaceAll("\\s",""));
-                        }
+                        a.c.add(data)
+                                .addOnSuccessListener(docRef -> {
+                                    Log.d(ActivityCreateSharedEvent.class.getSimpleName(), "DocumentSnapshot successfully written!");
+                                    String[] usersToInvite = getEmails();
+                                    for (String email : usersToInvite) {
+                                        a.sendNotification(docRef.getId(), email.replaceAll("\\s",""));
+                                    }
+                                })
+                                .addOnFailureListener(e -> Log.w(ActivityCreateSharedEvent.class.getSimpleName(), "Error writing document", e));
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
