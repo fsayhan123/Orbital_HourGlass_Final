@@ -93,7 +93,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
     private void createToDo() {
          if (checkFields()) {
-             Map<String, Object> details = detailsToMap(false);
+             Map<String, Object> details = customToDoToMap(false);
              this.c.add(details)
                      .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                      .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
@@ -104,14 +104,14 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
     public void updateToDo() {
         if (checkFields()) {
-            Map<String, Object> details = detailsToMap(this.toDo.getCompleted());
+            Map<String, Object> details = customToDoToMap(this.toDo.getCompleted());
             this.fStore.collection("todo").document(this.toDo.getID()).set(details);
             Intent intent = new Intent(this, ActivityToDoListPage.class);
             startActivity(intent);
         }
     }
 
-    public Map<String, Object> detailsToMap(boolean completed) {
+    public Map<String, Object> customToDoToMap(boolean completed) {
         String date = this.selectDate.getText().toString();
         String title = this.toDoTitle.getText().toString();
         Map<String, Object> details = new HashMap<>();
@@ -119,6 +119,9 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         details.put("date", HelperMethods.formatDateWithDash(date));
         details.put("title", title);
         details.put("completed", completed);
+        if (this.toDo.getEventID() != null) {
+            details.put("eventID", this.toDo.getEventID());
+        }
         return details;
     }
 

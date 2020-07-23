@@ -9,12 +9,21 @@ import java.util.Objects;
 
 public class CustomToDo implements Parcelable {
     private String ID;
+    private String eventID;
     private String title;
     private String date;
     private boolean completed;
 
     public CustomToDo(String ID, String title, String date, boolean completed) {
         this.ID = ID;
+        this.title = title;
+        this.date = date;
+        this.completed = completed;
+    }
+
+    public CustomToDo(String ID, String eventID, String title, String date, boolean completed) {
+        this.ID = ID;
+        this.eventID = eventID;
         this.title = title;
         this.date = date;
         this.completed = completed;
@@ -60,6 +69,10 @@ public class CustomToDo implements Parcelable {
 
     public String getID() {
         return this.ID;
+    }
+
+    public String getEventID() {
+        return this.eventID;
     }
 
     public String getTitle() {

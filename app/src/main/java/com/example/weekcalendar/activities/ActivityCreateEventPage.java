@@ -177,7 +177,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.selectEndDate.setText(HelperMethods.formatDateForView(this.event.getEndDate()));
             this.selectStartTime.setText(HelperMethods.formatTimeTo12H(this.event.getStartTime()));
             this.selectEndTime.setText(HelperMethods.formatTimeTo12H(this.event.getEndTime()));
-            if (!this.event.getDescription().equals("")) {
+            if (this.event.getDescription() == null || !this.event.getDescription().equals("")) {
                 this.description.setText(this.event.getDescription());
             }
             this.createEvent.setText("Update Event");

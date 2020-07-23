@@ -231,28 +231,27 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
         //testing firebase dynamic links
 
-        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
-            @Override
-            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                System.out.println("Hello World dyanmic links");
-
-                Uri deepLink = null;
-                if (pendingDynamicLinkData != null) {
-                    deepLink = pendingDynamicLinkData.getLink();
-                }
-
-                if (deepLink != null) {
-                    String documentID = deepLink.getQueryParameter("id");
-                    fStore.collection("events").document(documentID)
-                            .update("participants", FieldValue.arrayUnion(ActivityMainCalendar.this.userID));
-                }
-            }
-        }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                System.out.println("Error unable to retrieve link");
-            }
-        });
+//        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+//            @Override
+//            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+//
+//                Uri deepLink = null;
+//                if (pendingDynamicLinkData != null) {
+//                    deepLink = pendingDynamicLinkData.getLink();
+//                }
+//
+//                if (deepLink != null) {
+//                    String documentID = deepLink.getQueryParameter("id");
+//                    fStore.collection("events").document(documentID)
+//                            .update("participants", FieldValue.arrayUnion(ActivityMainCalendar.this.userID));
+//                }
+//            }
+//        }).addOnFailureListener(this, new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                System.out.println("Error unable to retrieve link");
+//            }
+//        });
     }
 
     private void fetch3MonthEventsFromFirebase(Date curr) {
@@ -356,10 +355,12 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         String endDate = (String) document.get("endDate");
         String startTime = (String) document.get("startTime");
         String endTime = (String) document.get("endTime");
+        String description = (String) document.get("description") == null ? "" : (String) document.get("description");
         String docID = document.getId();
         CustomEvent event;
         if (startDate.equals(endDate)) { // just one day
             event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
+            event.setDescription(description);
             if (!this.checkExist.contains(event)) {
                 this.checkExist.add(event);
                 addToMap(event);
@@ -378,6 +379,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                     startTime = "All Day"; // change later to support end time
                 }
                 event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
+                event.setDescription(description);
                 if (!this.checkExist.contains(event)) {
                     this.checkExist.add(event);
                     addToMap(event);

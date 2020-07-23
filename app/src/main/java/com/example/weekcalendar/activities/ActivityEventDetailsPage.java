@@ -71,6 +71,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private TextView eventDescription;
     private Button inviteEvent;
     private RecyclerView allToDos;
+    private EventDetailsToDoAdapter e;
 
     private CustomEvent event;
     private List<CustomToDo> listOfToDos;
@@ -164,10 +165,10 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
             this.eventDate.setText("Date: " + startDate + " to " + endDate);
         }
         this.eventTime.setText("Time: " + event.getStartTime() + " to " + event.getEndTime());
-        if (!event.getDescription().equals("")) {
-            this.eventDescription.setText(event.getDescription());
-        } else {
+        if (this.event.getDescription() == null || event.getDescription().equals("")) {
             this.eventDescription.setText("No event description.");
+        } else {
+            this.eventDescription.setText(event.getDescription());
         }
     }
 
@@ -234,11 +235,35 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                             CustomToDo todo = new CustomToDo(todoID, title, date, completed);
                             listOfToDos.add(todo);
                         }
-                        EventDetailsToDoAdapter e = new EventDetailsToDoAdapter(listOfToDos);
+                        e = new EventDetailsToDoAdapter(listOfToDos);
                         allToDos.setAdapter(e);
                     }
                 });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        pushToDo();
+    }
+
+    private void pushToDo() {
+        Set<CustomToDo> toggled = this.e.getMyToggledToDos();
+        for (CustomToDo todo : toggled) {
+            this.fStore.collection("todo").document(todo.getID()).set(customToDoToMap(todo));
+        }
+    }
+
+    public Map<String, Object> customToDoToMap(CustomToDo todo) {
+        Map<String, Object> todoDetails = new HashMap<>();
+        todoDetails.put("userID", userID);
+        todoDetails.put("date", todo.getDate());
+        todoDetails.put("eventID", this.event.getId());
+        todoDetails.put("title", todo.getTitle());
+        todoDetails.put("completed", todo.getCompleted());
+        return todoDetails;
+    }
+
 
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 

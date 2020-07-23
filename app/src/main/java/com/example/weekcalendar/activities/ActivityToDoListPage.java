@@ -195,6 +195,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
         todoDetails.put("date", todo.getDate());
         todoDetails.put("title", todo.getTitle());
         todoDetails.put("completed", todo.getCompleted());
+        if (todo.getEventID() != null) {
+            todoDetails.put("eventID", todo.getEventID());
+        }
         return todoDetails;
     }
 
