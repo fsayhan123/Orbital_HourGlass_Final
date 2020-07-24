@@ -129,6 +129,7 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
             String date = this.selectedDates.get(0);
             String dateFormatted = HelperMethods.formatDateWithDash(date);
             ArrayList<String> users = this.responses.get(dateFormatted);
+            users.add(this.userID);
 
             String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
             String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());

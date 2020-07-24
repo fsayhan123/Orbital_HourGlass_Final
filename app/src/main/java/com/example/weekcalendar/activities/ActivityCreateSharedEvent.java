@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +61,7 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
     private Button sendInvites;
     private TextView monthYear;
+    private EditText title;
 
     //Firebase Variables
     public FirebaseAuth fAuth;
@@ -89,6 +91,8 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
         this.calendarView = findViewById(R.id.compact_calendar_view_creation);
         this.calendarView.setFirstDayOfWeek(Calendar.SUNDAY);
         this.calendarView.shouldDrawIndicatorsBelowSelectedDays(true);
+
+        this.title = findViewById(R.id.create_shared_event_title);
 
         this.sendInvites = findViewById(R.id.button);
         this.sendInvites.setOnClickListener(v -> sendInvite());
@@ -163,7 +167,7 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
     public void createResponseForm() {
         Map<String, Object> sharedEventDetails = getSharedEventDetails();
         sharedEventDetails.put("hostID", this.userID);
-        sharedEventDetails.put("title", "testing title");
+        sharedEventDetails.put("title", this.title.getText().toString());
         DialogCreationEvent dialog = new DialogCreationEvent(sharedEventDetails,ActivityCreateSharedEvent.this);
         dialog.show(getSupportFragmentManager(), "Example");
 
