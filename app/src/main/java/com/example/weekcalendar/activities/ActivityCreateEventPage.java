@@ -74,7 +74,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectStartDate;
     private TextInputLayout selectEndDateLayout;
     private Button selectEndDate;
+    private TextInputLayout selectStartTimeLayout;
     private Button selectStartTime;
+    private TextInputLayout selectEndTimeLayout;
     private Button selectEndTime;
     private Button createEvent;
     private EditText description;
@@ -94,6 +96,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private CollectionReference cToDo;
 
     private CustomEvent event;
+    private String eventID;
     private List<CustomToDo> originalToDos;
 
     // Get data from Google
@@ -121,6 +124,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         this.selectStartDateLayout = findViewById(R.id.selectStartDateLayout);
         this.selectEndDateLayout = findViewById(R.id.selectEndDateLayout);
+        this.selectStartTimeLayout = findViewById(R.id.selectStartTimeLayout);
+        this.selectEndTimeLayout = findViewById(R.id.selectEndTimeLayout);
 
         this.selectStartDate = findViewById(R.id.select_start_date);
         this.selectStartDate.setOnClickListener(v -> openSelectDateDialog(this.selectStartDate));
@@ -138,10 +143,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         this.todoListLayout = findViewById(R.id.fill_in_todos);
 
-        // inflate?
-//        LayoutInflater inflater = this.getLayoutInflater();
-//        View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
-//        this.todoListLayout.addView(eachToDo);
         this.todo1 = findViewById(R.id.todo_item);
 
         this.addToDoButton = findViewById(R.id.add_todo);
@@ -166,12 +167,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         tb.setNavigationOnClickListener(v -> {
-            startActivity(new Intent(this, ActivityUpcomingPage.class));
+            startActivity(new Intent(this, ActivityMainCalendar.class));
         });
 
         Intent i = getIntent();
         this.event = i.getParcelableExtra("event to edit");
         if (this.event != null) {
+            this.eventID = this.event.getId();
             this.title.setText(this.event.getTitle());
             this.selectStartDate.setText(HelperMethods.formatDateForView(this.event.getStartDate()));
             this.selectEndDate.setText(HelperMethods.formatDateForView(this.event.getEndDate()));
@@ -197,6 +199,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
     private void fetchToDos(String eventID) {
         this.cToDo.whereEqualTo("eventID", eventID)
+                .orderBy("timestamp")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
@@ -248,16 +251,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.title.setError("Please insert event title!");
         } else if (this.selectStartDate.getText().toString().equals("Select Start Date")) {
             this.selectStartDateLayout.setError("Please choose a start date!");
-            this.selectStartDate.setError("Please choose a start date!");
         } else if (this.selectEndDate.getText().toString().equals("Select End Date")) {
             this.selectEndDateLayout.setError("Please choose an end date!");
-            this.selectEndDate.setError("Please choose an end date!");
         } else if (this.selectStartTime.getText().toString().equals("Select Start Time")) {
-//            this.selectStartDateLayout.setError("Please choose a start date!");
-            this.selectStartTime.setError("Please choose a start time!");
+            this.selectStartTimeLayout.setError("Please choose a start time!");
         } else if (this.selectEndTime.getText().toString().equals("Select End Time")) {
-//            this.selectStartDateLayout.setError("Please choose a start date!");
-            this.selectEndTime.setError("Please choose an end time!");
+            this.selectEndTimeLayout.setError("Please choose a end time!");
         } else {
             return true;
         }
@@ -297,6 +296,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 toDoDetails.put("date", startDate);
                 toDoDetails.put("title", toDo);
                 toDoDetails.put("completed", false);
+                toDoDetails.put("timestamp", System.currentTimeMillis());
                 allToDoDetails.add(toDoDetails);
             }
         }
@@ -333,15 +333,18 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                             Map<String, Object> nextToDo = getToDoDetails().get(i);
                             nextToDo.put("eventID", this.event.getId());
                             cToDo.add(nextToDo)
-                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
+                                    .addOnSuccessListener(docRef2 -> {
+                                        Log.d(TAG, "*****DocumentSnapshot successfully written!");
+                                        Intent intent = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                                        intent.putExtra("eventID", event.getId());
+                                        startActivity(intent);
+                                    })
                                     .addOnFailureListener(e -> Log.w(TAG, "*****Error writing document", e));
                         }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-
-            Intent i = new Intent(this, ActivityUpcomingPage.class);
-            startActivity(i);
         }
     }
 
@@ -353,20 +356,21 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
             this.cEvents.add(eventDetails)
                     .addOnSuccessListener(docRef -> {
+                        eventID = docRef.getId();
                         for (Map<String, Object> todo : allToDoDetails) {
                             todo.put("eventID", docRef.getId());
                             cToDo.add(todo)
-                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                                    .addOnSuccessListener(docRef2 -> {
+                                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                                        Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                                        i.putExtra("eventID", this.eventID);
+                                        startActivity(i);
+                                    })
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
-                        //Create deep link
-                        System.out.println(docRef.getId());
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-
-            Intent i = new Intent(this, ActivityUpcomingPage.class);
-            startActivity(i);
         }
     }
 
@@ -488,7 +492,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             if (aBoolean) {
-                Intent i = new Intent(ActivityCreateEventPage.this, ActivityUpcomingPage.class);
+                Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                i.putExtra("eventID", event.getId());
                 startActivity(i);
             }
         }
@@ -518,6 +523,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 for (Map<String, Object> todo : allToDoDetails) {
                     Log.d(TAG, "ID IS " + response.getId());
                     todo.put("eventID", response.getId());
+                    eventID = response.getId();
                     cToDo.add(todo)
                             .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                             .addOnFailureListener(td -> Log.w(TAG, "Error writing todo document", td));

@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -64,9 +64,8 @@
                     android:id="@+id/selectStartDateLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:gravity="center"
+                    android:gravity="bottom|center_horizontal"
                     android:textAlignment="gravity"
                     app:counterEnabled="false"
                     app:errorEnabled="true"
@@ -86,9 +85,8 @@
                     android:id="@+id/selectEndDateLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:gravity="center"
+                    android:gravity="bottom|center_horizontal"
                     android:textAlignment="gravity"
                     app:counterEnabled="false"
                     app:errorEnabled="true"
@@ -114,21 +112,49 @@
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/select_start_time"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectStartTimeLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Select Start Time"
-                    android:textColor="#4A4A4A" />
+                    android:gravity="bottom|center_horizontal"
+                    android:textAlignment="gravity"
+                    app:counterEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="false"
+                    app:hintAnimationEnabled="false"
+                    app:hintEnabled="false">
 
-                <Button
-                    android:id="@+id/select_end_time"
+                    <Button
+                        android:id="@+id/select_start_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Select Start Time"
+                        android:textColor="#4A4A4A" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/selectEndTimeLayout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Select End Time"
-                    android:textColor="#4A4A4A" />
+                    android:gravity="bottom|center_horizontal"
+                    android:textAlignment="gravity"
+                    app:counterEnabled="false"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="false"
+                    app:hintAnimationEnabled="false"
+                    app:hintEnabled="false">
+
+                    <Button
+                        android:id="@+id/select_end_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Select End Time"
+                        android:textColor="#4A4A4A" />
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
 
@@ -139,7 +165,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:ems="10"
             android:hint="Add Description"
             android:inputType="textPersonName" />
@@ -151,7 +177,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/event_data"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp">
+        android:layout_marginVertical="15dp">
 
         <TextView
             android:id="@+id/todo_title"

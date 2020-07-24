@@ -121,6 +121,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
 
         this.c.whereEqualTo("userID", userID)
                 .orderBy("date")
+                .orderBy("timestamp")
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override

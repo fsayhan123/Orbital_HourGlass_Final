@@ -82,9 +82,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     private RecyclerView mRecyclerView;
     private UpcomingRecyclerViewAdapter mAdapter;
 
-    // Store local copy of events data
-    private Map<String, CustomEvent> cache;
-
     // Firebase variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
@@ -137,20 +134,14 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 this.listOfDays = new ArrayList<>();
                 this.mapOfEvents = new HashMap<>();
                 this.setOfDays = new HashSet<>();
-                this.cache = new HashMap<>();
             } catch (Exception e) {
                 e.printStackTrace();
                 fetchedEvents = new ArrayList<>();
                 Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
             for (Event e : fetchedEvents) {
-                try {
-                    processGoogleEvent(e);
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
+                processGoogleEvent(e);
             }
-            Log.d(TAG, "TESTTTTTTT " + listOfDays.isEmpty());
             this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
                     ActivityUpcomingPage.this, ActivityUpcomingPage.this);
             this.mRecyclerView.setAdapter(mAdapter);
@@ -185,9 +176,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         } else {
             this.mapOfEvents.get(day).add(event);
         }
-        if (this.cache.get(event.getId()) == null) {
-            this.cache.put(event.getId(), event);
-        }
     }
 
     private void processFirebaseDocument(QueryDocumentSnapshot document) {
@@ -221,7 +209,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
-    private void processGoogleEvent(com.google.api.services.calendar.model.Event e) throws ParseException {
+    private void processGoogleEvent(com.google.api.services.calendar.model.Event e) {
         String title = e.getSummary();
         String startDate;
         String startTime;
@@ -231,11 +219,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String eventDescription = e.getDescription() == null ? "" : e.getDescription();
         CustomEvent event;
         if (e.getStart().get("dateTime") == null) { // full day event
-            try {
-                Log.d(TAG, "HIIIIIIIIIIIIII" + e.toPrettyString());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
             startDate = e.getStart().get("date").toString();
             startTime = "All day";
             endDate = startDate; // on Google it is instantiated as the next day
@@ -264,7 +247,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     newDate = first.plusDays(i).toString();
                     startTime = "All Day"; // change later to support end time
                 }
-                event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
+                event = new CustomEventFromGoogle(title, newDate, endDate, startTime, endTime, eventID);
                 event.setDescription(eventDescription);
                 addToMap(event);
             }
@@ -288,7 +271,6 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                         if (queryDocumentSnapshots.isEmpty()) {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
-                            cache = new HashMap<>();
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processFirebaseDocument(document);
                             }
@@ -318,7 +300,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     @Override
     public void onEventClickListener(String eventId) {
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
-        i.putExtra("event", this.cache.get(eventId));
+        i.putExtra("eventID", eventId);
         startActivity(i);
     }
 
