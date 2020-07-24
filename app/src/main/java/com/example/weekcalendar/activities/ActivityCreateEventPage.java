@@ -270,7 +270,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         String startTime = HelperMethods.formatTimeTo24H(this.selectStartTime.getText().toString());
         String endTime = HelperMethods.formatTimeTo24H(this.selectEndTime.getText().toString());
         String eventDescription = this.description.getText().toString();
-        Log.d(TAG, "!!!" + Boolean.toString(eventDescription == null) + "!!!!!!!!!!");
 
         Map<String, Object> eventDetails = new HashMap<>();
         eventDetails.put("userID", this.userID);

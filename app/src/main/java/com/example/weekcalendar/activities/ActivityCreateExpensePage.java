@@ -26,6 +26,7 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -42,11 +43,12 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
     private Button date;
     private EditText expenditure;
     private EditText cost;
+    private TextInputLayout spinnerLayout;
+    private TextInputLayout dateLayout;
     private Button dateDialog;
     private DatePickerDialog datePickerDialog;
     private Button addExpenditure;
     private SimpleDateFormat stringToDate = new SimpleDateFormat("yyyy-MM-dd");
-    private SimpleDateFormat dateToString = new SimpleDateFormat("dd MMMMM yyyy");
     private FirebaseFirestore db;
     private FirebaseAuth fAuth;
     private String userID;
@@ -79,11 +81,14 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
 
         addExpenditure = findViewById(R.id.submit_expenditure);
 
+        expenditure = findViewById(R.id.expenditure);
+
         cost = findViewById(R.id.cost);
         cost.setFilters(new InputFilter[] {new DigitsInputFilter(Integer.MAX_VALUE, 2, Double.MAX_VALUE)});
 
-//        View inflatedView = getLayoutInflater().inflate(R.layout.select_time_dialog, null);
-//        time_scroller = inflatedView.findViewById(R.id.date_selector_time);
+        spinnerLayout = findViewById(R.id.spinner_layout);
+
+        dateLayout = findViewById(R.id.date_layout);
 
         Intent i = getIntent();
         String num = i.getStringExtra("expense ID");
@@ -106,14 +111,12 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
                             try {
                                 Date d = stringToDate.parse(date);
                                 CustomDay myDay = new CustomDay(d);
-                                String output = dateToString.format(d);
                                 dateDialog.setText(myDay.getFullDateForView());
                             } catch (ParseException e) {
                                 System.out.println(e);
                             }
 
                             String name = document.get("Name").toString();
-                            expenditure = findViewById(R.id.expenditure);
                             expenditure.setText(name);
 
                             String amount = document.get("Amount").toString();
@@ -129,8 +132,6 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
                 }
             });
 
-
-            System.out.println(num);
             addExpenditure.setOnClickListener(v -> updateExpense(num));
             addExpenditure.setText("Update Expenditure");
         } else {
@@ -153,13 +154,14 @@ public class ActivityCreateExpensePage extends AppCompatActivity implements Adap
     private boolean checkValidInput() {
         String expenseName = ((EditText) findViewById(R.id.expenditure)).getText().toString();
         if (expenseName.equals("")) {
-            Toast.makeText(this, "Please insert expense name!", Toast.LENGTH_SHORT).show();
-        } else if (cost.getText().equals("")) {
-            Toast.makeText(this, "Please insert expense cost!", Toast.LENGTH_SHORT).show();
+            this.expenditure.setError("Please insert expense name!");
+        } else if (cost.getText().toString().equals("")) {
+            Toast.makeText(this, "empty cost", Toast.LENGTH_SHORT).show();
+            this.cost.setError("Please insert expense cost!");
         } else if (date.getText().toString().equals("Select Date")) {
-            Toast.makeText(this, "Please choose date!", Toast.LENGTH_SHORT).show();
+            this.dateLayout.setError("Please choose date!");
         } else if (s.getSelectedItem() == null) {
-            Toast.makeText(this, "Please choose a category!", Toast.LENGTH_SHORT).show();
+            this.spinnerLayout.setError("Please choose a category!");
         } else {
             return true;
         }

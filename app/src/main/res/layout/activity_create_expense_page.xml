@@ -17,91 +17,110 @@
         app:title="Add Expenditure"
         app:titleTextColor="#FFFFFF" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@+id/create_todo_toolbar"
         android:layout_marginTop="0dp"
         android:orientation="vertical">
 
         <EditText
             android:id="@+id/expenditure"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="15dp"
             android:ems="10"
             android:hint="Expenditure"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_conversion_absoluteHeight="45dp"
+            tools:layout_conversion_absoluteWidth="371dp" />
 
         <EditText
             android:id="@+id/cost"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="15dp"
             android:layout_marginTop="10dp"
             android:ems="10"
             android:hint="Cost ($)"
             android:inputType="numberDecimal"
-            android:numeric="decimal" />
+            android:numeric="decimal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/expenditure"
+            tools:layout_conversion_absoluteHeight="45dp"
+            tools:layout_conversion_absoluteWidth="371dp" />
 
-        <Button
-            android:id="@+id/select_date"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/date_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
-            android:text="Select Date"
-            android:textColor="#4A4A4A" />
+            android:gravity="center|top"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cost"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_conversion_absoluteWidth="371dp">
 
-        <Spinner
-            android:id="@+id/category_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
-            android:dropDownWidth="match_parent"
-            android:entries="@array/categories"
-            android:forceHasOverlappingRendering="false"
-            android:overlapAnchor="false"
-            android:padding="5dp"
-            android:spinnerMode="dropdown" />
+            <Button
+                android:id="@+id/select_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:paddingHorizontal="20dp"
+                android:text="Select Date"
+                android:textColor="#4A4A4A"
+                tools:layout_conversion_absoluteHeight="48dp"
+                tools:layout_conversion_absoluteWidth="371dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!--        ^ so that drop down is below the spinner selector-->
 
-        <EditText
-            android:id="@+id/location"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/spinner_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="15dp"
             android:layout_marginTop="10dp"
-            android:ems="10"
-            android:hint="Location"
-            android:inputType="textPersonName" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/date_layout">
 
-        <EditText
-            android:id="@+id/expense_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="10dp"
-            android:editable="true"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="Description"
-            android:lines="3"
-            android:scrollbars="vertical"
-            android:singleLine="false" />
+            <Spinner
+                android:id="@+id/category_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="0dp"
+                android:layout_marginTop="10dp"
+                android:dropDownWidth="match_parent"
+                android:entries="@array/categories"
+                android:forceHasOverlappingRendering="false"
+                android:overlapAnchor="false"
+                android:padding="5dp"
+                android:spinnerMode="dropdown"
+                tools:layout_conversion_absoluteHeight="32dp"
+                tools:layout_conversion_absoluteWidth="371dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/submit_expenditure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop = "200dp"
             android:layout_marginBottom="20dp"
             android:paddingHorizontal="20dp"
-            android:layout_gravity="center"
             android:text="Add Expenditure"
-            android:textColor="#4A4A4A" />
+            android:textColor="#4A4A4A"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_conversion_absoluteHeight="48dp"
+            tools:layout_conversion_absoluteWidth="162dp" />
 
         <!--            <Button-->
         <!--                android:id="@+id/attach_file"-->
@@ -110,6 +129,6 @@
         <!--                android:layout_marginHorizontal="20dp"-->
         <!--                android:layout_marginTop="10dp"-->
         <!--                android:text="Attach File" />-->
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>
