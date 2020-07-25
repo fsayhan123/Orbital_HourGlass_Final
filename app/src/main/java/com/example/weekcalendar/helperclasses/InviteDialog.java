@@ -15,12 +15,12 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
-public class Dialog extends AppCompatDialogFragment {
+public class InviteDialog extends AppCompatDialogFragment {
     private ActivityEventDetailsPage a;
     public EditText allEmails;
 
 
-    public Dialog(ActivityEventDetailsPage activity) {
+    public InviteDialog(ActivityEventDetailsPage activity) {
         this.a = activity;
     }
     @NonNull

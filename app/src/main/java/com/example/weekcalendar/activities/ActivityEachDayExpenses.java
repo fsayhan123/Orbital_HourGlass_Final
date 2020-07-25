@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
-import com.example.weekcalendar.helperclasses.DatabaseHelper;
 import com.example.weekcalendar.adapters.EachDayExpensesExListAdapter;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomExpense;
@@ -28,10 +27,12 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Sets up ActivityEachDayExpenses by querying data from Firebase expenses collection relevant to the user logged in.
+ */
 public class ActivityEachDayExpenses extends AppCompatActivity {
     /**
      * For logging purposes. To easily identify output or logs relevant to current page.
