@@ -51,6 +51,8 @@ public class HelperMethods {
         String[] timeArr = getAMOrPM[0].split(":");
         if (amOrPM.equalsIgnoreCase("PM") && Integer.parseInt(timeArr[0]) < 12) {
             timeArr[0] = String.valueOf(Integer.parseInt(timeArr[0]) + 12);
+        } else if (amOrPM.equalsIgnoreCase("AM") && Integer.parseInt(timeArr[0]) == 12) {
+            timeArr[0] = "00";
         }
         if (amOrPM.equalsIgnoreCase("AM") && timeArr[0].length() == 1) {
             timeArr[0] = "0" + timeArr[0];

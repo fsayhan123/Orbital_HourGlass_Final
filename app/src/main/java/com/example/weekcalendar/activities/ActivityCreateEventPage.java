@@ -409,11 +409,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                Log.d(TAG, Integer.toString(hourOfDay));
+                Log.d(TAG, "!!!!!" + Integer.toString(hourOfDay));
                 String end = "AM";
-                if (hourOfDay >= 12) {
+                if (hourOfDay > 12) {
                     hourOfDay -= 12;
                     end = "PM";
+                } else if (hourOfDay == 0) {
+                    hourOfDay = 12;
                 }
                 b.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute) + " " + end);
             }

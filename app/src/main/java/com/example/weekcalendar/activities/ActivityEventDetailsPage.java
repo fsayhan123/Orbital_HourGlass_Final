@@ -158,7 +158,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
 
         this.inviteEvent = findViewById(R.id.invite_event);
         if (this.googleAcct != null) {
-            this.overallLayout.removeView(this.inviteEvent);
+            this.layout.removeView(this.inviteEvent);
         } else {
             this.inviteEvent.setOnClickListener(v -> eventInvite());
         }
