@@ -27,6 +27,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -78,6 +79,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
     private TextView monthYear;
 
+    // FloatingActionButton to link to ActivityCreateEvent
+    private FloatingActionButton floatingCreateEvent;
+
     private static Date today = new Date();
     private String[] splitDate = FULL_DATE.format(today).split("-");
     private String month = splitDate[1];
@@ -96,7 +100,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private MainCalendarAdapter mAdapter;
     private Map<String, MainCalendarAdapter> existingAdapters = new HashMap<>();
     private Set<CustomEvent> checkExist = new HashSet<>();
-    private List<CustomEvent> LIST_WITH_EMPTY_CUSTOMEVENT = new ArrayList<>();
+    private final List<CustomEvent> LIST_WITH_EMPTY_CUSTOMEVENT = new ArrayList<>();
     private final CustomEventFromFirebase EMPTY_CUSTOMEVENT = new CustomEventFromFirebase("No Events Today!", "", "", "", "", "");
     private final MainCalendarAdapter EMPTY_ADAPTER = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
 
@@ -124,9 +128,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private static final List<com.google.api.services.calendar.model.Event> EMPTY_EVENTS_LIST = new ArrayList<>();
     private GoogleSignInAccount acct;
 
-    // Store reference copy
-    private Map<String, CustomEvent> cache = new HashMap<>();
-
     // Months
 
     @Override
@@ -147,7 +148,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         this.mRecyclerView.setLayoutManager(manager);
         this.LIST_WITH_EMPTY_CUSTOMEVENT.add(this.EMPTY_CUSTOMEVENT);
         this.mAdapter = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
-//        this.mRecyclerView.setAdapter(this.mAdapter);
 
         this.calPrev.add(Calendar.MONTH, -2);
         this.calPrev.set(Calendar.DATE, calPrev.getActualMaximum(Calendar.DAY_OF_MONTH));
@@ -155,6 +155,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         this.calNext.add(Calendar.MONTH, 2);
         this.calNext.set(Calendar.DATE, 1);
         this.dateNext = this.calNext.getTime();
+
+        this.floatingCreateEvent = findViewById(R.id.create_event);
+        this.floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
 
         this.compactCalendarView = findViewById(R.id.compact_calendar_view);
         this.compactCalendarView.setFirstDayOfWeek(Calendar.SUNDAY);
@@ -252,6 +255,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 //                System.out.println("Error unable to retrieve link");
 //            }
 //        });
+    }
+
+    private void moveToCreateEventPage() {
+        Intent intent = new Intent(this, ActivityCreateEventPage.class);
+        startActivity(intent);
     }
 
     private void fetch3MonthEventsFromFirebase(Date curr) {
@@ -460,22 +468,17 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             currMonth.put(day, temp);
             this.mapOfMonths.put(month, currMonth);
         }
-        if (this.cache.get(event.getId()) == null) {
-            this.cache.put(event.getId(), event);
-        }
-        Log.d(TAG, "added " + event.getTitle() + " to map");
     }
 
     @Override
     public void onEventClickListener(String eventID) {
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
-        i.putExtra("event", this.cache.get(eventID));
+        i.putExtra("eventID", eventID);
         startActivity(i);
     }
 
     private class RequestAuth extends AsyncTask<Date, Void, Void> {
         private List<com.google.api.services.calendar.model.Event> myList;
-        private Set<com.google.api.services.calendar.model.Event> fetched;
 
         @Override
         protected Void doInBackground(Date... dates) {

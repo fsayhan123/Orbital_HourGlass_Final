@@ -46,15 +46,30 @@
             android:hint="Description"
             android:inputType="textPersonName" />
 
-        <Button
-            android:id="@+id/select_date"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/date_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|center_horizontal"
-            android:layout_marginHorizontal="100dp"
-            android:layout_marginTop="10dp"
-            android:text="Select Date"
-            android:textColor="#4A4A4A" />
+            android:layout_weight="1"
+            android:gravity="bottom|center_horizontal"
+            android:textAlignment="gravity"
+            app:counterEnabled="false"
+            app:errorEnabled="true"
+            app:helperTextEnabled="false"
+            app:hintAnimationEnabled="false"
+            app:hintEnabled="false"
+            app:passwordToggleEnabled="false">
+
+            <Button
+                android:id="@+id/select_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|center_horizontal"
+                android:paddingHorizontal="20dp"
+                android:text="Select Date"
+                android:textColor="#4A4A4A" />
+        </com.google.android.material.textfield.TextInputLayout>
 
 
     </LinearLayout>

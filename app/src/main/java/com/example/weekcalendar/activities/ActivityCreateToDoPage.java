@@ -17,6 +17,7 @@ import com.example.weekcalendar.helperclasses.MyDateDialog;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.customclasses.CustomToDo;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,6 +33,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     private DatePickerDialog datePickerDialog;
     private TextView toDoTitle;
     private Button createToDo;
+    private TextInputLayout dateLayout;
 
     // Firebase variables
     private FirebaseAuth fAuth;
@@ -58,6 +60,8 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
         this.toDoTitle = findViewById(R.id.todo_description);
 
+        this.dateLayout = findViewById(R.id.date_layout);
+
         this.createToDo = findViewById(R.id.create_todo_button);
         this.createToDo.setOnClickListener(v -> createToDo());
 
@@ -81,10 +85,10 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     }
 
     private boolean checkFields() {
-        if (this.selectDate.getText().toString().equals("Select Date")) {
-            Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show();
-        } else if (this.toDoTitle.getText().toString().equals("")) {
-            Toast.makeText(this, "Please insert to do title", Toast.LENGTH_SHORT).show();
+        if (this.toDoTitle.getText().toString().equals("")) {
+            this.toDoTitle.setError("Please insert a description for the to do item!");
+        } else if (this.selectDate.getText().toString().equals("Select Date")) {
+            this.dateLayout.setError("Please choose a date!");
         } else {
             return true;
         }
@@ -119,7 +123,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         details.put("date", HelperMethods.formatDateWithDash(date));
         details.put("title", title);
         details.put("completed", completed);
-        if (this.toDo.getEventID() != null) {
+        if (this.toDo != null) {
             details.put("eventID", this.toDo.getEventID());
         }
         return details;
