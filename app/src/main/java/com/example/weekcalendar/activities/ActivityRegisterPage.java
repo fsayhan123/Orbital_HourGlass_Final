@@ -108,7 +108,7 @@ public class ActivityRegisterPage extends AppCompatActivity {
                                     Log.d(TAG, "onFailure: " + e.toString());
                                 }
                             });
-                            startActivity(new Intent(getApplicationContext(), ActivityUpcomingPage.class));
+                            startActivity(new Intent(getApplicationContext(), ActivityMainCalendar.class));
                         } else {
                             Toast.makeText(ActivityRegisterPage.this, "Error! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);

@@ -93,6 +93,7 @@ public class SetupNavDrawer {
                 case R.id.logout_button:
                     Toast.makeText(a, "Logout",Toast.LENGTH_SHORT).show();
                     mGoogleSignInClient.signOut();
+                    FirebaseAuth.getInstance().signOut();
                     Intent i4 = new Intent(a, ActivityLoginPage.class);
                     a.startActivity(i4);
                     break;

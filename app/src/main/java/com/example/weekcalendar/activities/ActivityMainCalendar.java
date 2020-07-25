@@ -210,7 +210,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 new ActivityMainCalendar.RequestAuth().execute(today).get();
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         } else if (this.fAuth.getCurrentUser() != null){
             this.fStore = FirebaseFirestore.getInstance();
@@ -311,7 +311,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     }
 
     private void firebaseQuery(String min, String max) {
-        Toast.makeText(this, "querying from " + min + " to " + max, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "querying from " + min + " to " + max, Toast.LENGTH_LONG).show();
         this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
                 .whereLessThan("startDate", max)
