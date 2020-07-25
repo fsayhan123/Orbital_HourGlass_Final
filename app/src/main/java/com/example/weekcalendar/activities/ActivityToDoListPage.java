@@ -102,6 +102,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         String ID = document.getId();
         String date = (String) document.get("date");
         String title = (String) document.get("title");
+        String eventID = (String) document.get("eventID");
         boolean completed = (boolean) document.get("completed");
         Date d = null;
         try {
@@ -110,7 +111,13 @@ public class ActivityToDoListPage extends AppCompatActivity {
             e.printStackTrace();
         }
         CustomDay day = new CustomDay(d);
-        CustomToDo toDo = new CustomToDo(ID, title, date, completed);
+        CustomToDo toDo;
+        if (eventID != null) {
+            toDo = new CustomToDo(ID, eventID, title, date, completed);
+        } else {
+            toDo = new CustomToDo(ID, title, date, completed);
+
+        }
         addToMap(day, toDo);
     }
 
@@ -163,12 +170,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
                 deleteToDo();
                 item.setIcon(R.drawable.ic_baseline_delete_24_transparent);
                 canDelete = false;
-                Toast.makeText(this, "false", Toast.LENGTH_SHORT).show();
-
             } else {
                 canDelete = true;
                 item.setIcon(R.drawable.ic_baseline_delete_24);
-                Toast.makeText(this, "true", Toast.LENGTH_SHORT).show();
             }
         }
         return super.onOptionsItemSelected(item);
@@ -181,22 +185,27 @@ public class ActivityToDoListPage extends AppCompatActivity {
 
     public void pushToDo() {
         Set<Pair<Long, Long>> toggledItems = this.mAdapter.getToggledItems();
+        long offset = 0;
         for (Pair<Long, Long> pair : toggledItems) {
             int groupPos = (int) (long) pair.first;
             int childPos = (int) (long) pair.second;
             CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
-            this.fStore.collection("todo").document(todo.getID()).set(customToDoToMap(todo));
-            Log.d(TAG, todo.getTitle() + " updated");
+            this.fStore.collection("todo")
+                    .document(todo.getID())
+                    .set(customToDoToMap(todo, offset));
+            offset++;
         }
     }
 
-    public Map<String, Object> customToDoToMap(CustomToDo todo) {
+    public Map<String, Object> customToDoToMap(CustomToDo todo, long offset) {
         Map<String, Object> todoDetails = new HashMap<>();
         todoDetails.put("userID", userID);
         todoDetails.put("date", todo.getDate());
         todoDetails.put("title", todo.getTitle());
         todoDetails.put("completed", todo.getCompleted());
+        todoDetails.put("timestamp", System.currentTimeMillis() + offset);
         if (todo.getEventID() != null) {
+            Toast.makeText(this, "eventID", Toast.LENGTH_SHORT).show();
             todoDetails.put("eventID", todo.getEventID());
         }
         return todoDetails;
@@ -218,8 +227,10 @@ public class ActivityToDoListPage extends AppCompatActivity {
                     .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
                     .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
         }
-        this.mAdapter.resetCheckBoxes();
-        setItems.clear();
+        if (iterable.size() > 0) {
+            this.mAdapter.resetCheckBoxes();
+            setItems.clear();
+        }
     }
 
     @Override

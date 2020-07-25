@@ -98,8 +98,6 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
         fetchDataFromFirebase(this.docID);
 
-
-
         this.submitButton = findViewById(R.id.submit_button);
         this.submitButton.setOnClickListener(v -> submitChoices());
 

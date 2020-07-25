@@ -17,10 +17,11 @@
         app:titleTextColor="#FFFFFF" />
 
     <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_below="@+id/event_details">
+        android:layout_below="@+id/event_details"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/event_title"
@@ -51,6 +52,16 @@
             android:text="Event Time"
             android:textColor="#4A4A4A"
             android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/event_participants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="10dp"
+            android:text="Participants"
+            android:textColor="#4a4a4a"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/event_description"

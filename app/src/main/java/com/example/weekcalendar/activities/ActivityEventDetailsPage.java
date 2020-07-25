@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,12 +73,17 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
 
+    private LinearLayout layout;
     private TextView eventTitle;
     private TextView eventDate;
     private TextView eventTime;
+    private TextView eventParticipants;
     private TextView eventDescription;
     private RecyclerView allToDos;
+    private Button inviteEvent;
     private EventDetailsToDoAdapter toDoAdapter;
+
+    private boolean isMyEvent = true;
 
     private CustomEvent event;
     private List<CustomToDo> listOfToDos;
@@ -132,16 +138,20 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
             startActivity(new Intent(this, ActivityMainCalendar.class));
         });
 
+        this.layout = findViewById(R.id.layout);
+
         this.eventTitle = findViewById(R.id.event_title);
 
         this.eventDate = findViewById(R.id.event_date);
 
         this.eventTime = findViewById(R.id.event_time);
 
+        this.eventParticipants = findViewById(R.id.event_participants);
+
         this.eventDescription = findViewById(R.id.event_description);
 
-        Button inviteEvent = findViewById(R.id.invite_event);
-        inviteEvent.setOnClickListener(v -> eventInvite());
+        this.inviteEvent = findViewById(R.id.invite_event);
+        this.inviteEvent.setOnClickListener(v -> eventInvite());
 
         this.allToDos = findViewById(R.id.all_todo);
         LinearLayoutManager manager = new LinearLayoutManager(ActivityEventDetailsPage.this);
@@ -163,8 +173,18 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.three_dot_menu, menu);
+        MenuInflater inflater = getMenuInflater();inflater.inflate(R.menu.three_dot_menu, menu);
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (!this.isMyEvent) {
+            menu.findItem(R.id.edit_event_topR).setVisible(false);
+        }
         return true;
     }
 
@@ -205,10 +225,14 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 .delete()
                 .addOnSuccessListener(v -> {
                     Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                    Intent intent = new Intent(this, ActivityUpcomingPage.class);
+                    Intent intent = new Intent(this, ActivityMainCalendar.class);
                     startActivity(intent);
                 })
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    }
+
+    private void deleteAssociatedToDos() {
+
     }
 
     /**
@@ -256,6 +280,17 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         String endTime = (String) doc.get("endTime");
         String docID = doc.getId();
         String description = (String) doc.get("description");
+        String hostID = (String) doc.get("userID");
+        ArrayList<String> participants = (ArrayList<String>) doc.get("participants");
+        if (participants.size() > 1) {
+            fillInParticipants(participants);
+        } else {
+            this.layout.removeView(this.eventParticipants);
+        }
+        if (!hostID.equals(this.userID)) {
+            this.layout.removeView(this.inviteEvent);
+            this.isMyEvent = false;
+        }
         CustomEventFromFirebase e = new CustomEventFromFirebase(eventTitle, startDate, endDate, startTime, endTime, docID);
         e.setDescription(description);
         return e;
@@ -281,6 +316,43 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         } else {
             this.eventDescription.setText(event.getDescription());
         }
+    }
+
+    /**
+     * Gets the names of the participants involved in this event and fills in TextView.
+     * @param participants array of email of participants involved in this event
+     */
+    private void fillInParticipants(ArrayList<String> participants) {
+        StringBuilder s = new StringBuilder("Participants: ");
+        for (String uid : participants) {
+            getUserFName(uid, s);
+        }
+    }
+
+    /**
+     * Queries name of user with specified userID as passed into uid parameter.
+     * @param uid String of userID to query from Firebase users collection
+     * @param s Object reference to StringBuilder object
+     */
+    private void getUserFName(String uid, StringBuilder s) {
+        this.fStore.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String name = (String) documentSnapshot.get("fName");
+                        Log.d(TAG, "Found user " + uid + " name: " + name);
+                        s.append(name).append(", ");
+                        eventParticipants.setText(s.substring(0, s.length() - 2));
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(ActivityEventDetailsPage.this, "Error finding user " + uid, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     /**
@@ -416,8 +488,12 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
      */
     private void pushToDo() {
         Set<CustomToDo> toggled = this.toDoAdapter.getMyToggledToDos();
+        long offset = 0;
         for (CustomToDo todo : toggled) {
-            this.fStore.collection("todo").document(todo.getID()).set(customToDoToMap(todo));
+            this.fStore.collection("todo")
+                    .document(todo.getID())
+                    .set(customToDoToMap(todo, offset));
+            offset++;
         }
     }
 
@@ -427,13 +503,14 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
      * @param customToDo CustomToDo item to convert
      * @return Map containing details of the CustomToDo item
      */
-    private Map<String, Object> customToDoToMap(CustomToDo customToDo) {
+    private Map<String, Object> customToDoToMap(CustomToDo customToDo, long offset) {
         Map<String, Object> todoDetails = new HashMap<>();
         todoDetails.put("userID", userID);
         todoDetails.put("date", customToDo.getDate());
         todoDetails.put("eventID", this.event.getId());
         todoDetails.put("title", customToDo.getTitle());
         todoDetails.put("completed", customToDo.getCompleted());
+        todoDetails.put("timestamp", System.currentTimeMillis() + offset);
         return todoDetails;
     }
 

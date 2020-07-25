@@ -17,11 +17,13 @@ import com.example.weekcalendar.helperclasses.MyDateDialog;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.customclasses.CustomToDo;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +44,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
     private CollectionReference c;
 
     private CustomToDo toDo;
+    private ArrayList<String> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,19 +102,30 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
          if (checkFields()) {
              Map<String, Object> details = customToDoToMap(false);
              this.c.add(details)
-                     .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                     .addOnSuccessListener(v -> {
+                         Log.d(TAG, "DocumentSnapshot successfully written!");
+                         Intent i = new Intent(this, ActivityToDoListPage.class);
+                         startActivity(i);
+                     })
                      .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-             Intent i = new Intent(this, ActivityToDoListPage.class);
-             startActivity(i);
         }
     }
 
     public void updateToDo() {
         if (checkFields()) {
             Map<String, Object> details = customToDoToMap(this.toDo.getCompleted());
-            this.fStore.collection("todo").document(this.toDo.getID()).set(details);
-            Intent intent = new Intent(this, ActivityToDoListPage.class);
-            startActivity(intent);
+            this.fStore.collection("todo")
+                    .document(this.toDo.getID())
+                    .update(details)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                            Intent intent = new Intent(ActivityCreateToDoPage.this, ActivityToDoListPage.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
         }
     }
 
@@ -123,6 +137,7 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         details.put("date", HelperMethods.formatDateWithDash(date));
         details.put("title", title);
         details.put("completed", completed);
+        details.put("timestamp", System.currentTimeMillis());
         if (this.toDo != null) {
             details.put("eventID", this.toDo.getEventID());
         }

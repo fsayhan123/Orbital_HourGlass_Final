@@ -279,12 +279,15 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         eventDetails.put("startTime", startTime);
         eventDetails.put("endTime", endTime);
         eventDetails.put("description", eventDescription);
-        eventDetails.put("participants", Arrays.asList(this.userID));
+        if (this.event == null) {
+            eventDetails.put("participants", Arrays.asList(this.userID));
+        }
         return eventDetails;
     }
 
     private List<Map<String, Object>> getToDoDetails() {
         List<Map<String, Object>> allToDoDetails = new ArrayList<>();
+        long offset = 0;
         for (EditText e : this.todos) {
             String toDo = e.getText().toString();
 
@@ -295,8 +298,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 toDoDetails.put("date", startDate);
                 toDoDetails.put("title", toDo);
                 toDoDetails.put("completed", false);
-                toDoDetails.put("timestamp", System.currentTimeMillis());
+                toDoDetails.put("timestamp", System.currentTimeMillis() + offset);
                 allToDoDetails.add(toDoDetails);
+                offset++;
             }
         }
         return allToDoDetails;
@@ -324,8 +328,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                             String newTitle = (String) todoDetails.get(i).get("title");
                             thisToDoDetails.put("title", newTitle);
                             toDoDocRef.update(thisToDoDetails)
-                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
-                                    .addOnFailureListener(e -> Log.w(TAG, "*****Error writing document", e));
+                                    .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
 
                         for (int i = originalToDos.size(); i < todoDetails.size(); i++) {
@@ -333,15 +337,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                             nextToDo.put("eventID", this.event.getId());
                             cToDo.add(nextToDo)
                                     .addOnSuccessListener(docRef2 -> {
-                                        Log.d(TAG, "*****DocumentSnapshot successfully written!");
-                                        Intent intent = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
-                                        intent.putExtra("eventID", event.getId());
-                                        startActivity(intent);
+                                        Log.d(TAG, "DocumentSnapshot successfully written!");
                                     })
-                                    .addOnFailureListener(e -> Log.w(TAG, "*****Error writing document", e));
+                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
-
+                        Intent intent = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                        intent.putExtra("eventID", event.getId());
+                        startActivity(intent);
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
         }
@@ -361,13 +364,13 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                             cToDo.add(todo)
                                     .addOnSuccessListener(docRef2 -> {
                                         Log.d(TAG, "DocumentSnapshot successfully written!");
-                                        Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
-                                        i.putExtra("eventID", this.eventID);
-                                        startActivity(i);
                                     })
                                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
                         }
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+                        Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                        i.putExtra("eventID", this.eventID);
+                        startActivity(i);
                     })
                     .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
         }

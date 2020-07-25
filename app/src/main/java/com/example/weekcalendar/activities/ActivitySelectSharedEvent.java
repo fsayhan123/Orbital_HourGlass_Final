@@ -141,7 +141,7 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
             eventDetails.put("endDate", dateFormatted);
             eventDetails.put("startTime", startTime);
             eventDetails.put("endTime", endTime);
-            eventDetails.put("description", "Description");
+            eventDetails.put("description", "");
             eventDetails.put("participants", users);
 
 

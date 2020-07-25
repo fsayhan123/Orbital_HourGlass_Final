@@ -15,5 +15,6 @@
         android:longClickable="true"
         android:paddingLeft="30dp"
         android:text="TextView"
+        android:textColor="#4a4a4a"
         android:textSize="20sp" />
 </LinearLayout>
