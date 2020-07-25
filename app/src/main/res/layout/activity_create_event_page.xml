@@ -17,22 +17,21 @@
         app:title="Create Event"
         app:titleTextColor="#FFFFFF" />
 
-    <Button
-        android:id="@+id/create_event_button"
+    <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:paddingHorizontal="20dp"
-        android:text="Create Event"
-        android:textColor="#4A4A4A" />
+        android:layout_below="@+id/create_event_toolbar">
 
-    <LinearLayout
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/create_event_toolbar">
+
+
+        <LinearLayout
         android:id="@+id/event_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/create_event_toolbar"
         android:orientation="vertical">
 
         <EditText
@@ -192,13 +191,9 @@
             android:id="@+id/add_todo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ScrollViewID"
+            android:layout_below="@id/fill_in_todos"
             android:text="add"
             android:textColor="#4A4A4A" />
-
-        <ScrollView android:id="@+id/ScrollViewID"
-            android:layout_width="fill_parent"
-            android:layout_height="200dp">
 
         <LinearLayout
             android:id="@+id/fill_in_todos"
@@ -234,8 +229,22 @@
             </LinearLayout>
 
         </LinearLayout>
-        </ScrollView>
 
     </RelativeLayout>
+        <Button
+            android:id="@+id/create_event_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/all_todo"
+            android:paddingHorizontal="20dp"
+            android:text="Create Event"
+            android:textColor="#4A4A4A" />
+    </RelativeLayout>
+
+    </ScrollView>
+
+
 
 </RelativeLayout>
