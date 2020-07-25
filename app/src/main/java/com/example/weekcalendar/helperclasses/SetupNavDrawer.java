@@ -98,7 +98,7 @@ public class SetupNavDrawer {
                     a.startActivity(i4);
                     break;
                 case R.id.main_calendar_button:
-                    Toast.makeText(a, "Main calendar",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(a, "Main Calendar",Toast.LENGTH_SHORT).show();
                     Intent i7 = new Intent(a, ActivityMainCalendar.class);
                     a.startActivity(i7);
                     break;

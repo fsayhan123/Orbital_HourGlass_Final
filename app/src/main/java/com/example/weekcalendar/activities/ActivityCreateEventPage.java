@@ -495,7 +495,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             super.onPostExecute(aBoolean);
             if (aBoolean) {
                 Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
-                i.putExtra("eventID", event.getId());
+                assert eventID != null;
+                i.putExtra("eventID", eventID);
                 startActivity(i);
             }
         }
@@ -520,12 +521,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 e.setEnd(end);
                 String calID = "primary";
                 Event response = service.events().insert(calID, e).execute();
+                eventID = response.getId();
 
                 List<Map<String, Object>> allToDoDetails = getToDoDetails();
                 for (Map<String, Object> todo : allToDoDetails) {
                     Log.d(TAG, "ID IS " + response.getId());
                     todo.put("eventID", response.getId());
-                    eventID = response.getId();
                     cToDo.add(todo)
                             .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                             .addOnFailureListener(td -> Log.w(TAG, "Error writing todo document", td));

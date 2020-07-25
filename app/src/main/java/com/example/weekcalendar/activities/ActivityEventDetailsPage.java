@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +74,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
 
+    private RelativeLayout overallLayout;
     private LinearLayout layout;
     private TextView eventTitle;
     private TextView eventDate;
@@ -103,7 +105,6 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final Set<String> SCOPES = CalendarScopes.all();
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
     private GoogleSignInAccount googleAcct;
-    private ActivityEventDetailsPage.RequestAuth task = new ActivityEventDetailsPage.RequestAuth();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +123,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         Intent intent = getIntent();
         String eventID = intent.getStringExtra("eventID");
 
-        fetchFirebaseEventDetails(eventID);
+        fetchEventDetails(eventID);
         fetchToDos(eventID);
     }
 
@@ -138,6 +139,8 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
             startActivity(new Intent(this, ActivityMainCalendar.class));
         });
 
+        this.overallLayout = findViewById(R.id.overall_layout);
+
         this.layout = findViewById(R.id.layout);
 
         this.eventTitle = findViewById(R.id.event_title);
@@ -147,11 +150,18 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         this.eventTime = findViewById(R.id.event_time);
 
         this.eventParticipants = findViewById(R.id.event_participants);
+        if (this.googleAcct != null) {
+            this.layout.removeView(this.eventParticipants);
+        }
 
         this.eventDescription = findViewById(R.id.event_description);
 
         this.inviteEvent = findViewById(R.id.invite_event);
-        this.inviteEvent.setOnClickListener(v -> eventInvite());
+        if (this.googleAcct != null) {
+            this.overallLayout.removeView(this.inviteEvent);
+        } else {
+            this.inviteEvent.setOnClickListener(v -> eventInvite());
+        }
 
         this.allToDos = findViewById(R.id.all_todo);
         LinearLayoutManager manager = new LinearLayoutManager(ActivityEventDetailsPage.this);
@@ -197,7 +207,8 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
             editEvent();
         } else if (item.getItemId() == R.id.delete_event_topR) {
             if (this.googleAcct != null) {
-                this.task.execute(this.event.getId(), "delete");
+                ActivityEventDetailsPage.RequestAuth task = new ActivityEventDetailsPage.RequestAuth();
+                task.execute(this.event.getId(), "delete");
             } else {
                 deleteFirebaseEvent();
             }
@@ -232,17 +243,19 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     }
 
     private void deleteAssociatedToDos() {
-
+//        this.fStore.collection("todo")
+//                .whereEqualTo("eventID", this.event.getId())
     }
 
     /**
-     * Fetches the event document with ID as specified by parameter.
-     * @param eventID String ID of the Firebase document in events collection
+     * Fetches the event with ID as specified by parameter.
+     * @param eventID String ID of the event
      */
-    private void fetchFirebaseEventDetails(String eventID) {
+    private void fetchEventDetails(String eventID) {
         if (this.googleAcct != null) {
             try {
-                this.task.execute(eventID, "query").get();
+                ActivityEventDetailsPage.RequestAuth task = new ActivityEventDetailsPage.RequestAuth();
+                task.execute(eventID, "query").get();
             } catch (ExecutionException | InterruptedException ex) {
                 ex.printStackTrace();
             }
