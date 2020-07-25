@@ -179,6 +179,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="15dp">
 
+
         <TextView
             android:id="@+id/todo_title"
             android:layout_width="wrap_content"
@@ -191,9 +192,13 @@
             android:id="@+id/add_todo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/fill_in_todos"
+            android:layout_below="@id/ScrollViewID"
             android:text="add"
             android:textColor="#4A4A4A" />
+
+        <ScrollView android:id="@+id/ScrollViewID"
+            android:layout_width="fill_parent"
+            android:layout_height="200dp">
 
         <LinearLayout
             android:id="@+id/fill_in_todos"
@@ -229,6 +234,7 @@
             </LinearLayout>
 
         </LinearLayout>
+        </ScrollView>
 
     </RelativeLayout>
 

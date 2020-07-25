@@ -41,6 +41,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -142,9 +143,13 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                             emails.add(respondentID);
                             Map<String, Object> data = new HashMap<>();
                             data.put("dateOfNotification", HelperMethods.getCurrDate());
+                            Collections.sort(ActivityCreateSharedEvent.this.selectedDates);
+                            String startDate = ActivityCreateSharedEvent.this.selectedDates.get(0).toString();
+                            String endDate = ActivityCreateSharedEvent.this.selectedDates.get(ActivityCreateSharedEvent.this.selectedDates.size() - 1).toString();
+                            String title = ActivityCreateSharedEvent.this.title.getText().toString();
 
                             // TO CHANGE
-                            data.put("message", "Hello, this is an invitation to a shared event"); // change with the necessary details
+                            data.put("message", String.format("Shared Event Title: %s, Start Date: %s, End Date: %s ", title, startDate, endDate)); // change with the necessary details
                             // TO CHANGE END
 
                             data.put("hostID", userID);

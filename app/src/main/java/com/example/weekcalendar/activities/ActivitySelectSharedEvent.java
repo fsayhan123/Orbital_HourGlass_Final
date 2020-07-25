@@ -1,6 +1,7 @@
 package com.example.weekcalendar.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -83,6 +84,18 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
         this.mRecyclerView.setHasFixedSize(true);
         this.layoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(layoutManager);
+
+        //Setup toolbar
+        Toolbar tb = findViewById(R.id.create_shared_event_toolbar);
+        setSupportActionBar(tb);
+
+        // sets up back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityPendingSharedEvent.class));
+        });
 
         System.out.println("Hello 2");
         this.CustomResponseArrayList = new ArrayList<>();
