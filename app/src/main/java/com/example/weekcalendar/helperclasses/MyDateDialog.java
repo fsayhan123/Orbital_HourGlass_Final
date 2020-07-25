@@ -58,6 +58,12 @@ public class MyDateDialog extends AppCompatDialogFragment {
     }
 
     public interface MyDateDialogEventListener {
+
+        /**
+         * Changes text on the select date button to reflect user's choice.
+         * @param d CustomDay user chose
+         * @param b button to set text on
+         */
         void applyDateText(CustomDay d, Button b);
     }
 }

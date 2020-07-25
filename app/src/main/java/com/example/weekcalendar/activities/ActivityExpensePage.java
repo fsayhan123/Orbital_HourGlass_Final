@@ -5,12 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.example.weekcalendar.helperclasses.DatabaseHelper;
 import com.example.weekcalendar.adapters.ExpenseRecyclerViewAdapter;
 import com.example.weekcalendar.helperclasses.MyOnDateClickListener;
 import com.example.weekcalendar.R;
@@ -30,80 +29,103 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
+/**
+ * Sets up ActivityExpensePage by querying data from Firebase expenses collection relevant to the user logged in.
+ */
 public class ActivityExpensePage extends AppCompatActivity implements MyOnDateClickListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
+    private static final String TAG = ActivityExpensePage.class.getSimpleName();
+
     /*
     RecyclerView and associated adapter, and List<CustomDay> to populate outer RecyclerView (just the dates),
     and a Map with key-value pair of CustomDay and a List<CustomExpenseCategory>, representing
     the spending in each category each day.
      */
-    private static final String TAG = ActivityExpensePage.class.getSimpleName();
-
-    private List<CustomDay> daysWithExpenditure;
+    private List<CustomDay> listOfDaysWithExpenditure;
+    private Set<CustomDay> setOfDaysWithExpenditure;
     private RecyclerView expensesByDay;
     private ExpenseRecyclerViewAdapter dayExpenseAdapter;
-    private LinearLayoutManager manager;
-    //private List<CustomExpenseCategory> customExpenseCategoriesList = new ArrayList<>();
-    private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay = new HashMap<>();
+    private Map<CustomDay, List<CustomExpenseCategory>> spendingEachDay;
 
-    // FloatingActionButton to link to ActivityCreateExpense
-    private FloatingActionButton floatingAddExpense;
-
-    private SetupNavDrawer navDrawer;
-
-    //Firebase fields
+    /**
+     * Firebase information
+     */
     private FirebaseFirestore db;
-    private FirebaseAuth fAuth;
     private String userID;
 
+    /**
+     * DateFormat to format Dates and Strings
+     */
+    @SuppressLint("SimpleDateFormat")
     private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
+    /**
+     * Sets up ActivityExpensePage when it is opened.
+     * First, sets up Firebase information.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling getSpendingDays() method.
+     * @param savedInstanceState saved state of current page, if applicable.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_page);
 
-        //Setup firebase fields
         this.db = FirebaseFirestore.getInstance();
-        this.fAuth = FirebaseAuth.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
 
         getSpendingDays();
 
-        this.expensesByDay = findViewById(R.id.day_by_day_expense_view);
-        dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
-                ActivityExpensePage.this, this);
-
-        this.manager = new LinearLayoutManager(ActivityExpensePage.this);
-        this.expensesByDay.setHasFixedSize(true);
-        this.expensesByDay.setLayoutManager(this.manager);
-        expensesByDay.setAdapter(dayExpenseAdapter);
-
-        this.floatingAddExpense = findViewById(R.id.to_add_expense);
-        this.floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
-
-        // Navigation pane drawer setup
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.expenses_toolbar));
-        this.navDrawer.setupNavDrawerPane();
-
-        for (CustomDay day : spendingEachDay.keySet()) {
-            List<CustomExpenseCategory> list = spendingEachDay.get(day);
-            Log.d(TAG, list.toString());
-        }
+        setupXMLItems();
     }
 
+    /**
+     * Sets up layout for ActivityExpensePage.
+     */
+    private void setupXMLItems() {
+        this.expensesByDay = findViewById(R.id.day_by_day_expense_view);
+
+        LinearLayoutManager manager = new LinearLayoutManager(ActivityExpensePage.this);
+        this.expensesByDay.setHasFixedSize(true);
+        this.expensesByDay.setLayoutManager(manager);
+        this.expensesByDay.setAdapter(this.dayExpenseAdapter);
+
+        FloatingActionButton floatingAddExpense = findViewById(R.id.to_add_expense);
+        floatingAddExpense.setOnClickListener(v -> moveToAddExpensePage());
+
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.expenses_toolbar));
+        navDrawer.setupNavDrawerPane();
+    }
+
+    /**
+     * Creates and starts intent when the FloatingActionButton in the XML is clicked. Links to
+     * ActivityCreateExpensePage.
+     */
     private void moveToAddExpensePage() {
         Intent i = new Intent(this, ActivityCreateExpensePage.class);
         startActivity(i);
     }
 
-    // Returns a List<CustomDay> that user has a spending;
+    /**
+     * Initialises data structures required to pass into layout adapters.
+     * Also queries expense data from Firebase database which are relevant to the user, ordered by date.
+     * Populates data structures, and initialises layout adapters.
+     */
     private void getSpendingDays() {
-        this.daysWithExpenditure = new ArrayList<>();
+        this.setOfDaysWithExpenditure = new HashSet<>();
+        this.spendingEachDay = new HashMap<>();
         this.db.collection("expense")
                 .whereEqualTo("userID", this.userID)
                 .orderBy("Date")
@@ -112,16 +134,19 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (queryDocumentSnapshots.isEmpty()) {
-                            Log.d("TAG", "onSuccess: LIST EMPTY");
+                            Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
+                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processDocument(document);
                             }
                             for (QueryDocumentSnapshot document: queryDocumentSnapshots) {
-                                prepHashMap(daysWithExpenditure);
+                                prepHashMap(setOfDaysWithExpenditure);
                                 prepSpending(document);
                             }
-                            dayExpenseAdapter = new ExpenseRecyclerViewAdapter(daysWithExpenditure, spendingEachDay,
+                            listOfDaysWithExpenditure = new ArrayList<>(setOfDaysWithExpenditure);
+                            Collections.sort(listOfDaysWithExpenditure);
+                            dayExpenseAdapter = new ExpenseRecyclerViewAdapter(listOfDaysWithExpenditure, spendingEachDay,
                                     ActivityExpensePage.this, ActivityExpensePage.this);
                             expensesByDay.setAdapter(dayExpenseAdapter);
                         }
@@ -130,29 +155,36 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e("TAG", "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }
 
-    //Get the days with expenditure and add them into the list
+    /**
+     * Takes in a Firebase expense collection document and retrieves relevant data of each day
+     * from the document.
+     * Thereafter, keeps track of the CustomDays which have expenditure by storing in a HashSet.
+     * @param document Firebase expense collection document
+     */
     private void processDocument(QueryDocumentSnapshot document) {
-        String date = document.get("Date").toString();
-        Date d = null;
+        String date = Objects.requireNonNull(document.get("Date")).toString();
         try {
-            d = dateFormatter.parse(date);
+            Date d = dateFormatter.parse(date);
+            assert d != null;
+            CustomDay day = new CustomDay(d);
+            this.setOfDaysWithExpenditure.add(day);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        CustomDay day = new CustomDay(d);
-        if (!(this.daysWithExpenditure.contains(day))) {
-            this.daysWithExpenditure.add(day);
-        }
     }
 
-    //Fill Hashmap with days
-    private void prepHashMap(List<CustomDay> dayList) {
-        for (CustomDay day : dayList) {
+    /**
+     * Prepares the HashMap which will later be passed into the layout adapter. Each key is a CustomDay,
+     * and each value is the list of categories which have expenditure during that day.
+     * @param daysWithExpenditure set of CustomDay with expenses
+     */
+    private void prepHashMap(Set<CustomDay> daysWithExpenditure) {
+        for (CustomDay day : daysWithExpenditure) {
             if (!(this.spendingEachDay.containsKey(day))) {
                 List<CustomExpenseCategory> customCategoryList = new ArrayList<>();
                 this.spendingEachDay.put(day, customCategoryList);
@@ -160,38 +192,51 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
         }
     }
 
-    //Prepare hashmap
+    /**
+     * First, retrieves relevant data of each individual expense from the Firebase document.
+     * Creates a CustomExpense object with data from the document, and add it to its category list
+     * in the HashMap this.spendingEachDay, where the category list was created in method prepHashMap().
+     *
+     * If CustomExpense is the first object in the category, creates the required CustomExpenseCategory
+     * and adds the CustomExpense to the category list.
+     * @param document Firebase expense collection document
+     */
     private void prepSpending(QueryDocumentSnapshot document) {
-        String date = document.get("Date").toString();
-        String category = document.get("Category").toString();
-        String name = document.get("Name").toString();
-        double amount = new Double(document.get("Amount").toString());
-        Date d = null;
+        String date = Objects.requireNonNull(document.get("Date")).toString();
+        String category = Objects.requireNonNull(document.get("Category")).toString();
+        String name = Objects.requireNonNull(document.get("Name")).toString();
+        double amount = Double.parseDouble(Objects.requireNonNull(document.get("Amount")).toString());
+
         try {
-            d = dateFormatter.parse(date);
+            Date d = dateFormatter.parse(date);
+            assert d != null;
+            CustomDay day = new CustomDay(d);
+            List<CustomExpenseCategory> listOfCustomExpenseCategories = this.spendingEachDay.get(day);
+            boolean flag = false;
+            assert listOfCustomExpenseCategories != null;
+            for (CustomExpenseCategory cat : listOfCustomExpenseCategories) {
+                if (cat.getName().equals(category)) {
+                    cat.addExpense(new CustomExpense(document.getId(), name, amount));
+                    flag = true;
+                }
+            }
+
+            if (!(flag)) {
+                CustomExpenseCategory newCat = new CustomExpenseCategory(category, new ArrayList<>());
+                newCat.addExpense(new CustomExpense(document.getId(), name, amount));
+                listOfCustomExpenseCategories.add(newCat);
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        CustomDay day = new CustomDay(d);
-        List<CustomExpenseCategory> customExpenseCategoriesList = this.spendingEachDay.get(day);
-        boolean flag = false;
-        for (CustomExpenseCategory cat : customExpenseCategoriesList) {
-            if (cat.getName().equals(category)) {
-                cat.addExpense(new CustomExpense(document.getId(), name, amount));
-                flag = true;
-            }
-        }
-
-        if (!(flag)) {
-            CustomExpenseCategory newCat = new CustomExpenseCategory(category, new ArrayList<>());
-            newCat.addExpense(new CustomExpense(document.getId(), name, amount));
-            customExpenseCategoriesList.add(newCat);
-        }
     }
 
+    /**
+     * Links to the ActivityEachDayExpenses, the page for expenses on the particular day clicked.
+     * @param date day clicked
+     */
     @Override
     public void onDateClickListener(String date) {
-        Toast.makeText(this, "clicked " + date, Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, ActivityEachDayExpenses.class);
         i.putExtra("date clicked", date);
         startActivity(i);
