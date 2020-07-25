@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
+import com.example.weekcalendar.helperclasses.DateDecorator;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,6 +20,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.timessquare.CalendarCellDecorator;
 import com.squareup.timessquare.CalendarPickerView;
 
 import java.text.DateFormat;
@@ -38,6 +41,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
     private SetupNavDrawer navDrawer;
     private Button submitButton;
+    private TextView title;
 
     private CalendarPickerView datePicker;
     private Set<CustomDay> selectedDates = new HashSet<>();
@@ -77,6 +81,8 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
             startActivity(new Intent(this, ActivityNotificationsPage.class));
         });
 
+        this.title = findViewById(R.id.accept_shared_event_title);
+
         this.fAuth = FirebaseAuth.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();
         this.fStore = FirebaseFirestore.getInstance();
@@ -92,11 +98,14 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
 
         fetchDataFromFirebase(this.docID);
 
+
+
         this.submitButton = findViewById(R.id.submit_button);
         this.submitButton.setOnClickListener(v -> submitChoices());
 
         this.datePicker = findViewById(R.id.picker_calendar);
         this.datePicker.init(today, nextDay.getTime()).withSelectedDate(today);
+
 
         this.datePicker.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
             @Override
@@ -104,8 +113,18 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                 CustomDay selectedDate = new CustomDay(date);
                 if (ActivityAcceptSharedEvent.this.selectedDates.contains(selectedDate)) {
                     ActivityAcceptSharedEvent.this.selectedDates.remove(selectedDate);
+                    CalendarCellDecorator decorator= new DateDecorator(ActivityAcceptSharedEvent.this, ActivityAcceptSharedEvent.this.selectedDates);
+                    List<CalendarCellDecorator> decoratorList = new ArrayList<>();
+                    decoratorList.add(decorator);
+
+                    datePicker.setDecorators(decoratorList);
                 } else {
                     ActivityAcceptSharedEvent.this.selectedDates.add(selectedDate);
+                    CalendarCellDecorator decorator= new DateDecorator(ActivityAcceptSharedEvent.this, ActivityAcceptSharedEvent.this.selectedDates);
+                    List<CalendarCellDecorator> decoratorList = new ArrayList<>();
+                    decoratorList.add(decorator);
+
+                    datePicker.setDecorators(decoratorList);
                 }
             }
 
@@ -120,6 +139,8 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot doc) {
+                        String title = doc.get("title").toString();
+                        ActivityAcceptSharedEvent.this.title.setText(title);
                         data = (Map<String, List<String>>) doc.get("responses");
                         TreeMap<String, List<String>> sortedData = new TreeMap<>(data);
                         String first = sortedData.firstKey();

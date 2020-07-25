@@ -143,7 +143,13 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
             eventDetails.put("endTime", endTime);
             eventDetails.put("description", "Description");
             eventDetails.put("participants", users);
+
+
+
+
             this.fStore.collection("events").add(eventDetails);
+            this.fStore.collection("responses").document(this.responseID).delete();
+
             Intent i = new Intent(this, ActivityUpcomingPage.class);
             startActivity(i);
 

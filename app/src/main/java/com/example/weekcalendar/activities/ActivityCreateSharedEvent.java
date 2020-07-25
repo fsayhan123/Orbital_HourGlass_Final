@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
-import com.example.weekcalendar.helperclasses.Dialog;
 import com.example.weekcalendar.helperclasses.DialogCreationEvent;
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;

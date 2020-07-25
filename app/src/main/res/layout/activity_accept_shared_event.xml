@@ -16,6 +16,9 @@
         android:layout_marginTop="0dp"
         android:orientation="vertical">
 
+
+
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/accept_shared_event"
             android:layout_width="match_parent"
@@ -26,6 +29,14 @@
             app:layout_constraintTop_toTopOf="parent"
             app:title="Confirm Shared Event"
             app:titleTextColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/accept_shared_event_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="32dp"
+            android:text="Title" />
 
 
         <com.squareup.timessquare.CalendarPickerView
