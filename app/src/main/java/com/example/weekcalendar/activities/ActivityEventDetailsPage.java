@@ -236,6 +236,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 .delete()
                 .addOnSuccessListener(v -> {
                     Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                    deleteAssociatedToDos();
                     Intent intent = new Intent(this, ActivityMainCalendar.class);
                     startActivity(intent);
                 })
@@ -243,8 +244,19 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     }
 
     private void deleteAssociatedToDos() {
-//        this.fStore.collection("todo")
-//                .whereEqualTo("eventID", this.event.getId())
+        this.fStore.collection("todo")
+                .whereEqualTo("eventID", this.event.getId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
+                            fStore.collection("todo")
+                                    .document(q.getId())
+                                    .delete();
+                        }
+                    }
+                });
     }
 
     /**
@@ -624,7 +636,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             if (aBoolean && this.command.equals("delete")) {
-                Intent i = new Intent(ActivityEventDetailsPage.this, ActivityUpcomingPage.class);
+                Intent i = new Intent(ActivityEventDetailsPage.this, ActivityMainCalendar.class);
                 startActivity(i);
             } else if (aBoolean && this.command.equals("query")) {
                 ActivityEventDetailsPage.this.event = processGoogleEvent(this.asyncEvent);
