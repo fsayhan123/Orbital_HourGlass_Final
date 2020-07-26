@@ -264,8 +264,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     }
 
     /**
-     *
-     * @param doc
+     * Processes Firebase document from to do collection into a CustomToDo
+     * @param doc Firebase document from to do collection
      */
     private void processToDoDocument(QueryDocumentSnapshot doc) {
         String date = (String) doc.get("date");
@@ -280,6 +280,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         addToDoEditText();
     }
 
+    /**
+     * Adds more to do input fields when clicked.
+     */
     private void addToDoEditText() {
         if (!this.todos.get(this.todos.size() - 1).getText().toString().equals("")) {
             LayoutInflater inflater = this.getLayoutInflater();
@@ -289,6 +292,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
+    /**
+     * Checks if all required fields are filled in by user. Otherwise, displays error.
+     * @return boolean indicating if all required fields are filled in
+     */
     private boolean checkFields() {
         String eventTitle = this.title.getText().toString();
         if (eventTitle.equals("")) {
@@ -315,6 +322,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         return false;
     }
 
+    /**
+     * Gets details of the event as filled in by the user.
+     * @return Map containing the details of the event, to be pushed to Firebase events collection
+     */
     private Map<String, Object> getEventDetails() {
         String eventTitle = this.title.getText().toString();
         String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
@@ -337,6 +348,11 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         return eventDetails;
     }
 
+    /**
+     * Gets details of all the to do items as filled in by the user.
+     * @return a List of Maps, where each Map represents details of 1 to do item, to be pushed to Firebase
+     * to do collection
+     */
     private List<Map<String, Object>> getToDoDetails() {
         List<Map<String, Object>> allToDoDetails = new ArrayList<>();
         long offset = 0;
@@ -357,6 +373,37 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         return allToDoDetails;
     }
 
+    /**
+     * Creates a Firebase event document in events collection based on details input by user.
+     */
+    private void createFirebaseEvent() {
+        if (checkFields()) {
+            Map<String, Object> eventDetails = getEventDetails();
+            List<Map<String, Object>> allToDoDetails = getToDoDetails();
+
+            this.cEvents.add(eventDetails)
+                    .addOnSuccessListener(docRef -> {
+                        eventID = docRef.getId();
+                        for (Map<String, Object> todo : allToDoDetails) {
+                            todo.put("eventID", docRef.getId());
+                            cToDo.add(todo)
+                                    .addOnSuccessListener(docRef2 -> {
+                                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                                    })
+                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                        }
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                        Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
+                        i.putExtra("eventID", this.eventID);
+                        startActivity(i);
+                    })
+                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+        }
+    }
+
+    /**
+     * Updates Firebase event document in events collection based on updated details input by user.
+     */
     private void updateFirebaseEvent() {
         if (checkFields()) {
             DocumentReference thisEventDoc = this.cEvents.document(this.event.getId());
@@ -398,31 +445,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
-    private void createFirebaseEvent() {
-        if (checkFields()) {
-            Map<String, Object> eventDetails = getEventDetails();
-            List<Map<String, Object>> allToDoDetails = getToDoDetails();
-
-            this.cEvents.add(eventDetails)
-                    .addOnSuccessListener(docRef -> {
-                        eventID = docRef.getId();
-                        for (Map<String, Object> todo : allToDoDetails) {
-                            todo.put("eventID", docRef.getId());
-                            cToDo.add(todo)
-                                    .addOnSuccessListener(docRef2 -> {
-                                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                                    })
-                                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-                        }
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                        Intent i = new Intent(ActivityCreateEventPage.this, ActivityEventDetailsPage.class);
-                        i.putExtra("eventID", this.eventID);
-                        startActivity(i);
-                    })
-                    .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
-        }
-    }
-
+    /**
+     * Opens a date picker interface in a dialog for user to select the date.
+     * @param b Button object reference
+     */
     private void openSelectDateDialog(Button b) {
         int day, month, year;
         if (b.getText().toString().contains("SELECT")) {
@@ -448,12 +474,15 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         datePickerDialog.show();
     }
 
+    /**
+     * Opens a date picker interface in a dialog for user to select the time.
+     * @param b Button object reference
+     */
     private void openSelectTimeDialog(Button b) {
         java.util.Calendar c = java.util.Calendar.getInstance();
         int amPM = c.get(java.util.Calendar.AM_PM);
         int minute = c.get(java.util.Calendar.MINUTE);
         int hour = amPM == 1 ? c.get(java.util.Calendar.HOUR) + 12 : c.get(java.util.Calendar.HOUR);
-        Log.d(TAG, "TIME NOW IS: " + hour + ":" + minute + " " + amPM);
         TimePickerDialog timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             @Override
@@ -471,16 +500,29 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         timePickerDialog.show();
     }
 
+    /**
+     * Displays selected date by user on the Button of reference.
+     * @param d CustomDay user chose
+     * @param b button to set text on
+     */
     @Override
     public void applyDateText(CustomDay d, Button b) {
         b.setText(d.getFullDateForView());
     }
 
+    /**
+     * Displays selected time by user on the Button of reference.
+     * @param d CustomDay user chose
+     * @param b button to set text on
+     */
     @Override
     public void applyTimeText(CustomDay d, Button b) {
         b.setText(d.getTime());
     }
 
+    /**
+     * Google Calendar API handler class for asynchronous task handling.
+     */
     @SuppressLint("StaticFieldLeak")
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 

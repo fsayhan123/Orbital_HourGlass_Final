@@ -29,16 +29,32 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ActivityRegisterPage extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityRegisterPage.class.getSimpleName();
 
+    /**
+     * UI variables
+     */
     EditText mFullname, mEmail, mPassword;
     Button mRegisterButton;
     TextView mLoginButton;
+    ProgressBar progressBar;
+
+    /**
+     * Firebase information
+     */
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
-    ProgressBar progressBar;
     String userID;
 
+    /**
+     * Sets up ActivityRegisterPage when it is opened.
+     * First, sets up Firebase account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +63,6 @@ public class ActivityRegisterPage extends AppCompatActivity {
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
 
-        // check if user is already logged in
         if (this.fAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), ActivityMainCalendar.class));
             finish();
@@ -56,6 +71,9 @@ public class ActivityRegisterPage extends AppCompatActivity {
         setupXMLItems();
     }
 
+    /**
+     * Sets up layout for ActivityEventDetails.
+     */
     private void setupXMLItems() {
         this.mFullname = findViewById(R.id.create_name);
         this.mEmail = findViewById(R.id.create_email);
@@ -71,28 +89,23 @@ public class ActivityRegisterPage extends AppCompatActivity {
             String password = mPassword.getText().toString().trim();
 
             if (TextUtils.isEmpty(email)) {
-                // user has not entered email value
                 mEmail.setError("Email is required!");
             }
 
             if (TextUtils.isEmpty(password)) {
-                // user has not entered password value
                 mPassword.setError("Password is required!");
             }
 
             if (password.length() < 6) {
-                // input password is too short
                 mPassword.setError("Password must be >= 6 characters!");
             }
 
             progressBar.setVisibility(View.VISIBLE);
 
-            // also checks if email is valid
             if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password) && password.length() >= 6) {
                 fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // process of registering the user is called task
                         if (task.isSuccessful()) {
                             Toast.makeText(ActivityRegisterPage.this, "User created!", Toast.LENGTH_SHORT).show();
                             userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
@@ -123,6 +136,9 @@ public class ActivityRegisterPage extends AppCompatActivity {
         });
     }
 
+    /**
+     * Links to ActivityLoginPage when button is clicked.
+     */
     private void toLogin() {
         startActivity(new Intent(this, ActivityLoginPage.class));
     }

@@ -72,22 +72,21 @@ import java.util.concurrent.ExecutionException;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ActivityMainCalendar extends AppCompatActivity implements MyOnEventClickListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityMainCalendar.class.getSimpleName();
+
+    /**
+     * Boolean flag to indicate if first time fetching data.
+     */
     private static boolean first = true;
 
+    /**
+     * UI variables
+     */
     private TextView monthYear;
-
-    private static Date today = new Date();
-    private String[] splitDate = FULL_DATE.format(today).split("-");
-    private String month = splitDate[1];
-    private String day = splitDate[2];
-    private String year = splitDate[0];
-
-    // first day of previous month
-    private Calendar calPrev = Calendar.getInstance();
-    private Calendar calNext = Calendar.getInstance();
-
-    // RecyclerView variables
+    private CompactCalendarView compactCalendarView;
     private Map<String, Map<String, List<CustomEvent>>> mapOfMonths = new HashMap<>();
     private RecyclerView mRecyclerView;
     private MainCalendarAdapter mAdapter;
@@ -97,12 +96,26 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private final CustomEventFromFirebase EMPTY_CUSTOMEVENT = new CustomEventFromFirebase("No Events Today!", "", "", "", "", "");
     private final MainCalendarAdapter EMPTY_ADAPTER = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
 
+    /**
+     * Date variables
+     */
+    private static Date today = new Date();
+    private String[] splitDate = FULL_DATE.format(today).split("-");
+    private String month = splitDate[1];
+    private String day = splitDate[2];
+    private String year = splitDate[0];
+    private Calendar calPrev = Calendar.getInstance();
+    private Calendar calNext = Calendar.getInstance();
+
+    /**
+     * Firebase information
+     */
     private String userID;
     private CollectionReference c;
 
-    private CompactCalendarView compactCalendarView;
-
-    // To transform String to Date
+    /**
+     * Convert Strings to Dates and vice versa
+     */
     @SuppressLint("SimpleDateFormat")
     private static final DateFormat MONTH = new SimpleDateFormat("MM");
     @SuppressLint("SimpleDateFormat")
@@ -110,7 +123,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     @SuppressLint("SimpleDateFormat")
     private static final DateFormat FULL_DATE = new SimpleDateFormat("yyyy-MM-dd");
 
-    // Get data from Google
+    /**
+     * Google information
+     */
     private static final String APPLICATION_NAME = "WeekCalendar";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
@@ -118,8 +133,12 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private static final List<com.google.api.services.calendar.model.Event> EMPTY_EVENTS_LIST = new ArrayList<>();
     private GoogleSignInAccount acct;
 
-    // Months
-
+    /**
+     * Sets up ActivityMainCalendar when it is opened.
+     * First, sets up Firebase or Google account and fetches data using respective methods.
+     * Then, sets up layout items by calling setupXMLItems();
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +174,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
+    /**
+     * Sets up layout for ActivityMainCalendar.
+     */
     private void setupXMLItems() {
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.main_calendar_toolbar));
         navDrawer.setupNavDrawerPane();
@@ -219,11 +241,19 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         });
     }
 
+    /**
+     * Link to ActivityCreateEventPage when create event button is clicked.
+     */
     private void moveToCreateEventPage() {
         Intent intent = new Intent(this, ActivityCreateEventPage.class);
         startActivity(intent);
     }
 
+    /**
+     * Queries data from Firebase with respect to the Date curr passed as parameter. Gets data for
+     * the previous and next month if not available.
+     * @param curr reference date to get data from Firebase
+     */
     private void fetch3MonthEventsFromFirebase(Date curr) {
         Calendar[] neighbouringMonths = getNeighbourMonths(curr);
         String prev = FULL_DATE.format(neighbouringMonths[0].getTime());
@@ -234,16 +264,13 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             return;
         }
         if (!this.mapOfMonths.containsKey(prevMonth) && !this.mapOfMonths.containsKey(nextMonth)) {
-            Log.d(TAG, "both missing");
             firebaseQuery(prev, next);
         } else if (!this.mapOfMonths.containsKey(prevMonth)) {
-            Log.d(TAG, "prev missing " + prevMonth + " " + mapOfMonths);
             Date[] missingMonth = getRequiredMonth(neighbouringMonths, -1);
             prev = FULL_DATE.format(missingMonth[0].getTime());
             next = FULL_DATE.format(missingMonth[1].getTime());
             firebaseQuery(prev, next);
         } else if (!this.mapOfMonths.containsKey(nextMonth)) {
-            Log.d(TAG, "next missing " + nextMonth);
             Date[] missingMonth = getRequiredMonth(neighbouringMonths, 0);
             prev = FULL_DATE.format(missingMonth[0].getTime());
             next = FULL_DATE.format(missingMonth[1].getTime());
@@ -251,7 +278,12 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
-    private Calendar[] getNeighbourMonths(Date current) { // start inclusive and end exclusive as per google calendar api
+    /**
+     * Calculates the previous and next months with respect to Date current.
+     * @param current reference Date used to calculate
+     * @return Calendar Array of previous and next months
+     */
+    private Calendar[] getNeighbourMonths(Date current) {
         Calendar calPrev = Calendar.getInstance();
         calPrev.setTime(current);
         calPrev.add(Calendar.MONTH, -1);
@@ -265,13 +297,25 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         return new Calendar[] { calPrev, calNext };
     }
 
-    private Date[] getRequiredMonth(Calendar[] neighbouringMonths, int addMonth) { // start inclusive and end exclusive as per google calendar api
+    /**
+     * Adjusts calculation of dates for query.
+     * @param neighbouringMonths previous and next months
+     * @param addMonth offset to calculate months
+     * @return Array of required dates
+     */
+    private Date[] getRequiredMonth(Calendar[] neighbouringMonths, int addMonth) {
         neighbouringMonths[0].set(Calendar.DATE, 1);
         neighbouringMonths[1].add(Calendar.MONTH, addMonth);
         neighbouringMonths[1].set(Calendar.DATE, 1);
         return new Date[] { neighbouringMonths[0].getTime(), neighbouringMonths[1].getTime() };
     }
 
+    /**
+     * Queries data from Firebase events collection. Includes all events where user is a participant
+     * (either invited or shared) and personal events.
+     * @param min lower bound date to search
+     * @param max upper bound date to search
+     */
     private void firebaseQuery(String min, String max) {
         this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
@@ -306,17 +350,27 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }
 
+    /**
+     * Adds CustomEvent to calendar widget, to display that particular dates have events.
+     * @param e CustomEvent
+     * @throws ParseException
+     */
     private void addToCalendarWidget(CustomEvent e) throws ParseException {
         Date d = FULL_DATE.parse(e.getStartDate());
         Event event = new Event(Color.LTGRAY, d.getTime(), e.getTitle());
         this.compactCalendarView.addEvent(event);
     }
 
+    /**
+     * Processes Firebase event document.
+     * @param document Firebase event document
+     * @throws ParseException
+     */
     private void processFirebaseDocument(QueryDocumentSnapshot document) throws ParseException {
         String title = (String) document.get("eventTitle");
         String startDate = (String) document.get("startDate");
@@ -326,7 +380,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         String description = (String) document.get("description") == null ? "" : (String) document.get("description");
         String docID = document.getId();
         CustomEvent event;
-        if (startDate.equals(endDate)) { // just one day
+        if (startDate.equals(endDate)) {
             event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
             event.setDescription(description);
             if (!this.checkExist.contains(event)) {
@@ -334,7 +388,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 addToMap(event);
                 addToCalendarWidget(event);
             }
-        } else { // > 1 day
+        } else {
             LocalDate first = LocalDate.parse(startDate);
             LocalDate last = LocalDate.parse(endDate);
             long numDays = DAYS.between(first, last);
@@ -357,6 +411,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
+    /**
+     * Converts Google's Event object from Google Calendar API into a CustomEventFromGoogle.
+     * @param e Event from Google Calendar
+     * @throws ParseException
+     */
     @SuppressLint("DefaultLocale")
     private void processGoogleEvent(com.google.api.services.calendar.model.Event e) throws ParseException {
         String title = e.getSummary();
@@ -366,7 +425,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         String endTime;
         String eventID = e.getId();
         CustomEvent event;
-        if (e.getStart().get("dateTime") == null) { // full day event of any number of days
+        if (e.getStart().get("dateTime") == null) {
             try {
                 Log.d(TAG, e.toPrettyString());
             } catch (IOException ex) {
@@ -376,21 +435,21 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             startTime = "All day";
             String fullEndDate = Objects.requireNonNull(e.getEnd().get("date")).toString();
             int endDateNum = Integer.parseInt(fullEndDate.substring(fullEndDate.length() - 2)) - 1;
-            endDate = fullEndDate.substring(0, fullEndDate.length() - 2) + String.format("%02d", endDateNum); // on Google it is instantiated as the next day;
+            endDate = fullEndDate.substring(0, fullEndDate.length() - 2) + String.format("%02d", endDateNum);
             endTime = "23:59";
-        } else { // < 1 day events, as well as non-full day events spanning multiple days
+        } else {
             String[] startDateAndTimeSplit = Objects.requireNonNull(e.getStart().get("dateTime")).toString().split("T");
             startDate = startDateAndTimeSplit[0];
-            startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
+            startTime = startDateAndTimeSplit[1].substring(0, 5);
             String[] endDateAndTimeSplit = Objects.requireNonNull(e.getEnd().get("dateTime")).toString().split("T");
             endDate = endDateAndTimeSplit[0];
             endTime = endDateAndTimeSplit[1].substring(0, 5);
         }
-        if (startDate.equals(endDate)) { // <= 1 day
+        if (startDate.equals(endDate)) {
             event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
             addToMap(event);
             addToCalendarWidget(event);
-        } else { // > 1 day
+        } else {
             LocalDate first = LocalDate.parse(startDate);
             LocalDate last = LocalDate.parse(endDate);
             long numDays = DAYS.between(first, last);
@@ -410,6 +469,10 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
+    /**
+     * Adds event to local storage of CustomEvents. Used to populate view adapters.
+     * @param event CustomEvent to add to local storage
+     */
     private void addToMap(CustomEvent event) {
         String[] splitDate = event.getStartDate().split("-");
         String month = splitDate[1];
@@ -432,6 +495,10 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
+    /**
+     * Links to ActivityEventDetailsPage with details of the event clicked.
+     * @param eventID ID of the event clicked
+     */
     @Override
     public void onEventClickListener(String eventID) {
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
@@ -439,6 +506,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         startActivity(i);
     }
 
+    /**
+     * Google Calendar API handler class for asynchronous task handling.
+     */
     @SuppressLint("StaticFieldLeak")
     private class RequestAuth extends AsyncTask<Date, Void, Void> {
         private List<com.google.api.services.calendar.model.Event> myList;

@@ -27,14 +27,20 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ActivityIndividualNotification extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityIndividualNotification.class.getSimpleName();
 
-    // Firebase Classes
+    /**
+     * Firebase information
+     */
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
 
-    // Notification Content
-    private LinearLayout notificationContents;
+    /**
+     * UI variables
+     */
     private TextView date;
     private TextView message;
     private TextView from;
@@ -43,28 +49,39 @@ public class ActivityIndividualNotification extends AppCompatActivity {
     private LinearLayout buttonLayout;
     private Button rejectButton;
 
+    /**
+     * Firebase document references
+     */
     private String notifID;
     private String responseFormID = null;
     private String eventID = null;
 
+    /**
+     * Sets up ActivityIndividualNotification when it is opened.
+     * First, sets up Firebase.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling setViews() method.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_notification);
 
-        // Setup Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
 
         setupXMLItems();
 
-        // get the document then set the text
         Intent intent = getIntent();
         this.notifID = intent.getStringExtra("notificationID");
-        setViews();
+        fetchData();
     }
 
+    /**
+     * Sets up layout for ActivityIndividualNotification.
+     */
     private void setupXMLItems() {
         Toolbar tb = findViewById(R.id.notifications_toolbar);
         setSupportActionBar(tb);
@@ -74,7 +91,7 @@ public class ActivityIndividualNotification extends AppCompatActivity {
             startActivity(new Intent(this, ActivityNotificationsPage.class));
         });
 
-        this.notificationContents = findViewById(R.id.notification_contents);
+        LinearLayout notificationContents = findViewById(R.id.notification_contents);
         this.date = findViewById(R.id.notification_date);
         this.message = findViewById(R.id.notification_message);
         this.from = findViewById(R.id.from);
@@ -86,7 +103,11 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         this.buttonLayout = findViewById(R.id.button_layouts);
     }
 
-    private void setViews() {
+    /**
+     * Queries for data from Firebase Notifications collection and sets up user interface
+     * accordingly with the details.
+     */
+    private void fetchData() {
         this.fStore.collection("Notifications")
                 .document(this.notifID)
                 .get()
@@ -94,7 +115,7 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                     @SuppressLint("SetTextI18n")
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        setText(documentSnapshot);
+                        setViews(documentSnapshot);
                         if ((boolean) documentSnapshot.get("hasResponded")) {
                             respondButton.setText("Delete Notification");
                             respondButton.setOnClickListener(v -> delete());
@@ -118,60 +139,11 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                 });
     }
 
-    private void delete() {
-        this.fStore.collection("Notifications")
-                .document(this.notifID)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        startActivity(new Intent(ActivityIndividualNotification.this, ActivityNotificationsPage.class));
-                    }
-                });
-    }
-
-    private void respond() {
-        Intent i;
-        if (this.responseFormID != null) {
-            i = new Intent(this, ActivityAcceptSharedEvent.class);
-            i.putExtra("response form ID", this.responseFormID);
-            i.putExtra("notification ID", this.notifID);
-        } else {
-            i = new Intent(this, ActivityNotificationsPage.class);
-            this.fStore.collection("events")
-                    .document(this.eventID)
-                    .update("participants", FieldValue.arrayUnion(Objects.requireNonNull(fAuth.getCurrentUser()).getUid()))
-                    .addOnSuccessListener(v -> Log.d(TAG, "Added user to event!"))
-                    .addOnFailureListener(e -> Log.w(TAG, "Error adding user to event.", e));
-            Map<String, Object> data = new HashMap<>();
-            data.put("hasResponded", true);
-            data.put("response", "accepted");
-            this.fStore.collection("Notifications")
-                    .document(this.notifID)
-                    .update(data)
-                    .addOnSuccessListener(v -> Log.d(TAG, "Normal event invite accepted!"))
-                    .addOnFailureListener(e -> Log.w(TAG, "Error accepting normal event invite.", e));
-            i.putExtra("eventID", this.eventID);
-        }
-        startActivity(i);
-    }
-
-    private void reject() {
-        Toast.makeText(this, "Event invite rejected.", Toast.LENGTH_SHORT).show();
-        Map<String, Object> data = new HashMap<>();
-        data.put("hasResponded", true);
-        data.put("response", "rejected");
-        Intent i = new Intent(this, ActivityNotificationsPage.class);
-        this.fStore.collection("Notifications")
-                .document(this.notifID)
-                .update(data)
-                .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
-        startActivity(i);
-    }
-
-    private void setText(DocumentSnapshot doc) {
-        Log.d(TAG, "!!!!!!!!!!!!!!!!" + doc.getId());
+    /**
+     * Sets up user interface with data from Firebase document doc passed as parameter.
+     * @param doc Firebase Notifications document
+     */
+    private void setViews(DocumentSnapshot doc) {
         String date = HelperMethods.formatDateForView((String) Objects.requireNonNull(doc.get("dateOfNotification")));
         String message = (String) doc.get("message");
         String hostID = (String) doc.get("hostID");
@@ -203,5 +175,68 @@ public class ActivityIndividualNotification extends AppCompatActivity {
                 response.setText(userResponse);
             }
         }
+    }
+
+    /**
+     * Deletes this notification from Firebase Notifications collection.
+     */
+    private void delete() {
+        this.fStore.collection("Notifications")
+                .document(this.notifID)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        startActivity(new Intent(ActivityIndividualNotification.this, ActivityNotificationsPage.class));
+                    }
+                });
+    }
+
+    /**
+     * Handles different response situations.
+     * If responding to a shared event, links to ActivityAcceptSharedEvent.
+     * Else, acts as an accept button.
+     */
+    private void respond() {
+        Intent i;
+        if (this.responseFormID != null) {
+            i = new Intent(this, ActivityAcceptSharedEvent.class);
+            i.putExtra("response form ID", this.responseFormID);
+            i.putExtra("notification ID", this.notifID);
+        } else {
+            i = new Intent(this, ActivityNotificationsPage.class);
+            this.fStore.collection("events")
+                    .document(this.eventID)
+                    .update("participants", FieldValue.arrayUnion(Objects.requireNonNull(fAuth.getCurrentUser()).getUid()))
+                    .addOnSuccessListener(v -> Log.d(TAG, "Added user to event!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error adding user to event.", e));
+            Map<String, Object> data = new HashMap<>();
+            data.put("hasResponded", true);
+            data.put("response", "accepted");
+            this.fStore.collection("Notifications")
+                    .document(this.notifID)
+                    .update(data)
+                    .addOnSuccessListener(v -> Log.d(TAG, "Normal event invite accepted!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error accepting normal event invite.", e));
+            i.putExtra("eventID", this.eventID);
+        }
+        startActivity(i);
+    }
+
+    /**
+     * Called when reject button is clicked, to reject invitation to a normal, personal event.
+     */
+    private void reject() {
+        Toast.makeText(this, "Event invite rejected.", Toast.LENGTH_SHORT).show();
+        Map<String, Object> data = new HashMap<>();
+        data.put("hasResponded", true);
+        data.put("response", "rejected");
+        Intent i = new Intent(this, ActivityNotificationsPage.class);
+        this.fStore.collection("Notifications")
+                .document(this.notifID)
+                .update(data)
+                .addOnSuccessListener(v -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+        startActivity(i);
     }
 }

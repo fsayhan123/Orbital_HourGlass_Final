@@ -38,27 +38,41 @@ import java.util.Objects;
 import static android.graphics.Color.*;
 
 public class ActivityCreateSharedEvent extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityCreateSharedEvent.class.getSimpleName();
 
-    private SetupNavDrawer navDrawer;
+    /**
+     * UI variables
+     */
     private CompactCalendarView calendarView;
     private ArrayList<CustomDay> selectedDates = new ArrayList<>();
     private ArrayList<String> emails = new ArrayList<>();
-    private Button sendInvites;
     private TextView monthYear;
     private EditText title;
 
-    // Firebase Variables
+    /**
+     * Firebase information
+     */
     public FirebaseAuth fAuth;
     public FirebaseFirestore fStore;
     public CollectionReference c;
     public String userID;
 
-    // Date variables
+    /**
+     * Used to convert Strings to Dates and vice versa
+     */
     private static Date today = new Date();
     @SuppressLint("SimpleDateFormat")
     private static final DateFormat MONTH_AND_YEAR = new SimpleDateFormat("MMMM yyyy");
 
+    /**
+     * Sets up ActivityCreateSharedEvent when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +85,12 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
         setupXMLItems();
     }
 
+    /**
+     * Sets up layout for ActivityCreateSharedEvent.
+     */
     private void setupXMLItems() {
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.create_shared_event));
-        this.navDrawer.setupNavDrawerPane();
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.create_shared_event));
+        navDrawer.setupNavDrawerPane();
 
         this.userID = Objects.requireNonNull(this.fAuth.getCurrentUser()).getUid();
 
@@ -83,8 +100,8 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
 
         this.title = findViewById(R.id.create_shared_event_title);
 
-        this.sendInvites = findViewById(R.id.button);
-        this.sendInvites.setOnClickListener(v -> createResponseForm());
+        Button sendInvites = findViewById(R.id.button);
+        sendInvites.setOnClickListener(v -> createResponseForm());
 
         this.monthYear = findViewById(R.id.month_year_shared);
         this.monthYear.setText(MONTH_AND_YEAR.format(today));
@@ -110,6 +127,12 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
             }});
     }
 
+    /**
+     * Sends an in-app notification to invited user with email userEmail parameter
+     * @param docRefID the Firebase response document ID, where invited users' responses will be collected
+     *                 once they response to the invite
+     * @param userEmail email of invited user
+     */
     public void sendNotification(String docRefID, String userEmail) {
         this.fStore.collection("users")
                 .whereEqualTo("email", userEmail)
@@ -142,6 +165,9 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Launches a dialog which allows user to key in emails of other users to share this event with.
+     */
     public void createResponseForm() {
         Map<String, Object> sharedEventDetails = getSharedEventDetails();
         sharedEventDetails.put("hostID", this.userID);
@@ -151,6 +177,10 @@ public class ActivityCreateSharedEvent extends AppCompatActivity {
 
     }
 
+    /**
+     * Gets details of this shared event as input by user.
+     * @return Map of details about the shared event
+     */
     private Map<String, Object> getSharedEventDetails() {
         Map<String, Object> details = new HashMap<>();
 

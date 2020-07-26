@@ -25,23 +25,36 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ActivityNotificationsPage extends AppCompatActivity implements NotificationsRecyclerViewAdapter.OnNotificationListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityNotificationsPage.class.getSimpleName();
 
+    /**
+     * Firebase infromation
+     */
     private String userID;
     private CollectionReference notification;
 
-    //Recycler View Variables
+    /**
+     * UI variables
+     */
     private ArrayList<CustomNotification> customNotificationArrayList;
     private RecyclerView mRecyclerView;
     private NotificationsRecyclerViewAdapter mAdapter;
 
+    /**
+     * Sets up ActivityNotificationsPage when it is opened.
+     * First, sets up Firebase account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling getNotificationFromFirebase() method.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications_page);
 
-        // Setup firebase Variables
-        // Firebase variables
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
         this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
@@ -52,18 +65,22 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
         getNotificationFromFirebase();
     }
 
+    /**
+     * Sets up layout for ActivityNotificationsPage.
+     */
     private void setupXMLItems() {
-        // Nav Drawer
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.notifications_toolbar));
         navDrawer.setupNavDrawerPane();
 
-        // Set up recycler View
         this.mRecyclerView = findViewById(R.id.notification_view);
         this.mRecyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         this.mRecyclerView.setLayoutManager(layoutManager);
     }
 
+    /**
+     * Queries data from Firebase Notifications collection involving the user.
+     */
     private void getNotificationFromFirebase() {
         this.customNotificationArrayList = new ArrayList<>();
         this.notification.whereEqualTo("respondentID", this.userID)
@@ -97,6 +114,10 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
                 });
     }
 
+    /**
+     * Links to ActivityIndividualNotification when a specific notification view is clicked.
+     * @param position integer position of notification clicked in the RecyclerView's adapter
+     */
     @Override
     public void onNotificationClick(int position) {
         CustomNotification customNotification = customNotificationArrayList.get(position);

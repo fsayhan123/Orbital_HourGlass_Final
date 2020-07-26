@@ -42,21 +42,35 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ActivityToDoListPage extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityToDoListPage.class.getSimpleName();
+
+    /**
+     * Indicates functionality to delete
+     */
     public boolean canDelete = false;
 
-    // ExpandableListView variables
+    /**
+     * UI variables
+     */
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomToDo>> mapOfToDo;
     private ExpandableListView expandableListView;
     private ToDoListViewAdapter mAdapter = new ToDoListViewAdapter(this, new ArrayList<>(), new HashMap<>());
 
+    /**
+     * Firebase information
+     */
     private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
 
-    // To transform String to Date
+    /**
+     * Converts Strings to Dates and vice versa
+     */
     @SuppressLint("SimpleDateFormat")
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -75,18 +89,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
         fetchToDos();
     }
 
-    private void addToMap(CustomDay day, CustomToDo toDo) {
-        if (!this.setOfDays.contains(day)) {
-            this.setOfDays.add(day);
-            this.listOfDays.add(day);
-            List<CustomToDo> temp = new ArrayList<>();
-            temp.add(toDo);
-            this.mapOfToDo.put(day, temp);
-        } else {
-            Objects.requireNonNull(this.mapOfToDo.get(day)).add(toDo);
-        }
-    }
-
+    /**
+     * Sets up layout for ActivityToDoListPage.
+     */
     private void setupXMLItems() {
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
         navDrawer.setupNavDrawerPane();
@@ -97,6 +102,65 @@ public class ActivityToDoListPage extends AppCompatActivity {
         this.expandableListView = findViewById(R.id.expandableListView);
     }
 
+    /**
+     * Groups to do items in their respective days for display.
+     * @param day day associated with to do item
+     * @param customToDo to do item to be put in group
+     */
+    private void addToMap(CustomDay day, CustomToDo customToDo) {
+        if (!this.setOfDays.contains(day)) {
+            this.setOfDays.add(day);
+            this.listOfDays.add(day);
+            List<CustomToDo> temp = new ArrayList<>();
+            temp.add(customToDo);
+            this.mapOfToDo.put(day, temp);
+        } else {
+            Objects.requireNonNull(this.mapOfToDo.get(day)).add(customToDo);
+        }
+    }
+
+    /**
+     * Queries all to do documents in Firebase to do collection relevant to user.
+     */
+    private void fetchToDos() {
+        this.listOfDays = new ArrayList<>();
+        this.mapOfToDo = new HashMap<>();
+        this.setOfDays = new HashSet<>();
+
+        this.c.whereEqualTo("userID", userID)
+                .orderBy("date")
+                .orderBy("timestamp")
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d(TAG, "onSuccess: LIST EMPTY");
+                        } else {
+                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
+                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                processDocument(document);
+                            }
+                            mAdapter = new ToDoListViewAdapter(ActivityToDoListPage.this, listOfDays, mapOfToDo);
+                            expandableListView.setAdapter(mAdapter);
+                            for (int i = 0; i < mAdapter.getGroupCount(); i++) {
+                                expandableListView.expandGroup(i);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
+                    }
+                });
+    }
+
+    /**
+     * Processes Firebase to do document to get details for each to do item
+     * @param document with details representing 1 to do item
+     */
     private void processDocument(QueryDocumentSnapshot document) {
         String ID = document.getId();
         String date = (String) document.get("date");
@@ -120,42 +184,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
         }
     }
 
-    private void fetchToDos() {
-        this.listOfDays = new ArrayList<>();
-        this.mapOfToDo = new HashMap<>();
-        this.setOfDays = new HashSet<>();
-
-        this.c.whereEqualTo("userID", userID)
-                .orderBy("date")
-                .orderBy("timestamp")
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        if (queryDocumentSnapshots.isEmpty()) {
-                            Log.d(TAG, "onSuccess: LIST EMPTY");
-                        } else {
-                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
-                            for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                processDocument(document);
-                            }
-                            mAdapter = new ToDoListViewAdapter(ActivityToDoListPage.this, listOfDays, mapOfToDo);
-                            expandableListView.setAdapter(mAdapter);
-                            // Expand all views by default
-                            for (int i = 0; i < mAdapter.getGroupCount(); i++) {
-                                expandableListView.expandGroup(i);
-                            }
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
-                    }
-                });
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -163,6 +194,9 @@ public class ActivityToDoListPage extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.delete) {
@@ -178,39 +212,36 @@ public class ActivityToDoListPage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Links to ActivityCreateToDoPage when button is clicked.
+     */
     private void createToDo() {
         Intent intent = new Intent(this, ActivityCreateToDoPage.class);
         startActivity(intent);
     }
 
-    private void pushToDo() {
-        Set<Pair<Long, Long>> toggledItems = this.mAdapter.getToggledItems();
-        long offset = 0;
-        for (Pair<Long, Long> pair : toggledItems) {
-            int groupPos = (int) (long) pair.first;
-            int childPos = (int) (long) pair.second;
-            CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
-            this.fStore.collection("todo")
-                    .document(todo.getID())
-                    .set(customToDoToMap(todo, offset));
-            offset++;
-        }
-    }
-
-    private Map<String, Object> customToDoToMap(CustomToDo todo, long offset) {
+    /**
+     * Stores details of to do item in a Map. Used to display details in view adapters.
+     * @param customToDo to do item to get details from
+     * @param offset for timestamp to maintain ordering of to do items
+     * @return Map of details of to do item
+     */
+    private Map<String, Object> customToDoToMap(CustomToDo customToDo, long offset) {
         Map<String, Object> todoDetails = new HashMap<>();
         todoDetails.put("userID", userID);
-        todoDetails.put("date", todo.getDate());
-        todoDetails.put("title", todo.getTitle());
-        todoDetails.put("completed", todo.getCompleted());
+        todoDetails.put("date", customToDo.getDate());
+        todoDetails.put("title", customToDo.getTitle());
+        todoDetails.put("completed", customToDo.getCompleted());
         todoDetails.put("timestamp", System.currentTimeMillis() + offset);
-        if (todo.getEventID() != null) {
-            Toast.makeText(this, "eventID", Toast.LENGTH_SHORT).show();
-            todoDetails.put("eventID", todo.getEventID());
+        if (customToDo.getEventID() != null) {
+            todoDetails.put("eventID", customToDo.getEventID());
         }
         return todoDetails;
     }
 
+    /**
+     * Deletes selected to do items.
+     */
     private void deleteToDo() {
         Set<Pair<Long, Long>> setItems = this.mAdapter.getItemsToDelete();
         List<Pair<Long, Long>> iterable = new ArrayList<>(setItems);
@@ -233,9 +264,30 @@ public class ActivityToDoListPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onStop() {
         super.onStop();
         pushToDo();
     }
+
+    /**
+     * Updates states of toggled to do items upon leaving this page.
+     */
+    private void pushToDo() {
+        Set<Pair<Long, Long>> toggledItems = this.mAdapter.getToggledItems();
+        long offset = 0;
+        for (Pair<Long, Long> pair : toggledItems) {
+            int groupPos = (int) (long) pair.first;
+            int childPos = (int) (long) pair.second;
+            CustomToDo todo = this.mAdapter.getChild(groupPos, childPos);
+            this.fStore.collection("todo")
+                    .document(todo.getID())
+                    .set(customToDoToMap(todo, offset));
+            offset++;
+        }
+    }
+
 }

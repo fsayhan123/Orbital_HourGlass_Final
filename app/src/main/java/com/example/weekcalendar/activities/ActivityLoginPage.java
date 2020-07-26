@@ -36,23 +36,39 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ActivityLoginPage extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityLoginPage.class.getSimpleName();
 
+    /**
+     * UI variables
+     */
     private EditText mEmail, mPassword;
-    private Button mLoginButton;
     private ProgressBar progressBar;
-    private TextView mRegister;
 
+    /**
+     * Firebase information
+     */
     private FirebaseAuth fAuth;
-    private static final int RC_SIGN_IN = 1;
-
-    // Google sign in
-    private SignInButton signInButton;
-    private GoogleSignInClient mGoogleSignInClient;
     private FirebaseFirestore fStore;
 
+    private static final int RC_SIGN_IN = 1;
+
+    /**
+     * Google information
+     */
+    private GoogleSignInClient mGoogleSignInClient;
+
+    /**
+     * Sets up ActivityLoginPage when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +87,12 @@ public class ActivityLoginPage extends AppCompatActivity {
         setupXMLItems();
     }
 
+    /**
+     * Sets up layout for ActivityLoginPage.
+     */
     private void setupXMLItems() {
-        this.signInButton = findViewById(R.id.sign_in_button);
-        this.signInButton.setOnClickListener(v -> {
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -81,35 +100,30 @@ public class ActivityLoginPage extends AppCompatActivity {
 
         this.mEmail = findViewById(R.id.email);
         this.mPassword = findViewById(R.id.password);
-        this.mLoginButton = findViewById(R.id.login_button);
-        this.mRegister = findViewById(R.id.no_account);
+        Button mLoginButton = findViewById(R.id.login_button);
+        TextView mRegister = findViewById(R.id.no_account);
         this.progressBar = findViewById(R.id.loading_login);
 
-        this.mRegister.setOnClickListener(v -> toRegister());
+        mRegister.setOnClickListener(v -> toRegister());
 
-        // to log in with firebase
-        this.mLoginButton.setOnClickListener(v -> {
+        mLoginButton.setOnClickListener(v -> {
             String email = mEmail.getText().toString().trim();
             String password = mPassword.getText().toString().trim();
 
             if (TextUtils.isEmpty(email)) {
-                // user has not entered email value
                 mEmail.setError("Email is required!");
             }
 
             if (TextUtils.isEmpty(password)) {
-                // user has not entered password value
                 mPassword.setError("Password is required!");
             }
 
             if (password.length() < 6) {
-                // input password is too short
                 mPassword.setError("Password must be >= 6 characters!");
             }
 
             progressBar.setVisibility(View.VISIBLE);
 
-            // to authenticate user
             if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password) && password.length() >= 6) {
                 fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -130,31 +144,25 @@ public class ActivityLoginPage extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null) {
-
-        }
-        super.onStart();
-    }
-
+    /**
+     * When register button is clicked, links to ActivityRegisterPage.
+     */
     public void toRegister() {
         startActivity(new Intent(this, ActivityRegisterPage.class));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                String authCode = account.getServerAuthCode();
-                Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
+                String authCode = Objects.requireNonNull(account).getServerAuthCode();
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 Log.w(TAG, "Google sign in failed", e);
@@ -162,6 +170,10 @@ public class ActivityLoginPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates account with Firebase.
+     * @param idToken ID token of account to be authenticated
+     */
     private void firebaseAuthWithGoogle(String idToken) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         this.fAuth.signInWithCredential(credential)
@@ -171,9 +183,8 @@ public class ActivityLoginPage extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fAuth.getCurrentUser();
-                            String id = user.getUid();
+                            String id = Objects.requireNonNull(user).getUid();
 
                             DocumentReference docRef = fStore.collection("users").document(id);
                             Map<String, Object> userDetails = new HashMap<>();

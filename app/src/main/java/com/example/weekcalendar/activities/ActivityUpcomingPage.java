@@ -70,42 +70,58 @@ import java.util.Set;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateClickListener, MyOnEventClickListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityUpcomingPage.class.getSimpleName();
 
-    // RecyclerView variables
+    /**
+     * UI variables
+     */
     private List<CustomDay> listOfDays;
     private Set<CustomDay> setOfDays;
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private RecyclerView mRecyclerView;
     private UpcomingRecyclerViewAdapter mAdapter;
 
+    /**
+     * Firebase information
+     */
     private String userID;
     private CollectionReference c;
 
-    // To transform String to Date
-    @SuppressLint("SimpleDateFormat")
-    private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
-    // Get data from Google
+    /**
+     * Google information
+     */
     private static final String APPLICATION_NAME = "WeekCalendar";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR);
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
+    /**
+     * Converts Strings to Dates and vice versa
+     */
+    @SuppressLint("SimpleDateFormat")
+    private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+
+    /**
+     * Sets up ActivityUpcomingPage when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data by calling respective methods depending on the type of account.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
 
-        // Setup link to Firebase
-        // Firebase variables
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
 
         setupXMLItems();
 
-        // logging in to google will also result in this.fAuth.getCurrentUser() != null being true
         if (acct != null) {
             prepareGoogleInterface();
         } else if (fAuth.getCurrentUser() != null){
@@ -117,8 +133,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
+    /**
+     * Sets up layout for ActivityUpcomingPage.
+     */
     private void setupXMLItems() {
-        // Set up navigation drawer
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
         navDrawer.setupNavDrawerPane();
 
@@ -127,11 +145,13 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         this.mRecyclerView.setHasFixedSize(true);
         this.mRecyclerView.setLayoutManager(manager);
 
-        // FloatingActionButton to link to ActivityCreateEvent
         FloatingActionButton floatingCreateEvent = findViewById(R.id.create_event);
         floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
     }
 
+    /**
+     * Sets up interface by populating views with data fetched from Google Calendar.
+     */
     private void prepareGoogleInterface() {
         List<Event> fetchedEvents;
         try {
@@ -152,11 +172,18 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         this.mRecyclerView.setAdapter(mAdapter);
     }
 
+    /**
+     * Links to ActivityCreateEventPage when button is clicked.
+     */
     private void moveToCreateEventPage() {
         Intent intent = new Intent(this, ActivityCreateEventPage.class);
         startActivity(intent);
     }
 
+    /**
+     * Stores details of to do item in a Map. Used to display details in view adapters.
+     * @param event CustomEvent encapsulating details required to display
+     */
     private void addToMap(CustomEvent event) {
         Date startD = null;
         try {
@@ -176,6 +203,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
+    /**
+     * Processes Firebase document from events collection into a CustomEventFromFirebase.
+     * @param document Firebase document from events collection
+     */
     private void processFirebaseDocument(QueryDocumentSnapshot document) {
         String title = (String) document.get("eventTitle");
         String startDate = (String) document.get("startDate");
@@ -184,11 +215,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String endTime = (String) document.get("endTime");
         String description = (String) document.get("description");
         String docID = document.getId();
-        if (startDate.equals(endDate)) { // just one day
+        if (startDate.equals(endDate)) {
             CustomEventFromFirebase event = new CustomEventFromFirebase(title, startDate, endDate, startTime, endTime, docID);
             event.setDescription(description);
             addToMap(event);
-        } else { // > 1 day
+        } else {
             LocalDate first = LocalDate.parse(startDate);
             LocalDate last = LocalDate.parse(endDate);
             long numDays = DAYS.between(first, last);
@@ -207,6 +238,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
+    /**
+     * Processes Google Calendar Event into a CustomEventFromGoogle.
+     * @param e Google Calendar Event to be converted
+     */
     private void processGoogleEvent(com.google.api.services.calendar.model.Event e) {
         String title = e.getSummary();
         String startDate;
@@ -216,10 +251,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String eventID = e.getId();
         String eventDescription = e.getDescription() == null ? "" : e.getDescription();
         CustomEvent event;
-        if (e.getStart().get("dateTime") == null) { // full day event
+        if (e.getStart().get("dateTime") == null) {
             startDate = Objects.requireNonNull(e.getStart().get("date")).toString();
             startTime = "All day";
-            endDate = startDate; // on Google it is instantiated as the next day
+            endDate = startDate;
             endTime = "23:59";
         } else {
             String[] startDateAndTimeSplit = Objects.requireNonNull(e.getStart().get("dateTime")).toString().split("T");
@@ -229,11 +264,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             endDate = endDateAndTimeSplit[0];
             endTime = endDateAndTimeSplit[1].substring(0, 5);
         }
-        if (startDate.equals(endDate)) { // <= 1 day
+        if (startDate.equals(endDate)) {
             event = new CustomEventFromGoogle(title, startDate, endDate, startTime, endTime, eventID);
             event.setDescription(eventDescription);
             addToMap(event);
-        } else { // > 1 day
+        } else {
             LocalDate first = LocalDate.parse(startDate);
             LocalDate last = LocalDate.parse(endDate);
             long numDays = DAYS.between(first, last);
@@ -252,7 +287,9 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         }
     }
 
-    // Fetches events from Firebase
+    /**
+     * Queries event data from Firebase events collection, with event dates greater than or equal to today.
+     */
     private void fetchEventsFromTodayFromFirebase() {
         this.listOfDays = new ArrayList<>();
         this.mapOfEvents = new HashMap<>();
@@ -287,7 +324,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 });
     }
 
-    // To link to ActivityCreateEventPage upon clicking a date in the RecyclerView
+    /**
+     * Links to ActivityCreateEventPage where date is set to the date clicked.
+     * @param date date clicked
+     */
     @Override
     public void onDateClickListener(String date) {
         Intent i = new Intent(this, ActivityCreateEventPage.class);
@@ -295,7 +335,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(i);
     }
 
-    // To link to ActivityEventDetailsPage upon clicking an event in the RecyclerView
+    /**
+     * Links to ActivityEventDetailsPage to display details of event clicked.
+     * @param eventId String event ID of event clicked
+     */
     @Override
     public void onEventClickListener(String eventId) {
         Intent i = new Intent(this, ActivityEventDetailsPage.class);
@@ -303,6 +346,10 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         startActivity(i);
     }
 
+    /**
+     * Google Calendar API handler class for asynchronous task handling.
+     */
+    @SuppressLint("StaticFieldLeak")
     private class RequestAuth extends AsyncTask<String, Void, List<Event>> {
         private List<Event> myList;
 
