@@ -72,8 +72,14 @@ import java.util.concurrent.ExecutionException;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ActivityEventDetailsPage extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
 
+    /**
+     * UI variables
+     */
     private LinearLayout layout;
     private TextView eventTitle;
     private TextView eventDate;
@@ -105,6 +111,13 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
     private GoogleSignInAccount googleAcct;
 
+    /**
+     * Sets up ActivityEventDetailsPage when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling fetchEventDetails() and fetchToDos() methods.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,6 +243,27 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
      */
     private void deleteFirebaseEvent() {
         this.c.document(this.event.getId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String host = (String) documentSnapshot.get("userID");
+                        if (userID.equals(host)) {
+                            ifEventHost();
+                        } else {
+                            ifEventParticipant();
+                        }
+                    }
+                });
+
+    }
+
+    /**
+     * Deletes event completely, along with associated to do items, since user is creator of the
+     * event.
+     */
+    private void ifEventHost() {
+        this.c.document(this.event.getId())
                 .delete()
                 .addOnSuccessListener(v -> {
                     Log.d(TAG, "DocumentSnapshot successfully deleted!");
@@ -238,6 +272,30 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                     startActivity(intent);
                 })
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    }
+
+    /**
+     * Removes user from event if user chooses to delete this event from their calendar. Only called
+     * when user is not the creator of the event.
+     */
+    private void ifEventParticipant() {
+        this.c.document(this.event.getId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        ArrayList<String> allParticipants = (ArrayList<String>) documentSnapshot.get("participants");
+                        allParticipants.remove(userID);
+                        c.document(event.getId())
+                                .update("participants", allParticipants)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        startActivity(new Intent(ActivityEventDetailsPage.this, ActivityMainCalendar.class));
+                                    }
+                                });
+                    }
+                });
     }
 
     /**

@@ -38,38 +38,58 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class ActivityAcceptSharedEvent extends AppCompatActivity {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityAcceptSharedEvent.class.getSimpleName();
 
-    private SetupNavDrawer navDrawer;
-    private Button submitButton;
+    /**
+     * UI variables
+     */
     private TextView title;
-
     private CalendarPickerView datePicker;
     private Set<CustomDay> selectedDates = new HashSet<>();
     private Map<String, List<String>> data;
 
-    // Firebase Variables
-    private FirebaseAuth fAuth;
+    /**
+     * Firebase information
+     */
     private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
+
+    /**
+     * ID of notification and shared event form to display
+     */
     private String docID;
     private String notifID;
 
+    /**
+     * Set up the range of date to display on the calendar picker
+     */
     private Date firstDate = null;
     private Date lastDate = null;
 
-    // To transform String to Date
+    /**
+     * To convert Strings to Dates and vice versa
+     */
     @SuppressLint("SimpleDateFormat")
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
+    /**
+     * Sets up ActivityAcceptSharedEvent when it is opened.
+     * First, sets up Firebase information.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling fetchDataFromFirebase() method.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accept_shared_event);
 
-        this.fAuth = FirebaseAuth.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        this.userID = fAuth.getCurrentUser().getUid();
         this.fStore = FirebaseFirestore.getInstance();
         this.c = this.fStore.collection("responses");
 
@@ -82,6 +102,9 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         fetchDataFromFirebase(this.docID);
     }
 
+    /**
+     * Sets up layout for ActivityAcceptSharedEvent.
+     */
     private void setupXMLItems() {
         Toolbar tb = findViewById(R.id.accept_shared_event);
         setSupportActionBar(tb);
@@ -97,8 +120,8 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         Calendar nextDay = Calendar.getInstance();
         nextDay.add(Calendar.WEEK_OF_MONTH, 1);
 
-        this.submitButton = findViewById(R.id.submit_button);
-        this.submitButton.setOnClickListener(v -> submitChoices());
+        Button submitButton = findViewById(R.id.submit_button);
+        submitButton.setOnClickListener(v -> submitChoices());
 
         this.datePicker = findViewById(R.id.picker_calendar);
         this.datePicker.init(today, nextDay.getTime()).withSelectedDate(today);
@@ -128,6 +151,11 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         });
     }
 
+    /**
+     * Queries data about the this shared event from Firebase response collection, to get the range
+     * of applicable dates to display in the calendar picker.
+     * @param responseFormID Firebase document on the responses about this shared event
+     */
     private void fetchDataFromFirebase(String responseFormID) {
         this.c.document(responseFormID)
                 .get()
@@ -156,6 +184,10 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.d(TAG, Objects.requireNonNull(e.getLocalizedMessage())));
     }
 
+    /**
+     * Submits choices of dates selected by adding the user's ID to the list of users who indicated availability
+     * for each selected date.
+     */
     public void submitChoices() {
         Map<String, Object> responses = getUserResponse();
 
@@ -180,6 +212,10 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         startActivity(i);
     }
 
+    /**
+     * Gets the dates selected by user.
+     * @return Map where the keys are selected dates and the values as the user's ID
+     */
     public Map<String, Object> getUserResponse() {
         Map<String, Object> responses = new HashMap<>();
         for (CustomDay d : this.selectedDates) {

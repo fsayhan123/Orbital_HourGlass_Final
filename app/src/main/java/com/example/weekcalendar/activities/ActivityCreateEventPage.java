@@ -53,7 +53,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.rpc.Help;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -61,7 +60,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -70,9 +68,14 @@ import java.util.Objects;
 import java.util.Set;
 
 public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
     private static final String TAG = ActivityCreateEventPage.class.getSimpleName();
 
-    // XML variables
+    /**
+     * UI variables
+     */
     private EditText title;
     private TextInputLayout selectStartDateLayout;
     private Button selectStartDate;
@@ -84,33 +87,39 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private Button selectEndTime;
     private Button createEvent;
     private EditText description;
-    private Button addToDoButton;
     private LinearLayout todoListLayout;
     private List<EditText> todos;
 
-    private EditText todo1;
-    private DatePickerDialog datePickerDialog;
-    private TimePickerDialog timePickerDialog;
-
-    // Firebase variables
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
+    /**
+     * Firebase information
+     */
     private String userID;
     private CollectionReference cEvents;
     private CollectionReference cToDo;
 
+    /**
+     * Google information
+     */
     private GoogleSignInAccount acct;
-
-    private CustomEvent event;
-    private String eventID;
-    private List<CustomToDo> originalToDos;
-
-    // Get data from Google
     private static final String APPLICATION_NAME = "WeekCalendar";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Set<String> SCOPES = CalendarScopes.all();
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
+    /**
+     * If updating an event, stores data that needs to be displayed
+     */
+    private CustomEvent event;
+    private String eventID;
+    private List<CustomToDo> originalToDos;
+
+    /**
+     * Sets up ActivityCreateEventPage when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, sets up user interface depending if we are creating or updating an event.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,11 +127,11 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         setContentView(R.layout.activity_create_event_page);
 
         // Setup link to Firebase
-        this.fAuth = FirebaseAuth.getInstance();
-        this.fStore = FirebaseFirestore.getInstance();
-        this.userID = Objects.requireNonNull(this.fAuth.getCurrentUser()).getUid();
-        this.cEvents = this.fStore.collection("events");
-        this.cToDo = this.fStore.collection("todo");
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+        this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
+        this.cEvents = fStore.collection("events");
+        this.cToDo = fStore.collection("todo");
 
         this.acct = GoogleSignIn.getLastSignedInAccount(this);
 
@@ -138,6 +147,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
+    /**
+     * Sets up layout for ActivityCreateEventPage.
+     */
     private void setupXMLItems() {
         Toolbar tb = findViewById(R.id.create_event_toolbar);
         setSupportActionBar(tb);
@@ -170,12 +182,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
         this.todoListLayout = findViewById(R.id.fill_in_todos);
 
-        this.todo1 = findViewById(R.id.todo_item);
+        EditText todo1 = findViewById(R.id.todo_item);
         this.todos = new ArrayList<>();
-        this.todos.add(this.todo1);
+        this.todos.add(todo1);
 
-        this.addToDoButton = findViewById(R.id.add_todo);
-        this.addToDoButton.setOnClickListener(v -> addToDoEditText());
+        Button addToDoButton = findViewById(R.id.add_todo);
+        addToDoButton.setOnClickListener(v -> addToDoEditText());
 
         this.originalToDos = new ArrayList<>();
 
@@ -189,10 +201,18 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
+    /**
+     * Sets up interface to create event on specified dateClicked if user clicked a date in
+     * AcitvityUpcomingPage.
+     * @param dateClicked date user clicked
+     */
     private void setupCreateInterface(String dateClicked) {
         this.selectStartDate.setText(dateClicked);
     }
 
+    /**
+     * Sets up interface to update an event if user clicked an event.
+     */
     private void setupUpdateInterface() {
         this.eventID = this.event.getId();
         this.title.setText(this.event.getTitle());
@@ -214,6 +234,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
+    /**
+     * Queries to do items associated with this event from Firebase.
+     * @param eventID ID of Firebase or Google event
+     */
     private void fetchToDos(String eventID) {
         this.cToDo.whereEqualTo("eventID", eventID)
                 .orderBy("timestamp")
@@ -239,6 +263,10 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 });
     }
 
+    /**
+     *
+     * @param doc
+     */
     private void processToDoDocument(QueryDocumentSnapshot doc) {
         String date = (String) doc.get("date");
         String title = (String) doc.get("title");
@@ -410,14 +438,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             year = c.get(java.util.Calendar.YEAR);
         }
 
-        this.datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 b.setText(String.format("%02d", dayOfMonth) + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
             }
         }, year, month, day);
-        this.datePickerDialog.show();
+        datePickerDialog.show();
     }
 
     private void openSelectTimeDialog(Button b) {
@@ -426,7 +454,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         int minute = c.get(java.util.Calendar.MINUTE);
         int hour = amPM == 1 ? c.get(java.util.Calendar.HOUR) + 12 : c.get(java.util.Calendar.HOUR);
         Log.d(TAG, "TIME NOW IS: " + hour + ":" + minute + " " + amPM);
-        this.timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
             @SuppressLint({"SetTextI18n", "DefaultLocale"})
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
@@ -440,7 +468,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 b.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute) + " " + end);
             }
         }, hour, minute, false);
-        this.timePickerDialog.show();
+        timePickerDialog.show();
     }
 
     @Override

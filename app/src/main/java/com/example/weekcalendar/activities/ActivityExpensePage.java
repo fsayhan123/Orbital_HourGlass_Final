@@ -75,7 +75,7 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
      * First, sets up Firebase information.
      * Then, sets up layout items by calling setupXMLItems();
      * Finally, fetches data from Firebase by calling getSpendingDays() method.
-     * @param savedInstanceState saved state of current page, if applicable.
+     * @param savedInstanceState saved state of current page, if applicable
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +86,9 @@ public class ActivityExpensePage extends AppCompatActivity implements MyOnDateCl
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
 
-        getSpendingDays();
-
         setupXMLItems();
+
+        getSpendingDays();
     }
 
     /**

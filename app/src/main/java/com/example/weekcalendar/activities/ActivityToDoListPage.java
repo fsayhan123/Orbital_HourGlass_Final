@@ -65,8 +65,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_to_do_list_page);
 
-        // Setup link to Firebase
-        // Firebase variables
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
         this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
@@ -74,7 +72,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
 
         setupXMLItems();
 
-        // Fetches data from Firebase
         fetchToDos();
     }
 
@@ -91,8 +88,6 @@ public class ActivityToDoListPage extends AppCompatActivity {
     }
 
     private void setupXMLItems() {
-        // Set up navigation drawer
-        // Set up navigation drawer
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
         navDrawer.setupNavDrawerPane();
 
