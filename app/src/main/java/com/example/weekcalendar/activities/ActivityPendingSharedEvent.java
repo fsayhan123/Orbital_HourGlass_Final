@@ -21,15 +21,31 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ActivityPendingSharedEvent extends AppCompatActivity implements PendingSharedEventsRecyclerViewAdapter.OnSharedEventListener {
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
+    private static final String TAG = ActivityPendingSharedEvent.class.getSimpleName();
 
+    /**
+     * Firebase information
+     */
     private FirebaseFirestore fStore;
     private String userID;
 
-    // Recycler View Variables
+    /**
+     * UI variables
+     */
     private ArrayList<CustomPendingShared> customPendingSharedArrayList;
     private RecyclerView mRecyclerView;
     private PendingSharedEventsRecyclerViewAdapter mAdapter;
 
+    /**
+     * Sets up ActivityPendingSharedEvent when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling getPendingSharedEvents() method.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +61,10 @@ public class ActivityPendingSharedEvent extends AppCompatActivity implements Pen
         getPendingSharedEvents();
     }
 
+
+    /**
+     * Sets up layout for ActivityPendingSharedEvent.
+     */
     private void setupXMLItems() {
         // Set up nav drawer
         SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.pending_shared_event_toolbar));
@@ -57,6 +77,10 @@ public class ActivityPendingSharedEvent extends AppCompatActivity implements Pen
         this.mRecyclerView.setLayoutManager(layoutManager);
     }
 
+    /**
+     * Fetches the list of pending shared events and adds them to a list
+     * Create a recyclerViewAdapter from this list and generate the recycler view for the page.
+     */
     protected void getPendingSharedEvents() {
         this.customPendingSharedArrayList = new ArrayList<>();
         this.fStore.collection("responses")
@@ -78,6 +102,12 @@ public class ActivityPendingSharedEvent extends AppCompatActivity implements Pen
                     }
                 });
     }
+
+    /**
+     *Once event is clicked, it brings user to the ActivitySelectSharedEvent page
+     * based on which pending shared event was chosen.
+     * @param position position of recycler view which was clicked
+     */
 
     @Override
     public void onEventClick(int position) {

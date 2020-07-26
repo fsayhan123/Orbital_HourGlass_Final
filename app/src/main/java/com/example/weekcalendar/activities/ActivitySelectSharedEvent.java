@@ -31,11 +31,21 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ActivitySelectSharedEvent extends AppCompatActivity {
-    // Firebase variables
+
+    /**
+     * For logging purposes. To easily identify output or logs relevant to current page.
+     */
+    private static final String TAG = ActivitySelectSharedEvent.class.getSimpleName();
+
+    /**
+     * Firebase information
+     */
     private FirebaseFirestore fStore;
     private String userID;
 
-    // Local Variables
+    /**
+     * UI variables
+     */
     private String responseID;
     private TextView title;
     private HashMap<String, ArrayList<String>> responses;
@@ -44,18 +54,23 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
     private Button selectStartTime;
     private TextInputLayout endTimeLayout;
     private Button selectEndTime;
-
-    // Recycler View Variables
     private ArrayList<CustomResponse> CustomResponseArrayList;
     private RecyclerView mRecyclerView;
     private ResponseRecyclerViewAdapter mAdapter;
 
+
+    /**
+     * Sets up ActivitySelectSharedEvent when it is opened.
+     * First, sets up Firebase or Google account.
+     * Then, sets up layout items by calling setupXMLItems();
+     * Finally, fetches data from Firebase by calling fetchResponses() method.
+     * @param savedInstanceState saved state of current page, if applicable
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_shared_event);
 
-        // Setup firebase Variables
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
         this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
@@ -68,6 +83,9 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
         fetchResponses();
     }
 
+    /**
+     * Sets up layout for ActivitySelectSharedEvent.
+     */
     private void setupXMlItems() {
         // Setup toolbar
         Toolbar tb = findViewById(R.id.create_shared_event_toolbar);
@@ -105,6 +123,10 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
         this.CustomResponseArrayList = new ArrayList<>();
     }
 
+    /**
+     * Fetches the responses associated with the specific responseID for the activity.
+     * On success of pulling the data, recycler view with dates will be created
+     */
     private void fetchResponses() {
         this.fStore.collection("responses")
                 .document(this.responseID)
@@ -140,6 +162,11 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
                     }
                 });
     }
+
+    /**
+     * If inputs for the events are valid, will create a firebase event
+     * with the given information for all users which are indicated available to attend.
+     */
 
     private void confirmEvent() {
         if (this.selectedDates.size() > 1)  {
@@ -179,6 +206,11 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
         }
     }
 
+    /**
+     * Opens a time picker interface in a dialog for user to select the time.
+     * @param b Button object reference
+     */
+
     private void openSelectTimeDialog(Button b) {
         java.util.Calendar c = java.util.Calendar.getInstance();
         int amPM = c.get(java.util.Calendar.AM_PM);
@@ -198,6 +230,12 @@ public class ActivitySelectSharedEvent extends AppCompatActivity {
         }, hour, minute, false);
         timePickerDialog.show();
     }
+
+    /**
+     * Returns whether all the times have been filled up properly.
+     *
+     * @return true if all fields are filled to create event
+     */
 
     private boolean checkFields() {
         if (this.selectStartTime.getText().toString().equals("Select Start Time")) {

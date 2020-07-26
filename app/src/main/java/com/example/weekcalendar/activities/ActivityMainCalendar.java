@@ -146,6 +146,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
         this.acct = GoogleSignIn.getLastSignedInAccount(this);
+        setupXMLItems();
         if (this.acct != null) {
             try {
                 new ActivityMainCalendar.RequestAuth().execute(today).get();
@@ -161,7 +162,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
             Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
         }
 
-        setupXMLItems();
+
 
         if (first) {
             String todayDate = FULL_DATE.format(today);
