@@ -3,6 +3,7 @@ package com.example.weekcalendar.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,8 +29,7 @@ public class MainCalendarAdapter extends RecyclerView.Adapter<MainCalendarAdapte
     public MainCalendarAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View eachEvent = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_event, parent, false);
         MainCalendarAdapter.MyViewHolder holder = new MyViewHolder(eachEvent);
-        holder.time.setOnClickListener(v -> clicker.onEventClickListener(holder.eventID));
-        holder.eventDetails.setOnClickListener(v -> clicker.onEventClickListener(holder.eventID));
+        holder.layout.setOnClickListener(v -> clicker.onEventClickListener(holder.eventID));
         return holder;
     }
 
@@ -48,11 +48,13 @@ public class MainCalendarAdapter extends RecyclerView.Adapter<MainCalendarAdapte
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         private String eventID;
+        private LinearLayout layout;
         private TextView time;
         private TextView eventDetails;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.layout = itemView.findViewById(R.id.each_event_layout);
             this.time = itemView.findViewById(R.id.time);
             this.eventDetails = itemView.findViewById(R.id.event_details);
         }

@@ -3,7 +3,7 @@
     android:id="@+id/each_day_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="20dp"
+    android:layout_marginBottom="20dp"
     android:background="#FFFFFF"
     android:backgroundTint="#00FFFFFF"
     android:orientation="horizontal">
@@ -16,6 +16,7 @@
         android:layout_marginRight="7dp"
         android:background="@drawable/click_layout"
         android:clickable="true"
+        android:foreground="@drawable/notification_view_bg"
         android:orientation="vertical">
 
         <TextView
