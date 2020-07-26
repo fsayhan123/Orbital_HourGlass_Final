@@ -79,8 +79,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!--        ^ so that drop down is below the spinner selector-->
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/spinner_layout"
             android:layout_width="match_parent"
@@ -122,13 +120,6 @@
             tools:layout_conversion_absoluteHeight="48dp"
             tools:layout_conversion_absoluteWidth="162dp" />
 
-        <!--            <Button-->
-        <!--                android:id="@+id/attach_file"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:layout_marginHorizontal="20dp"-->
-        <!--                android:layout_marginTop="10dp"-->
-        <!--                android:text="Attach File" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>

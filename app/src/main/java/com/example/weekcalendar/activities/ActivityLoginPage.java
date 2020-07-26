@@ -60,6 +60,7 @@ public class ActivityLoginPage extends AppCompatActivity {
 
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope("https://www.googleapis.com/auth/calendar"), new Scope("https://www.googleapis.com/auth/calendar.events"))
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -67,6 +68,10 @@ public class ActivityLoginPage extends AppCompatActivity {
                 .build();
         this.mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
+        setupXMLItems();
+    }
+
+    private void setupXMLItems() {
         this.signInButton = findViewById(R.id.sign_in_button);
         this.signInButton.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
@@ -197,12 +202,4 @@ public class ActivityLoginPage extends AppCompatActivity {
                     }
                 });
     }
-
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        if (authStateListener != null){
-//            fAuth.removeAuthStateListener(authStateListener);
-//        }
-//    }
 }

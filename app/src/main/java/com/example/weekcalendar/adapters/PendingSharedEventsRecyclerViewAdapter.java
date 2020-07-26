@@ -1,12 +1,10 @@
 package com.example.weekcalendar.adapters;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.example.weekcalendar.R;
-import com.example.weekcalendar.customclasses.CustomNotification;
 import com.example.weekcalendar.customclasses.CustomPendingShared;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,8 +13,6 @@ import java.util.ArrayList;
 
 public class PendingSharedEventsRecyclerViewAdapter extends RecyclerView.Adapter<PendingSharedEventsRecyclerViewAdapter.MyViewHolder> {
     private ArrayList<CustomPendingShared> mDataset;
-    private Activity a;
-    private View eachDayView;
     private OnSharedEventListener mOnSharedEventListener;
 
     // Provide a reference to the views for each data item
@@ -55,9 +51,8 @@ public class PendingSharedEventsRecyclerViewAdapter extends RecyclerView.Adapter
     public PendingSharedEventsRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                                             int viewType) {
         // create a new view
-        eachDayView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.pending_shared_event_message, parent, false);
-        MyViewHolder vh = new MyViewHolder(eachDayView, this.mOnSharedEventListener);
-        return vh;
+        View eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.pending_shared_event_message, parent, false);
+        return new MyViewHolder(eachDayView, this.mOnSharedEventListener);
     }
 
     // Replace the contents of a view (invoked by the layout manager)

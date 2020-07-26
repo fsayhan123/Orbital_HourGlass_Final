@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -52,6 +53,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.rpc.Help;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,9 +62,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ActivityCreateEventPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener, MyTimeDialog.MyTimeDialogListener {
@@ -95,6 +99,8 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private CollectionReference cEvents;
     private CollectionReference cToDo;
 
+    private GoogleSignInAccount acct;
+
     private CustomEvent event;
     private String eventID;
     private List<CustomToDo> originalToDos;
@@ -105,6 +111,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private static final Set<String> SCOPES = CalendarScopes.all();
     private static final String CREDENTIALS_FILE_PATH = "credentials.json";
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,13 +120,33 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         // Setup link to Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        this.userID = Objects.requireNonNull(this.fAuth.getCurrentUser()).getUid();
         this.cEvents = this.fStore.collection("events");
         this.cToDo = this.fStore.collection("todo");
 
-        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        this.acct = GoogleSignIn.getLastSignedInAccount(this);
 
-        // Links to XML
+        setupXMLItems();
+
+        Intent i = getIntent();
+        this.event = i.getParcelableExtra("event to edit");
+        String dateClicked = i.getStringExtra("date clicked");
+        if (this.event != null) {
+            setupUpdateInterface();
+        } else if (dateClicked != null) {
+            setupCreateInterface(dateClicked);
+        }
+    }
+
+    private void setupXMLItems() {
+        Toolbar tb = findViewById(R.id.create_event_toolbar);
+        setSupportActionBar(tb);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityMainCalendar.class));
+        });
+
         this.title = findViewById(R.id.insert_event_name);
 
         this.selectStartDateLayout = findViewById(R.id.selectStartDateLayout);
@@ -144,56 +171,46 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         this.todoListLayout = findViewById(R.id.fill_in_todos);
 
         this.todo1 = findViewById(R.id.todo_item);
+        this.todos = new ArrayList<>();
+        this.todos.add(this.todo1);
 
         this.addToDoButton = findViewById(R.id.add_todo);
         this.addToDoButton.setOnClickListener(v -> addToDoEditText());
 
-        this.todos = new ArrayList<>();
-        this.todos.add(this.todo1);
-
         this.originalToDos = new ArrayList<>();
 
         this.createEvent = findViewById(R.id.create_event_button);
-        if (acct != null) { // if logged in to a Google account
+
+        if (this.acct != null) {
             RequestAuth task = new RequestAuth();
             this.createEvent.setOnClickListener(v -> task.execute("create"));
         } else {
             this.createEvent.setOnClickListener(v -> createFirebaseEvent());
         }
+    }
 
-        // Setup toolbar with working back button
-        Toolbar tb = findViewById(R.id.create_event_toolbar);
-        setSupportActionBar(tb);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        tb.setNavigationOnClickListener(v -> {
-            startActivity(new Intent(this, ActivityMainCalendar.class));
-        });
+    private void setupCreateInterface(String dateClicked) {
+        this.selectStartDate.setText(dateClicked);
+    }
 
-        Intent i = getIntent();
-        this.event = i.getParcelableExtra("event to edit");
-        if (this.event != null) {
-            this.eventID = this.event.getId();
-            this.title.setText(this.event.getTitle());
-            this.selectStartDate.setText(HelperMethods.formatDateForView(this.event.getStartDate()));
-            this.selectEndDate.setText(HelperMethods.formatDateForView(this.event.getEndDate()));
-            this.selectStartTime.setText(HelperMethods.formatTimeTo12H(this.event.getStartTime()));
-            this.selectEndTime.setText(HelperMethods.formatTimeTo12H(this.event.getEndTime()));
-            if (this.event.getDescription() == null || !this.event.getDescription().equals("")) {
-                this.description.setText(this.event.getDescription());
-            }
-            this.createEvent.setText("Update Event");
-            fetchToDos(this.event.getId());
-            if (acct != null) {
-                RequestAuth task = new RequestAuth();
-                Log.d(TAG, "!!!!! " + this.event.getId());
-                this.createEvent.setOnClickListener(v -> task.execute("update", this.event.getId()));
-            } else {
-                this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
-            }
-        } else if (i.getStringExtra("date clicked") != null) {
-            String date = i.getStringExtra("date clicked");
-            this.selectStartDate.setText(date);
+    private void setupUpdateInterface() {
+        this.eventID = this.event.getId();
+        this.title.setText(this.event.getTitle());
+        this.selectStartDate.setText(HelperMethods.formatDateForView(this.event.getStartDate()));
+        this.selectEndDate.setText(HelperMethods.formatDateForView(this.event.getEndDate()));
+        this.selectStartTime.setText(HelperMethods.formatTimeTo12H(this.event.getStartTime()));
+        this.selectEndTime.setText(HelperMethods.formatTimeTo12H(this.event.getEndTime()));
+        if (this.event.getDescription() == null || !this.event.getDescription().equals("")) {
+            this.description.setText(this.event.getDescription());
+        }
+        this.createEvent.setText("Update Event");
+        fetchToDos(this.event.getId());
+        if (acct != null) {
+            RequestAuth task = new RequestAuth();
+            Log.d(TAG, "!!!!! " + this.event.getId());
+            this.createEvent.setOnClickListener(v -> task.execute("update", this.event.getId()));
+        } else {
+            this.createEvent.setOnClickListener(v -> updateFirebaseEvent());
         }
     }
 
@@ -217,12 +234,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }
 
-    private void processToDoDocument(QueryDocumentSnapshot doc) { // for previously created todos
+    private void processToDoDocument(QueryDocumentSnapshot doc) {
         String date = (String) doc.get("date");
         String title = (String) doc.get("title");
         String id = doc.getId();
@@ -238,13 +255,12 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
     private void addToDoEditText() {
         if (!this.todos.get(this.todos.size() - 1).getText().toString().equals("")) {
             LayoutInflater inflater = this.getLayoutInflater();
-            View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
+            @SuppressLint("InflateParams") View eachToDo = inflater.inflate(R.layout.each_todo_create_event, null);
             this.todoListLayout.addView(eachToDo);
             this.todos.add(eachToDo.findViewById(R.id.todo_item));
         }
     }
 
-    // need to have a check for start day >= end day, start time >= end time
     private boolean checkFields() {
         String eventTitle = this.title.getText().toString();
         if (eventTitle.equals("")) {
@@ -257,6 +273,14 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             this.selectStartTimeLayout.setError("Please choose a start time!");
         } else if (this.selectEndTime.getText().toString().equals("Select End Time")) {
             this.selectEndTimeLayout.setError("Please choose a end time!");
+        } else if (!HelperMethods.compareDates(this.selectStartDate.getText().toString(),
+                this.selectEndDate.getText().toString())) {
+            this.selectStartDateLayout.setError("Start date must be before end date!");
+            this.selectEndDateLayout.setError("End date must be after start date!");
+        } else if (!HelperMethods.compareTimes(this.selectStartTime.getText().toString(),
+                this.selectEndTime.getText().toString())) {
+            this.selectStartTimeLayout.setError("Start time must be before end time!");
+            this.selectEndTimeLayout.setError("End time must be after start time!");
         } else {
             return true;
         }
@@ -280,7 +304,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         eventDetails.put("endTime", endTime);
         eventDetails.put("description", eventDescription);
         if (this.event == null) {
-            eventDetails.put("participants", Arrays.asList(this.userID));
+            eventDetails.put("participants", Collections.singletonList(this.userID));
         }
         return eventDetails;
     }
@@ -290,7 +314,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         long offset = 0;
         for (EditText e : this.todos) {
             String toDo = e.getText().toString();
-
             if (!toDo.equals("")) {
                 Map<String, Object> toDoDetails = new HashMap<>();
                 String startDate = HelperMethods.formatDateWithDash(this.selectStartDate.getText().toString());
@@ -315,10 +338,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
             thisEventDoc.update(eventDetails)
                     .addOnSuccessListener(docRef -> {
-                        // need to check if event originally had to do items
-                        // if true, then we need to update this based on the existing to do's document ID
-                        // if false, we need to create new document
-                        for (int i = 0; i < originalToDos.size(); i++) { // for original todos
+                        for (int i = 0; i < originalToDos.size(); i++) {
                             CustomToDo todo = originalToDos.get(i);
                             DocumentReference toDoDocRef = cToDo.document(todo.getID());
                             Map<String, Object> thisToDoDetails = new HashMap<>();
@@ -350,7 +370,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
     }
 
-    // need to implement multi day here
     private void createFirebaseEvent() {
         if (checkFields()) {
             Map<String, Object> eventDetails = getEventDetails();
@@ -392,6 +411,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         }
 
         this.datePickerDialog = new DatePickerDialog(ActivityCreateEventPage.this, new DatePickerDialog.OnDateSetListener() {
+            @SuppressLint({"SetTextI18n", "DefaultLocale"})
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 b.setText(String.format("%02d", dayOfMonth) + " " + HelperMethods.numToStringMonth[month + 1].substring(0, 3) + " " + year);
@@ -407,9 +427,9 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         int hour = amPM == 1 ? c.get(java.util.Calendar.HOUR) + 12 : c.get(java.util.Calendar.HOUR);
         Log.d(TAG, "TIME NOW IS: " + hour + ":" + minute + " " + amPM);
         this.timePickerDialog = new TimePickerDialog(ActivityCreateEventPage.this, new TimePickerDialog.OnTimeSetListener() {
+            @SuppressLint({"SetTextI18n", "DefaultLocale"})
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                Log.d(TAG, "!!!!!" + Integer.toString(hourOfDay));
                 String end = "AM";
                 if (hourOfDay > 12) {
                     hourOfDay -= 12;
@@ -433,6 +453,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
         b.setText(d.getTime());
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class RequestAuth extends AsyncTask<String, Void, Boolean> {
 
         @Override
@@ -507,16 +528,16 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
             if (checkFields()) {
                 Map<String, Object> eventDetails = getEventDetails();
                 Event e = new Event()
-                        .setSummary(eventDetails.get("eventTitle").toString())
-                        .setDescription(eventDetails.get("description").toString());
-                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
-                        eventDetails.get("startTime").toString()));
+                        .setSummary(Objects.requireNonNull(eventDetails.get("eventTitle")).toString())
+                        .setDescription(Objects.requireNonNull(eventDetails.get("description")).toString());
+                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(Objects.requireNonNull(eventDetails.get("startDate")).toString(),
+                        Objects.requireNonNull(eventDetails.get("startTime")).toString()));
                 EventDateTime start = new EventDateTime()
                         .setDateTime(startDT)
                         .setTimeZone("Asia/Singapore");
                 e.setStart(start);
-                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("endDate").toString(),
-                        eventDetails.get("endTime").toString()));
+                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(Objects.requireNonNull(eventDetails.get("endDate")).toString(),
+                        Objects.requireNonNull(eventDetails.get("endTime")).toString()));
                 EventDateTime end = new EventDateTime()
                         .setDateTime(endDT)
                         .setTimeZone("Asia/Singapore");
@@ -527,7 +548,6 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
                 List<Map<String, Object>> allToDoDetails = getToDoDetails();
                 for (Map<String, Object> todo : allToDoDetails) {
-                    Log.d(TAG, "ID IS " + response.getId());
                     todo.put("eventID", response.getId());
                     cToDo.add(todo)
                             .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
@@ -543,16 +563,16 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                         .events()
                         .get("primary", eventID)
                         .execute()
-                        .setSummary(eventDetails.get("eventTitle").toString())
-                        .setDescription(eventDetails.get("description").toString());
-                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("startDate").toString(),
-                        eventDetails.get("startTime").toString()));
+                        .setSummary(Objects.requireNonNull(eventDetails.get("eventTitle")).toString())
+                        .setDescription(Objects.requireNonNull(eventDetails.get("description")).toString());
+                DateTime startDT = new DateTime(HelperMethods.toGoogleDateTime(Objects.requireNonNull(eventDetails.get("startDate")).toString(),
+                        Objects.requireNonNull(eventDetails.get("startTime")).toString()));
                 EventDateTime start = new EventDateTime()
                         .setDateTime(startDT)
                         .setTimeZone("Asia/Singapore");
                 e.setStart(start);
-                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(eventDetails.get("endDate").toString(),
-                        eventDetails.get("endTime").toString()));
+                DateTime endDT = new DateTime(HelperMethods.toGoogleDateTime(Objects.requireNonNull(eventDetails.get("endDate")).toString(),
+                        Objects.requireNonNull(eventDetails.get("endTime")).toString()));
                 EventDateTime end = new EventDateTime()
                         .setDateTime(endDT)
                         .setTimeZone("Asia/Singapore");
@@ -562,7 +582,7 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
 
                 List<Map<String, Object>> todoDetails = getToDoDetails();
 
-                for (int i = 0; i < originalToDos.size(); i++) { // for original todos
+                for (int i = 0; i < originalToDos.size(); i++) {
                     CustomToDo todo = originalToDos.get(i);
                     DocumentReference toDoDocRef = cToDo.document(todo.getID());
                     Map<String, Object> thisToDoDetails = new HashMap<>();
@@ -572,16 +592,16 @@ public class ActivityCreateEventPage extends AppCompatActivity implements MyDate
                     String newTitle = (String) todoDetails.get(i).get("title");
                     thisToDoDetails.put("title", newTitle);
                     toDoDocRef.update(thisToDoDetails)
-                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
-                            .addOnFailureListener(doc -> Log.w(TAG, "*****Error writing document", doc));
+                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                            .addOnFailureListener(doc -> Log.w(TAG, "Error writing document", doc));
                 }
 
                 for (int i = originalToDos.size(); i < todoDetails.size(); i++) {
                     Map<String, Object> nextToDo = getToDoDetails().get(i);
                     nextToDo.put("eventID", event.getId());
                     cToDo.add(nextToDo)
-                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "*****DocumentSnapshot successfully written!"))
-                            .addOnFailureListener(doc -> Log.w(TAG, "*****Error writing document", doc));
+                            .addOnSuccessListener(docRef2 -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                            .addOnFailureListener(doc -> Log.w(TAG, "Error writing document", doc));
                 }
             }
         }

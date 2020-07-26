@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +18,12 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityCreateToDoPage;
 import com.example.weekcalendar.activities.ActivityToDoListPage;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.customclasses.CustomToDo;
-
-import static android.content.ContentValues.TAG;
 
 public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
@@ -50,7 +47,8 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public CustomToDo getChild(int listPosition, int expandedListPosition) {
-        return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
+        return Objects.requireNonNull(this.expandableListDetail
+                .get(this.expandableListTitle.get(listPosition)))
                 .get(expandedListPosition);
     }
 
@@ -59,6 +57,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         return expandedListPosition;
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
@@ -67,7 +66,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.list_item, null);
+            convertView = Objects.requireNonNull(layoutInflater).inflate(R.layout.list_item, null);
         }
         CheckBox expandedListTextView = convertView.findViewById(R.id.list_child);
         expandedListTextView.setText(expandedListText);
@@ -129,8 +128,8 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int listPosition) {
-        return this.expandableListDetail
-                .get(this.expandableListTitle.get(listPosition))
+        return Objects.requireNonNull(this.expandableListDetail
+                .get(this.expandableListTitle.get(listPosition)))
                 .size();
     }
 
@@ -149,6 +148,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         return listPosition;
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public View getGroupView(int listPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
@@ -156,7 +156,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.list_group, null);
+            convertView = Objects.requireNonNull(layoutInflater).inflate(R.layout.list_group, null);
         }
         TextView listTitleTextView = convertView.findViewById(R.id.list_parent);
         listTitleTextView.setTypeface(null, Typeface.BOLD);
@@ -185,7 +185,7 @@ public class ToDoListViewAdapter extends BaseExpandableListAdapter {
     public void remove(int groupPos, int childPos) {
         CustomDay group = this.expandableListTitle.get(groupPos);
         List<CustomToDo> toDos = this.expandableListDetail.get(group);
-        toDos.remove(childPos);
+        Objects.requireNonNull(toDos).remove(childPos);
         if (this.getChildrenCount(groupPos) == 0) {
             this.expandableListTitle.remove(groupPos);
         }

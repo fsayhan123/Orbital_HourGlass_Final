@@ -26,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ActivityRegisterPage extends AppCompatActivity {
     private static final String TAG = ActivityRegisterPage.class.getSimpleName();
@@ -43,24 +44,27 @@ public class ActivityRegisterPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_page);
 
-        this.mFullname = findViewById(R.id.create_name);
-        this.mEmail = findViewById(R.id.create_email);
-        this.mPassword = findViewById(R.id.create_password);
-        this.mRegisterButton = findViewById(R.id.register_button);
-        this.mLoginButton = findViewById(R.id.already_registered);
-        this.progressBar = findViewById(R.id.loading_register);
-
-        this.mLoginButton.setOnClickListener(v -> toLogin());
-
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
 
         // check if user is already logged in
         if (this.fAuth.getCurrentUser() != null) {
-            startActivity(new Intent(getApplicationContext(), ActivityUpcomingPage.class));
+            startActivity(new Intent(getApplicationContext(), ActivityMainCalendar.class));
             finish();
         }
 
+        setupXMLItems();
+    }
+
+    private void setupXMLItems() {
+        this.mFullname = findViewById(R.id.create_name);
+        this.mEmail = findViewById(R.id.create_email);
+        this.mPassword = findViewById(R.id.create_password);
+        this.mLoginButton = findViewById(R.id.already_registered);
+        this.progressBar = findViewById(R.id.loading_register);
+
+        this.mLoginButton.setOnClickListener(v -> toLogin());
+        this.mRegisterButton = findViewById(R.id.register_button);
         this.mRegisterButton.setOnClickListener(v -> {
             String name = mFullname.getText().toString();
             String email = mEmail.getText().toString().trim();
@@ -91,7 +95,7 @@ public class ActivityRegisterPage extends AppCompatActivity {
                         // process of registering the user is called task
                         if (task.isSuccessful()) {
                             Toast.makeText(ActivityRegisterPage.this, "User created!", Toast.LENGTH_SHORT).show();
-                            userID = fAuth.getCurrentUser().getUid();
+                            userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
                             // will automatically create it if it does not exist
                             DocumentReference docRef = fStore.collection("users").document(userID);
                             Map<String, Object> user = new HashMap<>();
@@ -110,7 +114,7 @@ public class ActivityRegisterPage extends AppCompatActivity {
                             });
                             startActivity(new Intent(getApplicationContext(), ActivityMainCalendar.class));
                         } else {
-                            Toast.makeText(ActivityRegisterPage.this, "Error! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivityRegisterPage.this, "Error! " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }
                     }
@@ -119,7 +123,7 @@ public class ActivityRegisterPage extends AppCompatActivity {
         });
     }
 
-    public void toLogin() {
+    private void toLogin() {
         startActivity(new Intent(this, ActivityLoginPage.class));
     }
 }

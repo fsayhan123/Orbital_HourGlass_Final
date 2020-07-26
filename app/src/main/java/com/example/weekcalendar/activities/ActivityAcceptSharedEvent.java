@@ -3,12 +3,12 @@ package com.example.weekcalendar.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -47,7 +48,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
     private Set<CustomDay> selectedDates = new HashSet<>();
     private Map<String, List<String>> data;
 
-    //Firebase Variables
+    // Firebase Variables
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
@@ -59,6 +60,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
     private Date lastDate = null;
 
     // To transform String to Date
+    @SuppressLint("SimpleDateFormat")
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
@@ -66,45 +68,40 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accept_shared_event);
 
-//        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.create_shared_event));
-//        this.navDrawer.setupNavDrawerPane();
-
-        //Setup toolbar
-        Toolbar tb = findViewById(R.id.accept_shared_event);
-        setSupportActionBar(tb);
-
-        // sets up back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        tb.setNavigationOnClickListener(v -> {
-            startActivity(new Intent(this, ActivityNotificationsPage.class));
-        });
-
-        this.title = findViewById(R.id.accept_shared_event_title);
-
         this.fAuth = FirebaseAuth.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();
         this.fStore = FirebaseFirestore.getInstance();
         this.c = this.fStore.collection("responses");
 
-        Date today = new Date();
-        Calendar nextDay = Calendar.getInstance();
-        nextDay.add(Calendar.WEEK_OF_MONTH, 1);
+        setupXMLItems();
 
         Intent i = getIntent();
         this.docID = i.getStringExtra("response form ID");
         this.notifID = i.getStringExtra("notification ID");
 
         fetchDataFromFirebase(this.docID);
+    }
+
+    private void setupXMLItems() {
+        Toolbar tb = findViewById(R.id.accept_shared_event);
+        setSupportActionBar(tb);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityNotificationsPage.class));
+        });
+
+        this.title = findViewById(R.id.accept_shared_event_title);
+
+        Date today = new Date();
+        Calendar nextDay = Calendar.getInstance();
+        nextDay.add(Calendar.WEEK_OF_MONTH, 1);
 
         this.submitButton = findViewById(R.id.submit_button);
         this.submitButton.setOnClickListener(v -> submitChoices());
 
         this.datePicker = findViewById(R.id.picker_calendar);
         this.datePicker.init(today, nextDay.getTime()).withSelectedDate(today);
-
-
         this.datePicker.setOnDateSelectedListener(new CalendarPickerView.OnDateSelectedListener() {
             @Override
             public void onDateSelected(Date date) {
@@ -137,7 +134,7 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot doc) {
-                        String title = doc.get("title").toString();
+                        String title = Objects.requireNonNull(doc.get("title")).toString();
                         ActivityAcceptSharedEvent.this.title.setText(title);
                         data = (Map<String, List<String>>) doc.get("responses");
                         TreeMap<String, List<String>> sortedData = new TreeMap<>(data);
@@ -156,14 +153,13 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
                         datePicker.init(firstDate, lastDate).withSelectedDate(firstDate);
                     }
                 })
-                .addOnFailureListener(e -> Log.d(TAG, e.getLocalizedMessage()));
+                .addOnFailureListener(e -> Log.d(TAG, Objects.requireNonNull(e.getLocalizedMessage())));
     }
 
     public void submitChoices() {
         Map<String, Object> responses = getUserResponse();
 
         for (CustomDay d : this.selectedDates) {
-            Log.d(TAG, "!!!!!!!!!!!!!!!!!!!!!!! " + String.format("responses.%s", d.getDateForFirebase()));
             this.c.document(this.docID)
                     .update(String.format("responses.%s", d.getDateForFirebase()), FieldValue.arrayUnion(userID))
                     .addOnSuccessListener(docRef -> Log.d(TAG, "DocumentSnapshot successfully written!"))
@@ -192,4 +188,3 @@ public class ActivityAcceptSharedEvent extends AppCompatActivity {
         return responses;
     }
 }
-

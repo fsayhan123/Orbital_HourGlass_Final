@@ -36,8 +36,4 @@ public class CustomEventFromFirebase extends CustomEvent implements Parcelable {
     }
 
     // Parcelable methods END
-
-    // CustomEventFromFirebase methods START
-
-    // CustomEventFromFirebase methods END
 }

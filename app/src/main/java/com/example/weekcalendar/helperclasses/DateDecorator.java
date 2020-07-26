@@ -7,8 +7,6 @@ import com.example.weekcalendar.customclasses.CustomDay;
 import com.squareup.timessquare.CalendarCellDecorator;
 import com.squareup.timessquare.CalendarCellView;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 

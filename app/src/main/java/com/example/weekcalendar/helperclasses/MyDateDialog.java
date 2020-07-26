@@ -18,11 +18,11 @@ import com.example.weekcalendar.customclasses.CustomDay;
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 
 import java.text.SimpleDateFormat;
+import java.util.Objects;
 
 public class MyDateDialog extends AppCompatDialogFragment {
     private MyDateDialogEventListener listener;
     private Button b;
-    private static SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM yyyy");
 
     public MyDateDialog(Button b) {
         this.b = b;
@@ -34,7 +34,7 @@ public class MyDateDialog extends AppCompatDialogFragment {
         try {
             listener = (MyDateDialogEventListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement MyDateDialogEventueListener");
+            throw new ClassCastException(context.toString() + " must implement MyDateDialogEventListener");
         }
     }
 
@@ -42,7 +42,7 @@ public class MyDateDialog extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View scrolling = inflater.inflate(R.layout.select_date_dialog, null);
         SingleDateAndTimePicker s = scrolling.findViewById(R.id.date_selector_day);
 

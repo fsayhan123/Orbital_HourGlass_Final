@@ -3,8 +3,6 @@ package com.example.weekcalendar.customclasses.event;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.Nullable;
-
 import com.example.weekcalendar.helperclasses.HelperMethods;
 
 import java.util.Objects;

@@ -1,11 +1,11 @@
 package com.example.weekcalendar.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,7 +23,6 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     private List<CustomDay> spendingCustomDays;
     private Map<CustomDay, List<CustomExpenseCategory>> whatWeSpentEachDay;
     private Activity a;
-    private LinearLayoutManager manager;
     private MyOnDateClickListener mDateClickListener;
 
     public ExpenseRecyclerViewAdapter(List<CustomDay> spendingCustomDays,
@@ -37,7 +36,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
         this.mDateClickListener = mDateClickListener;
     }
 
-    public class MyExpenseViewHolder extends RecyclerView.ViewHolder {
+    public static class MyExpenseViewHolder extends RecyclerView.ViewHolder {
         private TextView date;
         private TextView costToday;
         private RecyclerView categoryAndExpenses;
@@ -54,7 +53,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
     @Override
     public ExpenseRecyclerViewAdapter.MyExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_expense_page_each_day_expense, parent, false);
-        ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder = new ExpenseRecyclerViewAdapter.MyExpenseViewHolder(view);
+        ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder = new MyExpenseViewHolder(view);
         holder.date.setOnClickListener(v -> {
             String day = holder.date.getText().toString();
             mDateClickListener.onDateClickListener(day);
@@ -62,15 +61,13 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
         return holder;
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull ExpenseRecyclerViewAdapter.MyExpenseViewHolder holder, int position) {
         CustomDay d = this.spendingCustomDays.get(position);
         holder.date.setText(d.getFullDateForView());
 
         List<CustomExpenseCategory> expenditureOnDayD = this.whatWeSpentEachDay.get(d);
-        if (expenditureOnDayD.size() == 0) {
-            Toast.makeText(a, "empty!!!!!!", Toast.LENGTH_SHORT).show();
-        }
         EachExpenseExRVAdapter e = new EachExpenseExRVAdapter(expenditureOnDayD);
 
         double totalCost = 0;
@@ -80,7 +77,7 @@ public class ExpenseRecyclerViewAdapter extends RecyclerView.Adapter<ExpenseRecy
 
         holder.costToday.setText(String.format("%.2f", totalCost));
 
-        manager = new LinearLayoutManager(a);
+        LinearLayoutManager manager = new LinearLayoutManager(a);
         holder.categoryAndExpenses.setLayoutManager(manager);
         holder.categoryAndExpenses.setAdapter(e);
     }

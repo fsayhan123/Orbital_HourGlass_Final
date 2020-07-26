@@ -1,5 +1,7 @@
 package com.example.weekcalendar.helperclasses;
 
+import android.annotation.SuppressLint;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.time.format.DateTimeFormatter;
@@ -60,6 +62,7 @@ public class HelperMethods {
         return timeArr[0] + ":" + timeArr[1];
     }
 
+    @SuppressLint("DefaultLocale")
     public static String formatTimeTo12H(String time) {
         String[] timeArr = time.split(":");
         String amOrPM;
@@ -83,5 +86,22 @@ public class HelperMethods {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDateTime date = LocalDateTime.now();
         return dtf.format(date);
+    }
+
+    public static boolean compareDates(String s1, String s2) {
+        String[] split1 = s1.split(" ");
+        split1[1] = convertMonth(split1[1]);
+        String[] split2 = s2.split(" ");
+        split2[1] = convertMonth(split2[1]);
+        return Integer.parseInt(split1[0]) <= Integer.parseInt(split2[0])
+                && Integer.parseInt(split1[1]) <= Integer.parseInt(split2[2])
+                && Integer.parseInt(split1[2]) <= Integer.parseInt(split2[2]);
+    }
+
+    public static boolean compareTimes(String t1, String t2) {
+        String[] split1 = formatTimeTo24H(t1).split(":");
+        String[] split2 = formatTimeTo24H(t2).split(":");
+        return Integer.parseInt(split1[0]) <= Integer.parseInt(split2[0])
+                && Integer.parseInt(split1[1]) <= Integer.parseInt(split2[1]);
     }
 }

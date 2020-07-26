@@ -17,6 +17,8 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.github.florent37.singledateandtimepicker.SingleDateAndTimePicker;
 
+import java.util.Objects;
+
 public class MyTimeDialog extends AppCompatDialogFragment {
     private MyTimeDialogListener listener;
     private Button b;
@@ -39,7 +41,7 @@ public class MyTimeDialog extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
         View scrolling = inflater.inflate(R.layout.select_time_dialog, null);
         SingleDateAndTimePicker s = scrolling.findViewById(R.id.date_selector_time);
 

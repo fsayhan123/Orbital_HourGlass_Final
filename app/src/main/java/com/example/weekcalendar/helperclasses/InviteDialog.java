@@ -1,6 +1,5 @@
 package com.example.weekcalendar.helperclasses;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +14,8 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityEventDetailsPage;
 
+import java.util.Objects;
+
 public class InviteDialog extends AppCompatDialogFragment {
     private ActivityEventDetailsPage a;
     public EditText allEmails;
@@ -26,7 +27,7 @@ public class InviteDialog extends AppCompatDialogFragment {
     @NonNull
     @Override
     public android.app.Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
         this.allEmails = view.findViewById(R.id.edit_invite);

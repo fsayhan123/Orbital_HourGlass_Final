@@ -10,7 +10,6 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.MyDateDialog;
@@ -26,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateDialog.MyDateDialogEventListener {
     private static final String TAG = ActivityCreateToDoPage.class.getSimpleName();
@@ -51,13 +51,29 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_to_do_page);
 
-        // Setup link to Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
         this.userID = this.fAuth.getCurrentUser().getUid();
         this.c = this.fStore.collection("todo");
 
-        // Links to XML
+        setupXMLItems();
+
+        Intent i = getIntent();
+        this.toDo = i.getParcelableExtra("todo");
+        if (this.toDo != null) {
+            setupUpdateInterface();
+        }
+    }
+
+    private void setupXMLItems() {
+        Toolbar tb = findViewById(R.id.create_todo_toolbar);
+        setSupportActionBar(tb);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        tb.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(this, ActivityToDoListPage.class));
+        });
+
         this.selectDate = findViewById(R.id.select_date);
         this.selectDate.setOnClickListener(v -> openSelectDateDialog(selectDate));
 
@@ -67,24 +83,13 @@ public class ActivityCreateToDoPage extends AppCompatActivity implements MyDateD
 
         this.createToDo = findViewById(R.id.create_todo_button);
         this.createToDo.setOnClickListener(v -> createToDo());
+    }
 
-        // Setup toolbar with working back button
-        Toolbar tb = findViewById(R.id.create_todo_toolbar);
-        setSupportActionBar(tb);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        tb.setNavigationOnClickListener(v -> {
-            startActivity(new Intent(this, ActivityToDoListPage.class));
-        });
-
-        Intent i = getIntent();
-        this.toDo = i.getParcelableExtra("todo");
-        if (this.toDo != null) {
-            this.toDoTitle.setText(this.toDo.getTitle());
-            this.selectDate.setText(HelperMethods.formatDateForView(this.toDo.getDate()));
-            this.createToDo.setOnClickListener(v -> updateToDo());
-            this.createToDo.setText("Update To Do");
-        }
+    private void setupUpdateInterface() {
+        this.toDoTitle.setText(this.toDo.getTitle());
+        this.selectDate.setText(HelperMethods.formatDateForView(this.toDo.getDate()));
+        this.createToDo.setOnClickListener(v -> updateToDo());
+        this.createToDo.setText("Update To Do");
     }
 
     private boolean checkFields() {

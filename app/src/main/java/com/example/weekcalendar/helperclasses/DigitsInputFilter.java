@@ -4,7 +4,6 @@ import android.text.InputFilter;
 import android.text.Spanned;
 
 public class DigitsInputFilter implements InputFilter {
-
     private final String DOT = ".";
 
     private int mMaxIntegerDigitsLength;

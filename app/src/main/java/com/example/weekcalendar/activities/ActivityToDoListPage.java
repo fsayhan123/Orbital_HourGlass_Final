@@ -1,5 +1,6 @@
 package com.example.weekcalendar.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,7 +8,6 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -15,20 +15,19 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.weekcalendar.R;
-import com.example.weekcalendar.helperclasses.HelperMethods;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.example.weekcalendar.adapters.ToDoListViewAdapter;
 import com.example.weekcalendar.customclasses.CustomDay;
 import com.example.weekcalendar.customclasses.CustomToDo;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ActivityToDoListPage extends AppCompatActivity {
@@ -52,16 +52,12 @@ public class ActivityToDoListPage extends AppCompatActivity {
     private ExpandableListView expandableListView;
     private ToDoListViewAdapter mAdapter = new ToDoListViewAdapter(this, new ArrayList<>(), new HashMap<>());
 
-    // Firebase variables
-    private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
 
-    // Set up navigation drawer
-    private SetupNavDrawer navDrawer;
-
     // To transform String to Date
+    @SuppressLint("SimpleDateFormat")
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
@@ -70,20 +66,16 @@ public class ActivityToDoListPage extends AppCompatActivity {
         setContentView(R.layout.activity_to_do_list_page);
 
         // Setup link to Firebase
-        this.fAuth = FirebaseAuth.getInstance();
+        // Firebase variables
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
         this.c = this.fStore.collection("todo");
+
+        setupXMLItems();
 
         // Fetches data from Firebase
         fetchToDos();
-
-        // Link to XML
-        this.expandableListView = findViewById(R.id.expandableListView);
-
-        // Set up navigation drawer
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
-        this.navDrawer.setupNavDrawerPane();
     }
 
     private void addToMap(CustomDay day, CustomToDo toDo) {
@@ -94,8 +86,20 @@ public class ActivityToDoListPage extends AppCompatActivity {
             temp.add(toDo);
             this.mapOfToDo.put(day, temp);
         } else {
-            this.mapOfToDo.get(day).add(toDo);
+            Objects.requireNonNull(this.mapOfToDo.get(day)).add(toDo);
         }
+    }
+
+    private void setupXMLItems() {
+        // Set up navigation drawer
+        // Set up navigation drawer
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.todo_toolbar));
+        navDrawer.setupNavDrawerPane();
+
+        FloatingActionButton createToDo = findViewById(R.id.create_to_do_button);
+        createToDo.setOnClickListener(v -> createToDo());
+
+        this.expandableListView = findViewById(R.id.expandableListView);
     }
 
     private void processDocument(QueryDocumentSnapshot document) {
@@ -106,19 +110,19 @@ public class ActivityToDoListPage extends AppCompatActivity {
         boolean completed = (boolean) document.get("completed");
         Date d = null;
         try {
-            d = dateFormatter.parse(date);
+            d = dateFormatter.parse(Objects.requireNonNull(date));
+            CustomDay day = new CustomDay(Objects.requireNonNull(d));
+            CustomToDo toDo;
+            if (eventID != null) {
+                toDo = new CustomToDo(ID, eventID, title, date, completed);
+            } else {
+                toDo = new CustomToDo(ID, title, date, completed);
+
+            }
+            addToMap(day, toDo);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        CustomDay day = new CustomDay(d);
-        CustomToDo toDo;
-        if (eventID != null) {
-            toDo = new CustomToDo(ID, eventID, title, date, completed);
-        } else {
-            toDo = new CustomToDo(ID, title, date, completed);
-
-        }
-        addToMap(day, toDo);
     }
 
     private void fetchToDos() {
@@ -136,6 +140,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
                         if (queryDocumentSnapshots.isEmpty()) {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
+                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processDocument(document);
                             }
@@ -151,7 +156,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }
@@ -178,12 +183,12 @@ public class ActivityToDoListPage extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void createToDo(View view) {
+    private void createToDo() {
         Intent intent = new Intent(this, ActivityCreateToDoPage.class);
         startActivity(intent);
     }
 
-    public void pushToDo() {
+    private void pushToDo() {
         Set<Pair<Long, Long>> toggledItems = this.mAdapter.getToggledItems();
         long offset = 0;
         for (Pair<Long, Long> pair : toggledItems) {
@@ -197,7 +202,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         }
     }
 
-    public Map<String, Object> customToDoToMap(CustomToDo todo, long offset) {
+    private Map<String, Object> customToDoToMap(CustomToDo todo, long offset) {
         Map<String, Object> todoDetails = new HashMap<>();
         todoDetails.put("userID", userID);
         todoDetails.put("date", todo.getDate());
@@ -211,7 +216,7 @@ public class ActivityToDoListPage extends AppCompatActivity {
         return todoDetails;
     }
 
-    public void deleteToDo() {
+    private void deleteToDo() {
         Set<Pair<Long, Long>> setItems = this.mAdapter.getItemsToDelete();
         List<Pair<Long, Long>> iterable = new ArrayList<>(setItems);
         Collections.sort(iterable, (p1, p2) -> (int) -(p2.first - p1.first + p2.second - p1.second));

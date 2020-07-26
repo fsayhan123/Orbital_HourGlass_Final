@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,9 +29,8 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
     private Map<CustomDay, List<CustomEvent>> mapOfEvents;
     private MyOnDateClickListener mDateClickListener;
     private Activity a;
-    private View eachDayView;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView date;
         private TextView month;
@@ -61,7 +59,7 @@ public class UpcomingRecyclerViewAdapter extends RecyclerView.Adapter<UpcomingRe
     @NonNull
     @Override
     public UpcomingRecyclerViewAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_day, parent, false);
+        View eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_day, parent, false);
         UpcomingRecyclerViewAdapter.MyViewHolder holder = new MyViewHolder(eachDayView);
 
         holder.eachDayLayout.setOnClickListener(v -> {

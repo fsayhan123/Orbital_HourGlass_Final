@@ -1,6 +1,5 @@
 package com.example.weekcalendar.adapters;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ public class MainCalendarAdapter extends RecyclerView.Adapter<MainCalendarAdapte
     @Override
     public MainCalendarAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View eachEvent = LayoutInflater.from(parent.getContext()).inflate(R.layout.each_event, parent, false);
-        MainCalendarAdapter.MyViewHolder holder = new MainCalendarAdapter.MyViewHolder(eachEvent);
+        MainCalendarAdapter.MyViewHolder holder = new MyViewHolder(eachEvent);
         holder.time.setOnClickListener(v -> clicker.onEventClickListener(holder.eventID));
         holder.eventDetails.setOnClickListener(v -> clicker.onEventClickListener(holder.eventID));
         return holder;
@@ -47,7 +46,7 @@ public class MainCalendarAdapter extends RecyclerView.Adapter<MainCalendarAdapte
         return this.listOfEvents == null ? 0 : this.listOfEvents.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         private String eventID;
         private TextView time;
         private TextView eventDetails;

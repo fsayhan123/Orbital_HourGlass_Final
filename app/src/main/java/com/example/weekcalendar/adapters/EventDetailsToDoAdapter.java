@@ -1,11 +1,9 @@
 package com.example.weekcalendar.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,8 +30,7 @@ public class EventDetailsToDoAdapter extends RecyclerView.Adapter<EventDetailsTo
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         eachItemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_todo_event_details, parent, false);
-        EventDetailsToDoAdapter.MyViewHolder holder = new EventDetailsToDoAdapter.MyViewHolder(eachItemView);
-        return holder;
+        return new MyViewHolder(eachItemView);
     }
 
     @Override
@@ -60,7 +57,7 @@ public class EventDetailsToDoAdapter extends RecyclerView.Adapter<EventDetailsTo
         return this.todos == null ? 0 : this.todos.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         private CheckBox listChild;
 
         public MyViewHolder(@NonNull View itemView) {

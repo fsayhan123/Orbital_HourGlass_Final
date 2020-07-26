@@ -5,15 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.adapters.NotificationsRecyclerViewAdapter;
-import com.example.weekcalendar.adapters.UpcomingRecyclerViewAdapter;
 import com.example.weekcalendar.customclasses.CustomNotification;
 import com.example.weekcalendar.helperclasses.SetupNavDrawer;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -25,24 +22,17 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 
 public class ActivityNotificationsPage extends AppCompatActivity implements NotificationsRecyclerViewAdapter.OnNotificationListener {
     private static final String TAG = ActivityNotificationsPage.class.getSimpleName();
 
-    // Firebase variables
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference notification;
-
-    //Nav Drawer
-    private SetupNavDrawer navDrawer;
 
     //Recycler View Variables
     private ArrayList<CustomNotification> customNotificationArrayList;
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager layoutManager;
     private NotificationsRecyclerViewAdapter mAdapter;
 
     @Override
@@ -50,28 +40,32 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications_page);
 
-        //Set up nav drawer
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.notifications_toolbar));
-        this.navDrawer.setupNavDrawerPane();
-
-        //Set up recycler View
-        this.mRecyclerView = findViewById(R.id.notification_view);
-        this.mRecyclerView.setHasFixedSize(true);
-        this.layoutManager = new LinearLayoutManager(this);
-        this.mRecyclerView.setLayoutManager(layoutManager);
-
-        //Setup firebase Variables
-        this.fAuth = FirebaseAuth.getInstance();
-        this.fStore = FirebaseFirestore.getInstance();
-        this.userID = this.fAuth.getCurrentUser().getUid();
+        // Setup firebase Variables
+        // Firebase variables
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+        this.userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
         this.notification = fStore.collection("Notifications");
+
+        setupXMLItems();
 
         getNotificationFromFirebase();
     }
 
-    protected void getNotificationFromFirebase() {
+    private void setupXMLItems() {
+        // Nav Drawer
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.notifications_toolbar));
+        navDrawer.setupNavDrawerPane();
+
+        // Set up recycler View
+        this.mRecyclerView = findViewById(R.id.notification_view);
+        this.mRecyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        this.mRecyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void getNotificationFromFirebase() {
         this.customNotificationArrayList = new ArrayList<>();
-//        Toast.makeText(this, this.userID, Toast.LENGTH_SHORT).show();
         this.notification.whereEqualTo("respondentID", this.userID)
                 .orderBy("dateOfNotification")
                 .get()
@@ -81,6 +75,7 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
                         if (queryDocumentSnapshots.isEmpty()) {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
+                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 String notifID = document.getId();
                                 String date = (String) document.get("dateOfNotification");
@@ -97,7 +92,7 @@ public class ActivityNotificationsPage extends AppCompatActivity implements Noti
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e("TAG", "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }

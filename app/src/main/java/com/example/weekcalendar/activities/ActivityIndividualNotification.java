@@ -1,9 +1,9 @@
 package com.example.weekcalendar.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,29 +14,26 @@ import android.widget.Toast;
 
 import com.example.weekcalendar.R;
 import com.example.weekcalendar.helperclasses.HelperMethods;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.w3c.dom.Document;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ActivityIndividualNotification extends AppCompatActivity {
     private static final String TAG = ActivityIndividualNotification.class.getSimpleName();
 
-    //Firebase Classes
+    // Firebase Classes
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
 
-    //Notification Content
+    // Notification Content
     private LinearLayout notificationContents;
     private TextView date;
     private TextView message;
@@ -56,22 +53,27 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_individual_notification);
 
-        //Setup Firebase
+        // Setup Firebase
         this.fAuth = FirebaseAuth.getInstance();
         this.fStore = FirebaseFirestore.getInstance();
 
-        //Setup toolbar
+        setupXMLItems();
+
+        // get the document then set the text
+        Intent intent = getIntent();
+        this.notifID = intent.getStringExtra("notificationID");
+        setViews();
+    }
+
+    private void setupXMLItems() {
         Toolbar tb = findViewById(R.id.notifications_toolbar);
         setSupportActionBar(tb);
-
-        // sets up back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(this, ActivityNotificationsPage.class));
         });
 
-        //Setup local activity variables
         this.notificationContents = findViewById(R.id.notification_contents);
         this.date = findViewById(R.id.notification_date);
         this.message = findViewById(R.id.notification_message);
@@ -82,14 +84,14 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         this.respondButton.setOnClickListener(v -> respond());
 
         this.buttonLayout = findViewById(R.id.button_layouts);
+    }
 
-        //get the document then set the text
-        Intent intent = getIntent();
-        this.notifID = intent.getStringExtra("notificationID");
+    private void setViews() {
         this.fStore.collection("Notifications")
                 .document(this.notifID)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         setText(documentSnapshot);
@@ -138,7 +140,7 @@ public class ActivityIndividualNotification extends AppCompatActivity {
             i = new Intent(this, ActivityNotificationsPage.class);
             this.fStore.collection("events")
                     .document(this.eventID)
-                    .update("participants", FieldValue.arrayUnion(fAuth.getCurrentUser().getUid()))
+                    .update("participants", FieldValue.arrayUnion(Objects.requireNonNull(fAuth.getCurrentUser()).getUid()))
                     .addOnSuccessListener(v -> Log.d(TAG, "Added user to event!"))
                     .addOnFailureListener(e -> Log.w(TAG, "Error adding user to event.", e));
             Map<String, Object> data = new HashMap<>();
@@ -170,13 +172,14 @@ public class ActivityIndividualNotification extends AppCompatActivity {
 
     private void setText(DocumentSnapshot doc) {
         Log.d(TAG, "!!!!!!!!!!!!!!!!" + doc.getId());
-        String date = HelperMethods.formatDateForView((String) doc.get("dateOfNotification"));
+        String date = HelperMethods.formatDateForView((String) Objects.requireNonNull(doc.get("dateOfNotification")));
         String message = (String) doc.get("message");
         String hostID = (String) doc.get("hostID");
         this.fStore.collection("users")
-                .document(hostID)
+                .document(Objects.requireNonNull(hostID))
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         from.setText("From: " + documentSnapshot.get("fName"));
@@ -188,11 +191,11 @@ public class ActivityIndividualNotification extends AppCompatActivity {
         if (hasResponded) {
             if (doc.get("responseFormID") != null) {
                 List<String> userResponses = (List<String>) doc.get("response");
-                Collections.sort(userResponses);
+                Collections.sort(Objects.requireNonNull(userResponses));
                 StringBuilder s = new StringBuilder();
                 s.append("Responses: ");
                 for (String response : userResponses) {
-                    s.append(HelperMethods.formatDateForView(response) + ", ");
+                    s.append(HelperMethods.formatDateForView(response)).append(", ");
                 }
                 response.setText(s.substring(0, s.length() - 2));
             } else {

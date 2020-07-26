@@ -14,14 +14,9 @@ public class CustomNotification {
         this.date = date;
         this.message = message;
         this.ID = ID;
-//        this.eventTitle = eventTitle;
         this.dateForView = HelperMethods.formatDateForView(this.date);
         this.responseStatus = responseStatus;
     }
-
-//    public String getEventTitle() {
-//        return this.eventTitle;
-//    }
 
     public String getDate() {
         return this.date;

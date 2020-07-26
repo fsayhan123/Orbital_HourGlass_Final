@@ -62,17 +62,6 @@
             android:textColor="#4A4A4A" />
     </LinearLayout>
 
-    <!--    <TextView-->
-<!--        android:id="@+id/notification_url"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginBottom="30dp"-->
-<!--        android:text="TextView"-->
-<!--        android:linksClickable="true"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
-
     <LinearLayout
         android:id="@+id/button_layouts"
         android:layout_width="match_parent"

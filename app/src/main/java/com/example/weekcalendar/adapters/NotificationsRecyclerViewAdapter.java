@@ -1,6 +1,5 @@
 package com.example.weekcalendar.adapters;
 
-import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +13,6 @@ import java.util.ArrayList;
 
 public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<NotificationsRecyclerViewAdapter.MyViewHolder> {
     private ArrayList<CustomNotification> mDataset;
-    private Activity a;
-    private View eachDayView;
     private OnNotificationListener mOnNotificationListener;
 
     // Provide a reference to the views for each data item
@@ -58,9 +55,8 @@ public class NotificationsRecyclerViewAdapter extends RecyclerView.Adapter<Notif
     public NotificationsRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType) {
         // create a new view
-        eachDayView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.notification_view, parent, false);
-        MyViewHolder vh = new MyViewHolder(eachDayView, this.mOnNotificationListener);
-        return vh;
+        View eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.notification_view, parent, false);
+        return new MyViewHolder(eachDayView, this.mOnNotificationListener);
     }
 
     // Replace the contents of a view (invoked by the layout manager)

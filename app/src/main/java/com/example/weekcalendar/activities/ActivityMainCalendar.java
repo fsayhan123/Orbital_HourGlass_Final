@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -42,10 +43,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.Events;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
-import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -60,7 +58,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -68,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -79,9 +77,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
     private TextView monthYear;
 
-    // FloatingActionButton to link to ActivityCreateEvent
-    private FloatingActionButton floatingCreateEvent;
-
     private static Date today = new Date();
     private String[] splitDate = FULL_DATE.format(today).split("-");
     private String month = splitDate[1];
@@ -91,11 +86,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     // first day of previous month
     private Calendar calPrev = Calendar.getInstance();
     private Calendar calNext = Calendar.getInstance();
-    private Date datePrev;
-    private Date dateNext;
 
     // RecyclerView variables
-    private Map<String, Map<String, List<CustomEvent>>> mapOfMonths = new HashMap<>(); // MM -> dd -> list
+    private Map<String, Map<String, List<CustomEvent>>> mapOfMonths = new HashMap<>();
     private RecyclerView mRecyclerView;
     private MainCalendarAdapter mAdapter;
     private Map<String, MainCalendarAdapter> existingAdapters = new HashMap<>();
@@ -104,20 +97,17 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     private final CustomEventFromFirebase EMPTY_CUSTOMEVENT = new CustomEventFromFirebase("No Events Today!", "", "", "", "", "");
     private final MainCalendarAdapter EMPTY_ADAPTER = new MainCalendarAdapter(this.LIST_WITH_EMPTY_CUSTOMEVENT, this);
 
-    // Firebase variables
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
 
-    // Set up UI
-    private SetupNavDrawer navDrawer;
     private CompactCalendarView compactCalendarView;
 
     // To transform String to Date
-    private static final DateFormat DATE_AND_TIME = new SimpleDateFormat("yyyy-MM-dd, HH:mm");
+    @SuppressLint("SimpleDateFormat")
     private static final DateFormat MONTH = new SimpleDateFormat("MM");
+    @SuppressLint("SimpleDateFormat")
     private static final DateFormat MONTH_AND_YEAR = new SimpleDateFormat("MMMM yyyy");
+    @SuppressLint("SimpleDateFormat")
     private static final DateFormat FULL_DATE = new SimpleDateFormat("yyyy-MM-dd");
 
     // Get data from Google
@@ -135,9 +125,39 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_calendar);
 
-        // Set up navigation drawer START
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.main_calendar_toolbar));
-        this.navDrawer.setupNavDrawerPane();
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        this.acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (this.acct != null) {
+            try {
+                new ActivityMainCalendar.RequestAuth().execute(today).get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (fAuth.getCurrentUser() != null){
+            FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+            this.userID = fAuth.getCurrentUser().getUid();
+            this.c = fStore.collection("events");
+            fetch3MonthEventsFromFirebase(today);
+        } else {
+            Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
+        }
+
+        setupXMLItems();
+
+        if (first) {
+            String todayDate = FULL_DATE.format(today);
+            if (this.existingAdapters.containsKey(todayDate)) {
+                this.mRecyclerView.setAdapter(this.existingAdapters.get(todayDate));
+            } else {
+                this.mRecyclerView.setAdapter(EMPTY_ADAPTER);
+            }
+            first = false;
+        }
+    }
+
+    private void setupXMLItems() {
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.main_calendar_toolbar));
+        navDrawer.setupNavDrawerPane();
 
         this.monthYear = findViewById(R.id.month_year);
         this.monthYear.setText(MONTH_AND_YEAR.format(today));
@@ -151,13 +171,11 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
 
         this.calPrev.add(Calendar.MONTH, -2);
         this.calPrev.set(Calendar.DATE, calPrev.getActualMaximum(Calendar.DAY_OF_MONTH));
-        this.datePrev = calPrev.getTime();
         this.calNext.add(Calendar.MONTH, 2);
         this.calNext.set(Calendar.DATE, 1);
-        this.dateNext = this.calNext.getTime();
 
-        this.floatingCreateEvent = findViewById(R.id.create_event);
-        this.floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
+        FloatingActionButton floatingCreateEvent = findViewById(R.id.create_event);
+        floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
 
         this.compactCalendarView = findViewById(R.id.compact_calendar_view);
         this.compactCalendarView.setFirstDayOfWeek(Calendar.SUNDAY);
@@ -172,7 +190,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                     mRecyclerView.setAdapter(EMPTY_ADAPTER);
                 } else {
                     mRecyclerView.setAdapter(existingAdapters.get(clicked));
-                    Log.d(TAG, "" + mapOfMonths.get(split[1]).get(split[2]).toString());
+                    Log.d(TAG, "" + Objects.requireNonNull(Objects.requireNonNull(mapOfMonths.get(split[1])).get(split[2])).toString());
                 }
             }
 
@@ -199,62 +217,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 }
             }
         });
-        // Set up UI END
-
-        // Fetching data START
-            // logging in to google will also result in this.fAuth.getCurrentUser() != null being true
-        this.acct = GoogleSignIn.getLastSignedInAccount(this);
-        this.fAuth = FirebaseAuth.getInstance();
-        if (this.acct != null) {
-            try {
-                new ActivityMainCalendar.RequestAuth().execute(today).get();
-            } catch (Exception e) {
-                e.printStackTrace();
-                //Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            }
-        } else if (this.fAuth.getCurrentUser() != null){
-            this.fStore = FirebaseFirestore.getInstance();
-            this.userID = this.fAuth.getCurrentUser().getUid();
-            this.c = this.fStore.collection("events");
-            fetch3MonthEventsFromFirebase(today);
-        } else {
-            Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
-        }
-
-        if (first) {
-            String todayDate = FULL_DATE.format(today);
-            if (this.existingAdapters.containsKey(todayDate)) {
-                this.mRecyclerView.setAdapter(this.existingAdapters.get(todayDate));
-            } else {
-                this.mRecyclerView.setAdapter(EMPTY_ADAPTER);
-            }
-            first = false;
-        }
-        // Firebase end
-
-        //testing firebase dynamic links
-
-//        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
-//            @Override
-//            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-//
-//                Uri deepLink = null;
-//                if (pendingDynamicLinkData != null) {
-//                    deepLink = pendingDynamicLinkData.getLink();
-//                }
-//
-//                if (deepLink != null) {
-//                    String documentID = deepLink.getQueryParameter("id");
-//                    fStore.collection("events").document(documentID)
-//                            .update("participants", FieldValue.arrayUnion(ActivityMainCalendar.this.userID));
-//                }
-//            }
-//        }).addOnFailureListener(this, new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//                System.out.println("Error unable to retrieve link");
-//            }
-//        });
     }
 
     private void moveToCreateEventPage() {
@@ -311,7 +273,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
     }
 
     private void firebaseQuery(String min, String max) {
-        //Toast.makeText(this, "querying from " + min + " to " + max, Toast.LENGTH_LONG).show();
         this.c.whereArrayContains("participants", userID)
                 .whereGreaterThanOrEqualTo("startDate", min)
                 .whereLessThan("startDate", max)
@@ -332,7 +293,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                                     e.printStackTrace();
                                 }
                             }
-                            // optimise to only loop through those that are fetched
                             for (String month : mapOfMonths.keySet()) {
                                 for (String day : mapOfMonths.get(month).keySet()) {
                                     String date = new StringBuilder(year).append("-").append(month).append("-").append(day).toString();
@@ -346,7 +306,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, e.getLocalizedMessage());
                     }
                 });
     }
@@ -384,7 +344,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                     newDate = startDate;
                 } else {
                     newDate = first.plusDays(i).toString();
-                    startTime = "All Day"; // change later to support end time
+                    startTime = "All Day";
                 }
                 event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
                 event.setDescription(description);
@@ -397,6 +357,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         }
     }
 
+    @SuppressLint("DefaultLocale")
     private void processGoogleEvent(com.google.api.services.calendar.model.Event e) throws ParseException {
         String title = e.getSummary();
         String startDate;
@@ -407,21 +368,21 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         CustomEvent event;
         if (e.getStart().get("dateTime") == null) { // full day event of any number of days
             try {
-                Log.d(TAG, "HIIIIIIIIIIIIII" + e.toPrettyString());
+                Log.d(TAG, e.toPrettyString());
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            startDate = e.getStart().get("date").toString();
+            startDate = Objects.requireNonNull(e.getStart().get("date")).toString();
             startTime = "All day";
-            String fullEndDate = e.getEnd().get("date").toString();
+            String fullEndDate = Objects.requireNonNull(e.getEnd().get("date")).toString();
             int endDateNum = Integer.parseInt(fullEndDate.substring(fullEndDate.length() - 2)) - 1;
             endDate = fullEndDate.substring(0, fullEndDate.length() - 2) + String.format("%02d", endDateNum); // on Google it is instantiated as the next day;
             endTime = "23:59";
         } else { // < 1 day events, as well as non-full day events spanning multiple days
-            String[] startDateAndTimeSplit = e.getStart().get("dateTime").toString().split("T");
+            String[] startDateAndTimeSplit = Objects.requireNonNull(e.getStart().get("dateTime")).toString().split("T");
             startDate = startDateAndTimeSplit[0];
             startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
-            String[] endDateAndTimeSplit = e.getEnd().get("dateTime").toString().split("T");
+            String[] endDateAndTimeSplit = Objects.requireNonNull(e.getEnd().get("dateTime")).toString().split("T");
             endDate = endDateAndTimeSplit[0];
             endTime = endDateAndTimeSplit[1].substring(0, 5);
         }
@@ -438,8 +399,9 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                 if (i == 0) {
                     newDate = startDate;
                 } else {
-                    newDate = first.plusDays(i).toString();
-                    startTime = "All Day"; // change later to support end time
+                    first.plusDays(i);
+                    newDate = first.toString();
+                    startTime = "All Day";
                 }
                 event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, eventID);
                 addToMap(event);
@@ -454,8 +416,8 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         String day = splitDate[2];
         if (this.mapOfMonths.containsKey(month)) {
             Map<String, List<CustomEvent>> currMonth = this.mapOfMonths.get(month);
-            if (currMonth.containsKey(day)) {
-                currMonth.get(day).add(event);
+            if (Objects.requireNonNull(currMonth).containsKey(day)) {
+                Objects.requireNonNull(currMonth.get(day)).add(event);
             } else {
                 List<CustomEvent> temp = new ArrayList<>();
                 temp.add(event);
@@ -477,6 +439,7 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         startActivity(i);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class RequestAuth extends AsyncTask<Date, Void, Void> {
         private List<com.google.api.services.calendar.model.Event> myList;
 
@@ -491,7 +454,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
                         ex.printStackTrace();
                     }
                 }
-                // optimise to only loop through those that are fetched
                 for (String month : mapOfMonths.keySet()) {
                     for (String day : mapOfMonths.get(month).keySet()) {
                         String date = new StringBuilder(year).append("-").append(month).append("-").append(day).toString();
@@ -536,7 +498,6 @@ public class ActivityMainCalendar extends AppCompatActivity implements MyOnEvent
         private void googleQuery(com.google.api.services.calendar.Calendar service, Date first, Date second) throws IOException {
             DateTime min = new DateTime(first);
             DateTime max = new DateTime(second);
-            Log.d(TAG, "querying from " + min + " to " + max);
             Events events = service.events().list("primary")
                     .setTimeMin(min)
                     .setTimeMax(max)

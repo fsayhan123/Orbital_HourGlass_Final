@@ -16,6 +16,7 @@ import com.example.weekcalendar.R;
 import com.example.weekcalendar.activities.ActivityCreateSharedEvent;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class DialogCreationEvent extends AppCompatDialogFragment {
     private ActivityCreateSharedEvent a;
@@ -29,7 +30,7 @@ public class DialogCreationEvent extends AppCompatDialogFragment {
     @NonNull
     @Override
     public android.app.Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
         this.allEmails = view.findViewById(R.id.edit_invite);

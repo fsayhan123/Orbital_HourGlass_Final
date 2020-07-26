@@ -45,7 +45,6 @@
             app:fabCustomSize="0dp"
             app:maxImageSize="48dp"
             app:srcCompat="@drawable/plus_icon" />
-        // change color of button
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/week_view"

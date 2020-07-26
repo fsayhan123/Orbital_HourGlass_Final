@@ -1,5 +1,7 @@
 package com.example.weekcalendar.customclasses;
 
+import android.annotation.SuppressLint;
+
 import com.example.weekcalendar.helperclasses.HelperMethods;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +26,7 @@ public class CustomDay implements Comparable<CustomDay> {
             "January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December" };
 
+    @SuppressLint("SimpleDateFormat")
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm a");
 
     public CustomDay(Date d) {

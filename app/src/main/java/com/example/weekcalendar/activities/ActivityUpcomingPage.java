@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -63,6 +64,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -77,19 +79,11 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
     private RecyclerView mRecyclerView;
     private UpcomingRecyclerViewAdapter mAdapter;
 
-    // Firebase variables
-    private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
     private String userID;
     private CollectionReference c;
 
-    // FloatingActionButton to link to ActivityCreateEvent
-    private FloatingActionButton floatingCreateEvent;
-
-    // Set up navigation drawer
-    private SetupNavDrawer navDrawer;
-
     // To transform String to Date
+    @SuppressLint("SimpleDateFormat")
     private static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 
     // Get data from Google
@@ -103,50 +97,59 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upcoming_page);
 
-        // Links to XML
+        // Setup link to Firebase
+        // Firebase variables
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore fStore = FirebaseFirestore.getInstance();
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+
+        setupXMLItems();
+
+        // logging in to google will also result in this.fAuth.getCurrentUser() != null being true
+        if (acct != null) {
+            prepareGoogleInterface();
+        } else if (fAuth.getCurrentUser() != null){
+            this.userID = fAuth.getCurrentUser().getUid();
+            this.c = fStore.collection("events");
+            fetchEventsFromTodayFromFirebase();
+        } else {
+            Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupXMLItems() {
+        // Set up navigation drawer
+        SetupNavDrawer navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
+        navDrawer.setupNavDrawerPane();
+
         this.mRecyclerView = findViewById(R.id.week_view);
         LinearLayoutManager manager = new LinearLayoutManager(ActivityUpcomingPage.this);
         this.mRecyclerView.setHasFixedSize(true);
         this.mRecyclerView.setLayoutManager(manager);
 
-        this.floatingCreateEvent = findViewById(R.id.create_event);
-        this.floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
+        // FloatingActionButton to link to ActivityCreateEvent
+        FloatingActionButton floatingCreateEvent = findViewById(R.id.create_event);
+        floatingCreateEvent.setOnClickListener(v -> moveToCreateEventPage());
+    }
 
-        // Set up navigation drawer
-        this.navDrawer = new SetupNavDrawer(this, findViewById(R.id.upcoming_toolbar));
-        this.navDrawer.setupNavDrawerPane();
-
-        // Setup link to Firebase
-        this.fAuth = FirebaseAuth.getInstance();
-        this.fStore = FirebaseFirestore.getInstance();
-        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
-        // logging in to google will also result in this.fAuth.getCurrentUser() != null being true
-        if (acct != null) {
-            List<Event> fetchedEvents;
-            try {
-                fetchedEvents = new ActivityUpcomingPage.RequestAuth().execute().get();
-                Log.d(TAG, "from google: " + fetchedEvents.isEmpty());
-                this.listOfDays = new ArrayList<>();
-                this.mapOfEvents = new HashMap<>();
-                this.setOfDays = new HashSet<>();
-            } catch (Exception e) {
-                e.printStackTrace();
-                fetchedEvents = new ArrayList<>();
-                Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            }
-            for (Event e : fetchedEvents) {
-                processGoogleEvent(e);
-            }
-            this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
-                    ActivityUpcomingPage.this, ActivityUpcomingPage.this);
-            this.mRecyclerView.setAdapter(mAdapter);
-        } else if (this.fAuth.getCurrentUser() != null){
-            this.userID = this.fAuth.getCurrentUser().getUid();
-            this.c = this.fStore.collection("events");
-            fetchEventsFromTodayFromFirebase();
-        } else {
-            Toast.makeText(this, "Not logged in to any account!", Toast.LENGTH_SHORT).show();
+    private void prepareGoogleInterface() {
+        List<Event> fetchedEvents;
+        try {
+            fetchedEvents = new ActivityUpcomingPage.RequestAuth().execute().get();
+            this.listOfDays = new ArrayList<>();
+            this.mapOfEvents = new HashMap<>();
+            this.setOfDays = new HashSet<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fetchedEvents = new ArrayList<>();
+            Log.d(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
         }
+        for (Event e : fetchedEvents) {
+            processGoogleEvent(e);
+        }
+        this.mAdapter = new UpcomingRecyclerViewAdapter(listOfDays, mapOfEvents,
+                ActivityUpcomingPage.this, ActivityUpcomingPage.this);
+        this.mRecyclerView.setAdapter(mAdapter);
     }
 
     private void moveToCreateEventPage() {
@@ -161,7 +164,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        CustomDay day = new CustomDay(startD);
+        CustomDay day = new CustomDay(Objects.requireNonNull(startD));
         if (!this.setOfDays.contains(day)) {
             this.setOfDays.add(day);
             this.listOfDays.add(day);
@@ -169,7 +172,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
             temp.add(event);
             this.mapOfEvents.put(day, temp);
         } else {
-            this.mapOfEvents.get(day).add(event);
+            Objects.requireNonNull(this.mapOfEvents.get(day)).add(event);
         }
     }
 
@@ -195,7 +198,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     newDate = startDate;
                 } else {
                     newDate = first.plusDays(i).toString();
-                    startTime = "All Day"; // change later to support end time
+                    startTime = "All Day";
                 }
                 CustomEventFromFirebase event = new CustomEventFromFirebase(title, newDate, endDate, startTime, endTime, docID);
                 event.setDescription(description);
@@ -214,15 +217,15 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
         String eventDescription = e.getDescription() == null ? "" : e.getDescription();
         CustomEvent event;
         if (e.getStart().get("dateTime") == null) { // full day event
-            startDate = e.getStart().get("date").toString();
+            startDate = Objects.requireNonNull(e.getStart().get("date")).toString();
             startTime = "All day";
             endDate = startDate; // on Google it is instantiated as the next day
             endTime = "23:59";
         } else {
-            String[] startDateAndTimeSplit = e.getStart().get("dateTime").toString().split("T");
+            String[] startDateAndTimeSplit = Objects.requireNonNull(e.getStart().get("dateTime")).toString().split("T");
             startDate = startDateAndTimeSplit[0];
-            startTime = startDateAndTimeSplit[1].substring(0, 5); // getOriginalStart?
-            String[] endDateAndTimeSplit = e.getEnd().get("dateTime").toString().split("T");
+            startTime = startDateAndTimeSplit[1].substring(0, 5);
+            String[] endDateAndTimeSplit = Objects.requireNonNull(e.getEnd().get("dateTime")).toString().split("T");
             endDate = endDateAndTimeSplit[0];
             endTime = endDateAndTimeSplit[1].substring(0, 5);
         }
@@ -240,7 +243,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                     newDate = startDate;
                 } else {
                     newDate = first.plusDays(i).toString();
-                    startTime = "All Day"; // change later to support end time
+                    startTime = "All Day";
                 }
                 event = new CustomEventFromGoogle(title, newDate, endDate, startTime, endTime, eventID);
                 event.setDescription(eventDescription);
@@ -266,6 +269,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                         if (queryDocumentSnapshots.isEmpty()) {
                             Log.d(TAG, "onSuccess: LIST EMPTY");
                         } else {
+                            Log.d(TAG, "onSuccess: LIST NOT EMPTY");
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                                 processFirebaseDocument(document);
                             }
@@ -278,7 +282,7 @@ public class ActivityUpcomingPage extends AppCompatActivity implements MyOnDateC
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "hello!!!!!!!!!!!!!!!!!!! " + e.getLocalizedMessage());
+                        Log.e(TAG, Objects.requireNonNull(e.getLocalizedMessage()));
                     }
                 });
     }

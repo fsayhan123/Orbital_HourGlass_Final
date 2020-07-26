@@ -29,7 +29,9 @@
             android:layout_below="@+id/create_shared_event_toolbar"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
+            android:layout_marginTop="10dp"
             android:text="Title"
+            android:textColor="#4a4a4a"
             android:textSize="30dp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -38,7 +40,7 @@
             android:layout_height="400dp"
             android:layout_below="@+id/select_shared_event_title"
             android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="0dp"
             android:orientation="vertical"
             android:scrollbars="vertical">
@@ -50,24 +52,47 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/selecting_shared_event_date"
+            android:layout_marginTop="0dp"
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/select_start_time"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/select_start_time_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select Start Time"
-                android:textColor="#4A4A4A" />
+                app:errorEnabled="true">
 
-            <Button
-                android:id="@+id/select_end_time"
+                <Button
+                    android:id="@+id/select_start_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="20dp"
+                    android:text="Select Start Time"
+                    android:textColor="#4A4A4A" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/select_end_time_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Select End Time"
-                android:textColor="#4A4A4A" />
+                app:errorEnabled="true">
+
+                <Button
+                    android:id="@+id/select_end_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="20dp"
+                    android:text="Select End Time"
+                    android:textColor="#4A4A4A" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
@@ -75,12 +100,14 @@
             android:id="@+id/confirm_event_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/selecting_shared_event_date"
-            android:layout_marginTop="75dp"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:onClick = "confirmEvent"
-            android:text="Confirm Event" />
+            android:layout_marginBottom="20dp"
+            android:onClick="confirmEvent"
+            android:paddingHorizontal="20dp"
+            android:text="Confirm Event"
+            android:textColor="#4A4A4A" />
 
     </RelativeLayout>
 

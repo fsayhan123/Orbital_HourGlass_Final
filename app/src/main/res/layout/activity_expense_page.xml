@@ -45,7 +45,6 @@
             android:layout_below="@id/expenses_toolbar"
             android:nestedScrollingEnabled="true" />
 
-
 </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView

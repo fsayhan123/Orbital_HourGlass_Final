@@ -17,7 +17,6 @@ import java.util.ArrayList;
 public class ResponseRecyclerViewAdapter extends RecyclerView.Adapter<ResponseRecyclerViewAdapter.MyViewHolder> {
     private ArrayList<CustomResponse> mDataset;
     private Activity a;
-    private View eachDayView;
     private OnDateCheckListener onDateCheckListener;
 
     public interface OnDateCheckListener {
@@ -54,12 +53,10 @@ public class ResponseRecyclerViewAdapter extends RecyclerView.Adapter<ResponseRe
 
     // Create new views (invoked by the layout manager)
     @Override
-    public ResponseRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
-                                                                                  int viewType) {
+    public ResponseRecyclerViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        eachDayView  = LayoutInflater.from(parent.getContext()).inflate(R.layout.shared_event_date_selection, parent, false);
-        MyViewHolder vh = new MyViewHolder(eachDayView);
-        return vh;
+        View eachDayView = LayoutInflater.from(parent.getContext()).inflate(R.layout.shared_event_date_selection, parent, false);
+        return new MyViewHolder(eachDayView);
     }
 
     // Replace the contents of a view (invoked by the layout manager)

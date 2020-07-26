@@ -74,7 +74,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class ActivityEventDetailsPage extends AppCompatActivity {
     private static final String TAG = ActivityEventDetailsPage.class.getSimpleName();
 
-    private RelativeLayout overallLayout;
     private LinearLayout layout;
     private TextView eventTitle;
     private TextView eventDate;
@@ -133,13 +132,11 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
     private void setupXMLItems() {
         Toolbar tb = findViewById(R.id.event_details);
         setSupportActionBar(tb);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         tb.setNavigationOnClickListener(v -> {
             startActivity(new Intent(this, ActivityMainCalendar.class));
         });
-
-        this.overallLayout = findViewById(R.id.overall_layout);
 
         this.layout = findViewById(R.id.layout);
 
@@ -243,6 +240,9 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
+    /**
+     * Deletes all to do items associated with current event.
+     */
     private void deleteAssociatedToDos() {
         this.fStore.collection("todo")
                 .whereEqualTo("eventID", this.event.getId())
@@ -307,7 +307,7 @@ public class ActivityEventDetailsPage extends AppCompatActivity {
         String description = (String) doc.get("description");
         String hostID = (String) doc.get("userID");
         ArrayList<String> participants = (ArrayList<String>) doc.get("participants");
-        if (participants.size() > 1) {
+        if (Objects.requireNonNull(participants).size() > 1) {
             fillInParticipants(participants);
         } else {
             this.layout.removeView(this.eventParticipants);

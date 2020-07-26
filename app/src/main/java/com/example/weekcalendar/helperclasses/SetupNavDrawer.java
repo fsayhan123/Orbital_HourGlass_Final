@@ -32,6 +32,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
 public class SetupNavDrawer {
@@ -62,8 +64,8 @@ public class SetupNavDrawer {
         dl.addDrawerListener(t);
         t.syncState();
 
-        ((AppCompatActivity) a).getSupportActionBar().setDisplayShowHomeEnabled(true);
-        ((AppCompatActivity) a).getSupportActionBar().setHomeButtonEnabled(true);
+        Objects.requireNonNull(((AppCompatActivity) a).getSupportActionBar()).setDisplayShowHomeEnabled(true);
+        Objects.requireNonNull(((AppCompatActivity) a).getSupportActionBar()).setHomeButtonEnabled(true);
 
         NavigationView nv = a.findViewById(R.id.nv);
         nv.setNavigationItemSelectedListener(item -> {
@@ -108,6 +110,7 @@ public class SetupNavDrawer {
                     a.startActivity(i8);
                     break;
                 case R.id.activity_pending_shared_event_view:
+                    Toast.makeText(a, "Pending Shared Events", Toast.LENGTH_SHORT).show();
                     Intent i9 = new Intent(a, ActivityPendingSharedEvent.class);
                     a.startActivity(i9);
                     break;
@@ -125,13 +128,12 @@ public class SetupNavDrawer {
             String personName = acct.getDisplayName();
             nav_user.setText(personName);
         } else {
-            String userID = fAuth.getCurrentUser().getUid();
+            String userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
             DocumentReference docRef = fStore.collection("users").document(userID);
             docRef.addSnapshotListener(a, new EventListener<DocumentSnapshot>() {
                 @Override
                 public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                    // accessing via key value pairs
-                    String username = documentSnapshot.getString("fName");
+                    String username = Objects.requireNonNull(documentSnapshot).getString("fName");
                     nav_user.setText(username);
                 }
             });
