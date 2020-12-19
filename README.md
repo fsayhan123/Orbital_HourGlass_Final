@@ -1,4 +1,4 @@
-# Orbital-Firebase
+# CP2106 Orbital
 
 # Team Name: 
 
@@ -27,26 +27,5 @@ As an employee, I would like to keep track of tasks I have to complete in a to-d
 When planning a meeting for friends or for work, I would like to find a suitable timeslot for everyone to meet in the easiest manner possible <br>
 When planning events for multiple people, I would like to have a shared checklist integrated with my personal to-do list to manage my tasks as well  <br>
 I can track my expenses alongside my to do list such as shopping lists, so I do not have to track my expenses on different applications <br>
- 
-# Scope of Project
 
-# Flow of Application
-
-
-Our project will be an android application which will have the functionalities as listed below. 
-
-Features to be completed by mid-June:<br>
-Calendar User Interface and Application <br>
-Creating of basic events, recurring events and multiple calendars <br>
-Login functionality <br>
-To-Do List<br>
-Each event can have its own to-do checklist<br>
-There will be an overall to-do list which summarises all the to-do checklists from all events - one stop interface<br>
-Expenses tracking features<br>
-Synchronisation features with external calendars e.g. Google Calendar<br>
-Allows events to also be created in personal or work calendars outside of the app<br>
-
-Features to be completed by mid-July:<br>
-Provides recommendations on best timings to meet<br>
-Allows users to indicate the time slots within a set period of dates selected by the host through a calendar-like UI<br>
-Based on group members’ availabilities, a heatmap of dates will be displayed in a calendar-like UI<br>
+For more details, click [here](https://drive.google.com/drive/u/0/folders/1XQ245evlZ9j6qEfr4sJqYgo5rY3vRS8C) to read our full README with features, or [here](https://drive.google.com/drive/folders/1SRIQ3JAEbILQYYZrZH6NgM8ipP6ZlIt1?usp=sharing) to view our videos.
